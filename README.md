@@ -16,7 +16,7 @@ A comprehensive business intelligence dashboard for the School of Management, de
 - **Frontend Framework**: Nuxt.js 3
 - **UI Framework**: Tailwind CSS
 - **Authentication**: Firebase Auth
-- **Database**: Firestore
+- **Database**: Mysql
 - **Charts**: Chart.js
 - **Icons**: Heroicons
 
@@ -24,7 +24,7 @@ A comprehensive business intelligence dashboard for the School of Management, de
 
 - Node.js (v16 or higher)
 - npm or yarn
-- Firebase project with Authentication and Firestore enabled
+- Firebase project with Authentication and Mysql enabled
 
 ## Setup
 
