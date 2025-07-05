@@ -131,40 +131,27 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1.</td>
-                  <td class="px-3 py-1">Business Research</td>
-                  <td class="px-3 py-1 text-center">1203331</td>
-                  <td class="px-3 py-1 text-center">50</td>
+                <tr v-if="!teachingData">
+                  <td colspan="4" class="text-center py-4">Loading data...</td>
                 </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2.</td>
-                  <td class="px-3 py-1">Business Law and Ethics</td>
-                  <td class="px-3 py-1 text-center">1203217</td>
-                  <td class="px-3 py-1 text-center">50</td>
+                <tr v-else-if="!teachingData.undergraduate?.length">
+                  <td colspan="4" class="text-center py-4">No undergraduate courses found</td>
                 </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3.</td>
-                  <td class="px-3 py-1">Principles of Marketing</td>
-                  <td class="px-3 py-1 text-center">1203121</td>
-                  <td class="px-3 py-1 text-center">50</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">4.</td>
-                  <td class="px-3 py-1">Digital Business</td>
-                  <td class="px-3 py-1 text-center">1203108</td>
-                  <td class="px-3 py-1 text-center">50</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">5.</td>
-                  <td class="px-3 py-1">Business Analysis</td>
-                  <td class="px-3 py-1 text-center">1203223</td>
-                  <td class="px-3 py-1 text-center">50</td>
-                </tr>
+                <template v-else>
+                  <tr v-for="(item, index) in teachingData.undergraduate" 
+                      :key="item.id" 
+                      :class="index % 2 === 0 ? '' : 'bg-[#E8F4FC]'">
+                    <td class="px-3 py-1 text-center">{{ item.id }}</td>
+                    <td class="px-3 py-1">{{ item.course_name }}</td>
+                    <td class="px-3 py-1 text-center">{{ item.course_code }}</td>
+                    <td class="px-3 py-1 text-center">{{ item.total_student }}</td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
         </div>
+
         <!-- Graduate Teaching -->
         <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Graduate Teaching</h2>
@@ -179,24 +166,19 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1.</td>
-                  <td class="px-3 py-1">Philosophy and Theory in Business</td>
-                  <td class="px-3 py-1 text-center">1203907</td>
-                  <td class="px-3 py-1 text-center">50</td>
+                <tr v-if="!teachingData?.graduate?.length">
+                  <td colspan="4" class="text-center py-4">Loading data...</td>
                 </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2.</td>
-                  <td class="px-3 py-1">Advanced Research Methodology in Business</td>
-                  <td class="px-3 py-1 text-center">1203911</td>
-                  <td class="px-3 py-1 text-center">50</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3.</td>
-                  <td class="px-3 py-1">Seminar in Business Administration</td>
-                  <td class="px-3 py-1 text-center">1203913</td>
-                  <td class="px-3 py-1 text-center">50</td>
-                </tr>
+                <template v-else>
+                  <tr v-for="(item, index) in teachingData.graduate" 
+                      :key="item.id" 
+                      :class="index % 2 === 0 ? '' : 'bg-[#E8F4FC]'">
+                    <td class="px-3 py-1 text-center">{{ item.id }}</td>
+                    <td class="px-3 py-1">{{ item.course_name }}</td>
+                    <td class="px-3 py-1 text-center">{{ item.course_code }}</td>
+                    <td class="px-3 py-1 text-center">{{ item.total_student }}</td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -209,6 +191,28 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Chart from "chart.js/auto";
+import { useFetch } from '#app';
+
+const teachingData = ref<any>(null);
+
+onMounted(async () => {
+  console.log('Attempting to fetch teaching data...');
+  
+  try {
+    const { data } = await useFetch('http://localhost:4000/api/teaching-performance');
+    console.log('Raw response data:', data.value);
+    
+    if (data.value) {
+      teachingData.value = data.value;
+      console.log('Teaching data set:', teachingData.value);
+    } else {
+      console.log('No data received from API');
+    }
+  } catch (error) {
+    console.error('Error fetching teaching data:', error);
+    teachingData.value = null;
+  }
+});
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useAirtableKpi } from '@/composables/useAirtableKpi'
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
