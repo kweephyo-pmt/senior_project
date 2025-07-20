@@ -3,7 +3,7 @@
     <!-- Header with Round Selector -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Domain 3: Academic Performance</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Domain 3: Academic Services Performance</h1>
         <p class="text-sm sm:text-base text-gray-600">Welcome back, {{ user?.displayName }}</p>
       </div>
       <div class="relative w-full sm:w-auto">
@@ -26,7 +26,7 @@
 
     <!-- Administration Track -->
     <div class="mb-6">
-      <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Academic Service Track</h2>
+      <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Teaching Track</h2>
       <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
     </div>
 
@@ -103,7 +103,7 @@
       <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
         <div class="flex flex-col items-center">
           <h2 class="text-md font-bold text-gray-900 mb-1 text-center">
-            Academic Performance
+            Academic Services Performance
           </h2>
           <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
           Threshold (10) - Earned score (59)

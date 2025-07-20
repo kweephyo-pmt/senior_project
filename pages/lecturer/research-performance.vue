@@ -25,7 +25,7 @@
 
     <!-- Research Track -->
     <div class="mb-6">
-      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">Research Track</h2>
+      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">Teaching Track</h2>
       <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
     </div>
 
@@ -151,11 +151,11 @@
                   <td class="px-3 py-1">Student Success Prediction Model</td>
                 </tr>
                 <tr>
-                  <td class="px-3 py-1 text-center">7</td>
+                  <td class="px-3 py-1 text-center">7.1</td>
                   <td class="px-3 py-1">Blockchain in Education</td>
                 </tr>
                 <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">8</td>
+                  <td class="px-3 py-1 text-center">7.2</td>
                   <td class="px-3 py-1">Virtual Reality Learning Environments</td>
                 </tr>
               </tbody>
@@ -175,35 +175,35 @@
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr>
-                  <td class="px-3 py-1 text-center">4</td>
+                  <td class="px-3 py-1 text-center">1</td>
                   <td class="px-3 py-1">Self Research Highlights</td>
                 </tr>
                 <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">5</td>
+                  <td class="px-3 py-1 text-center">2</td>
                   <td class="px-3 py-1">Gold Chain of Knowledge</td>
                 </tr>
                 <tr>
-                  <td class="px-3 py-1 text-center">6</td>
+                  <td class="px-3 py-1 text-center">3</td>
                   <td class="px-3 py-1">Machine Learning in Education</td>
                 </tr>
                 <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">7</td>
+                  <td class="px-3 py-1 text-center">4</td>
                   <td class="px-3 py-1">Adaptive Learning Systems</td>
                 </tr>
                 <tr>
-                  <td class="px-3 py-1 text-center">8</td>
+                  <td class="px-3 py-1 text-center">5</td>
                   <td class="px-3 py-1">Educational Technology Integration</td>
                 </tr>
                 <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">9</td>
+                  <td class="px-3 py-1 text-center">6</td>
                   <td class="px-3 py-1">Digital Assessment Methods</td>
                 </tr>
                 <tr>
-                  <td class="px-3 py-1 text-center">10</td>
+                  <td class="px-3 py-1 text-center">7.1</td>
                   <td class="px-3 py-1">Learning Analytics Dashboard</td>
                 </tr>
                 <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">11</td>
+                  <td class="px-3 py-1 text-center">8.1</td>
                   <td class="px-3 py-1">InsightlyHub</td>
                 </tr>
               </tbody>

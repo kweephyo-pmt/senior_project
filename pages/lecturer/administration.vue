@@ -1,35 +1,37 @@
 <template>
-    <div class="container mx-auto px-4 py-8">
-      <!-- Header with Round Selector -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 class="text-xl md:text-2xl font-bold text-gray-900">Domain 4: Administration Performance</h1>
-          <p class="text-gray-600 text-sm md:text-base">Welcome back, {{ user?.displayName }}</p>
-        </div>
-        <div class="relative w-full md:w-auto">
-          <select
-          class="w-full sm:w-auto appearance-none bg-white border-0  rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header with Round Selector -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
+          Domain 4: Administration Performance
+        </h1>
+        <p class="text-sm sm:text-base text-gray-600">Welcome back, {{ user?.displayName }}</p>
+      </div>
+      <div class="relative w-full sm:w-auto">
+        <select
+          class="w-full sm:w-auto appearance-none bg-white border-0 rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
         >
-         <option>Round 2/2025</option>
+          <option>Round 2/2025</option>
           <option>Round 1/2025</option>
           <option>Round 2/2024</option>
         </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </div>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
         </div>
       </div>
-  
-      <!-- Administration Track -->
-      <div class="mb-6">
-        <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Administration Track</h2>
-        <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
-      </div>
-  
-     <!-- KPI Categories with NuxtLink-->
-     <div v-if="selectedRound" class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+    </div>
+
+    <!-- Administration Track -->
+    <div class="mb-6">
+      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">Teaching Track</h2>
+      <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
+    </div>
+
+    <!-- KPI Categories with NuxtLink-->
+    <div v-if="selectedRound" class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -95,62 +97,124 @@
         <p class="text-xl font-bold text-inherit">{{ selectedRound?.categories[4]?.value || 0 }}%</p>
       </NuxtLink>
     </div>
-  
-      <!-- Administration Performance -->
-      <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-8 mx-0 md:mx-4 lg:mx-20">
-        <div class="flex flex-col items-center">
-            <h2 class="text-md font-bold text-gray-900 mb-1 text-center">Administration Performance</h2>
-            <span class="text-sm text-gray-500 mb-6 text-center">Threshold (30) - Earned score (115)</span>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      <!-- Administration Performance Card -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl p-4 sm:p-8">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 text-center">
+          Administration Performance
+        </h2>
+        <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
+          Threshold (30) - Earned score (115)
+        </p>
+        <div class="h-[300px] sm:h-[360px] w-full">
+          <canvas ref="administrationChart"></canvas>
         </div>
-        
-        <!-- Performance Chart -->
-        <div class="w-full overflow-x-auto">
-          <div class="min-w-[320px] md:min-w-[600px] lg:min-w-[900px] h-[400px] bg-white rounded-xl p-4 md:p-6">
-            <canvas ref="administrationChart" style="width:100%;height:100%"></canvas>
+      </div>
+
+      <!-- Tables stacked vertically in a card column -->
+      <div class="flex flex-col gap-6">
+        <!-- Curricular Committee Table -->
+        <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Curricular Committee</h2>
+          <div class="max-h-[200px] overflow-y-auto">
+            <table class="min-w-full text-xs">
+              <thead class="sticky top-0">
+                <tr>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">ID</th>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Name</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-3 py-1 text-center">1</td>
+                  <td class="px-3 py-1 text-center">Dr. John Smith</td>
+                </tr>
+                <tr class="bg-[#E8F4FC]">
+                  <td class="px-3 py-1 text-center">2</td>
+                  <td class="px-3 py-1 text-center">Prof. Jane Doe</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-1 text-center">3</td>
+                  <td class="px-3 py-1 text-center">Dr. Michael Johnson</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- School Committee Table -->
+        <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
+          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">School Committee</h2>
+          <div class="max-h-[200px] overflow-y-auto">
+            <table class="min-w-full text-xs">
+              <thead class="sticky top-0">
+                <tr>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">ID</th>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Name</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-3 py-1 text-center">1</td>
+                  <td class="px-3 py-1 text-center">Dr. Sarah Wilson</td>
+                </tr>
+                <tr class="bg-[#E8F4FC]">
+                  <td class="px-3 py-1 text-center">2</td>
+                  <td class="px-3 py-1 text-center">Prof. Robert Brown</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-1 text-center">3</td>
+                  <td class="px-3 py-1 text-center">Dr. Emily Davis</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import Chart from 'chart.js/auto'
-  import ChartDataLabels from 'chartjs-plugin-datalabels'
-  import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-  
-  definePageMeta({
-  layout: 'lecturer'
-  })
-  
-  const administrationChart = ref<HTMLCanvasElement | null>(null)
-  const showMobileMenu = ref(false)
-  const { user, logout } = useFirebaseAuth()
-  import { useAirtableKpi } from '@/composables/useAirtableKpi'
+  </div>
+</template>
 
-  const { kpiRounds, selectedRound, selectRound, isLoading, error } = useAirtableKpi()
-  const selectedRoundId = ref(selectedRound.value?.id || '')
-  
-  const toggleMobileMenu = () => {
+<script setup lang="ts">
+import { useAirtableKpi } from '@/composables/useAirtableKpi'
+import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+import Chart from 'chart.js/auto'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { onMounted, ref } from 'vue'
+
+definePageMeta({
+  layout: 'lecturer'
+})
+
+const administrationChart = ref<HTMLCanvasElement | null>(null)
+const showMobileMenu = ref(false)
+const { user, logout } = useFirebaseAuth()
+
+const { kpiRounds, selectedRound, selectRound, isLoading, error } = useAirtableKpi()
+const selectedRoundId = ref(selectedRound.value?.id || '')
+
+const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
-  }
-  
-  onMounted(() => {
+}
+
+onMounted(() => {
   // Create horizontal bar chart for administration performance
   if (administrationChart.value) {
     new Chart(administrationChart.value, {
       type: 'bar',
       data: {
         labels: [
-        ['Academic Administration assigned', 'by the School or University'],
-        'Coordination with Guest Lecturer',
+          ['Academic Administration assigned', 'by the School or University'],
+          'Coordination with Guest Lecturer',
           'Course Coordination',
-          ['University\'s Committee or ','Committee-Appointed Working Group'],
-          ['School\'s Committee or ','Committee-Appointed Working Group'],
+          ['University\'s Committee or ', 'Committee-Appointed Working Group'],
+          ['School\'s Committee or ', 'Committee-Appointed Working Group'],
           'School Committee',
           'Curricular Committee',
           ['Administrative duty assigned', 'by the school']
-          ],
+        ],
         datasets: [{
           data: [0, 0, 10, 25, 20, 0, 0, 60],
           backgroundColor: '#1D3555',
@@ -166,17 +230,17 @@
           legend: {
             display: false
           },
-        datalabels: {               
-                    anchor: 'end',              
-                    align: 'end',               
-                    color: '#6B7280',           
-                    font: {
-                    size: 12,
-                    weight: 'bold'
-                    },
-                    offset: 4                  
-                }
+          datalabels: {               
+            anchor: 'end',              
+            align: 'end',               
+            color: '#6B7280',           
+            font: {
+              size: 12,
+              weight: 'bold'
             },
+            offset: 4                  
+          }
+        },
         scales: {
           x: {
             beginAtZero: true,
@@ -210,8 +274,8 @@
           }
         }
       },
-      plugins: [ChartDataLabels]        // 👉 Register datalabels plugin here
+      plugins: [ChartDataLabels]        // Register datalabels plugin here
     })
   }
 })
-  </script>
+</script>
