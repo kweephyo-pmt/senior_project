@@ -29,7 +29,7 @@
       </div>
   
      <!-- KPI Categories with NuxtLink-->
-     <div v-if="selectedRound" class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+     <div v-if="selectedRound" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -96,8 +96,9 @@
       </NuxtLink>
     </div>
   
-      <!-- Academic Service Performance -->
-      <div class="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6 sm:gap-8">
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 sm:gap-8">
+        <!-- Arts and Culture Performance Chart -->
         <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
         <div class="flex flex-col items-center">
           <h2 class="text-md font-bold text-gray-900 mb-1 text-center">
@@ -113,52 +114,162 @@
           <canvas ref="acChart"></canvas>
         </div>
       </div>
-      <!-- table -->
-      <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-8 sm:mb-40 mr-0 sm:mr-8">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">
-          Self Development Projects
-        </h2>
-        <div class="max-h-80 overflow-y-auto pr-2">
-            <div>
-            <p class="text-sm ml-4 mb-2 font-bold">Thailand Cloud Immersion Day</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acDateLogo/>Date : 27 June 2024</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acTypeLogo/>Type : Seminar</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acLocationLogo/>Room E4A0514, Mae Fah Luang University</p>
-            <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
+      
+      <!-- Right column with tables -->
+      <div class="space-y-6">
+        <!-- Self Development Projects -->
+        <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4"> 
+          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Self Development Projects</h2>
+          <div class="max-h-[150px] overflow-y-auto pr-2"> 
+            <table class="min-w-full text-xs">
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                    <div class="flex-1">
+                      <p class="text-sm font-bold mb-1">Thailand Cloud Immersion Day</p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acDateLogo class="w-4 h-4"/>Date : 27 June 2024
+                      </p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acTypeLogo class="w-4 h-4"/>Type : Seminar
+                      </p>
+                      <p class="text-xs text-gray-600 flex items-center gap-1">
+                        <acLocationLogo class="w-4 h-4"/>Room E4A0514, Mae Fah Luang University
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                    <div class="flex-1">
+                      <p class="text-sm font-bold mb-1">Digital Innovation Workshop</p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acDateLogo class="w-4 h-4"/>Date : 15 May 2024
+                      </p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acTypeLogo class="w-4 h-4"/>Type : Workshop
+                      </p>
+                      <p class="text-xs text-gray-600 flex items-center gap-1">
+                        <acLocationLogo class="w-4 h-4"/>Online Platform
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                    <div class="flex-1">
+                      <p class="text-sm font-bold mb-1">Advanced AI Concepts</p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acDateLogo class="w-4 h-4"/>Date : 10 April 2024
+                      </p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acTypeLogo class="w-4 h-4"/>Type : Seminar
+                      </p>
+                      <p class="text-xs text-gray-600 flex items-center gap-1">
+                        <acLocationLogo class="w-4 h-4"/>Room B3A101, Mae Fah Luang University
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                    <div class="flex-1">
+                      <p class="text-sm font-bold mb-1">UX/UI Design Principles</p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acDateLogo class="w-4 h-4"/>Date : 20 March 2024
+                      </p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acTypeLogo class="w-4 h-4"/>Type : Training
+                      </p>
+                      <p class="text-xs text-gray-600 flex items-center gap-1">
+                        <acLocationLogo class="w-4 h-4"/>Online Training Platform
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                 <tr>
+                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                    <div class="flex-1">
+                      <p class="text-sm font-bold mb-1">Data Visualization Techniques</p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acDateLogo class="w-4 h-4"/>Date : 05 February 2024
+                      </p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acTypeLogo class="w-4 h-4"/>Type : Workshop
+                      </p>
+                      <p class="text-xs text-gray-600 flex items-center gap-1">
+                        <acLocationLogo class="w-4 h-4"/>Conference Hall, Mae Fah Luang University
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                    <div class="flex-1">
+                      <p class="text-sm font-bold mb-1">Machine Learning for Education</p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acDateLogo class="w-4 h-4"/>Date : 15 January 2024
+                      </p>
+                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <acTypeLogo class="w-4 h-4"/>Type : Seminar
+                      </p>
+                      <p class="text-xs text-gray-600 flex items-center gap-1">
+                        <acLocationLogo class="w-4 h-4"/>Online Webinar
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div>
-            <p class="text-sm ml-4 mb-2 font-bold">Project 002</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acDateLogo/>Date : 27 June 2024</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acTypeLogo/>Type : Seminar</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acLocationLogo/>Room E4A0514, Mae Fah Luang University</p>
-            <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
-        </div>
-        <div>
-            <p class="text-sm ml-4 mb-2 font-bold">Project 003</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acDateLogo/>Date : 27 June 2024</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acTypeLogo/>Type : Seminar</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acLocationLogo/>Room E4A0514, Mae Fah Luang University</p>
-            <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
-        </div>
-        <div>
-            <p class="text-sm ml-4 mb-2 font-bold">Project 004</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acDateLogo/>Date : 27 June 2024</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acTypeLogo/>Type : Seminar</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acLocationLogo/>Room E4A0514, Mae Fah Luang University</p>
-            <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
-        </div>
-        <div>
-            <p class="text-sm ml-4 mb-2 font-bold">Project 005</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acDateLogo/>Date : 27 June 2024</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acTypeLogo/>Type : Seminar</p>
-            <p class="text-xs ml-4 mb-2 flex items-center gap-2"><acLocationLogo/>Room E4A0514, Mae Fah Luang University</p>
-            <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
-        </div>
+
+        <!-- MFU-arranged activities table -->
+        <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4"> 
+          <h2 class="text-lg font-medium text-gray-900 mb-4">
+            MFU-arranged activities
+          </h2>
+          <div class="max-h-[150px] overflow-y-auto pr-2">
+            <table class="min-w-full text-xs">
+              <thead class="sticky top-0">
+                <tr>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">Level</th>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Project Name</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-3 py-1 text-center">1</td>
+                  <td class="px-3 py-1">Cultural Heritage Workshop</td>
+                </tr>
+                <tr class="bg-[#E8F4FC]">
+                  <td class="px-3 py-1 text-center">2</td>
+                  <td class="px-3 py-1">Traditional Arts Festival</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-1 text-center">3</td>
+                  <td class="px-3 py-1">Community Engagement Program</td>
+                </tr>
+                <tr class="bg-[#E8F4FC]">
+                  <td class="px-3 py-1 text-center">4</td>
+                  <td class="px-3 py-1">Local Culture Documentation</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-1 text-center">5</td>
+                  <td class="px-3 py-1">Arts Conservation Training</td>
+                </tr>
+                <tr class="bg-[#E8F4FC]">
+                  <td class="px-3 py-1 text-center">6</td>
+                  <td class="px-3 py-1">Cultural Exchange Initiative</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
     </div>
-  </template>
+</template>
   
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
