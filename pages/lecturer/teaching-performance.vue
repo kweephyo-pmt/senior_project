@@ -12,7 +12,7 @@
       <!-- Round Selector - Full Width on Mobile -->
       <div class="relative w-full md:w-auto">
         <select
-          class="w-full sm:w-auto appearance-none bg-white border-0  rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
+          class="w-full sm:w-auto appearance-none bg-white border-0 rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
         >
           <option>Round 2/2025</option>
           <option>Round 1/2025</option>
@@ -100,9 +100,9 @@
       </NuxtLink>
     </div>
 
-    <!-- Main Content Grid -->
+    <!-- Main Content Grid - Always rendered -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-      <!-- Teaching Performance Card -->
+      <!-- Teaching Performance Card - Always rendered, chart always visible -->
       <div class="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-6 lg:p-8">
         <h2 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 text-center">
           Teaching Performance
@@ -110,127 +110,387 @@
         <p class="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 lg:mb-6 text-center">
           Threshold (170) - Earned score (203.95)
         </p>
+        <!-- Chart Container - Always visible -->
         <div class="h-[250px] sm:h-[300px] lg:h-[400px] w-full">
           <canvas ref="teachingChart"></canvas>
         </div>
       </div>
 
-      <!-- Tables stacked vertically in a card column -->
+      <!-- Tables Column - Loading states only affect tables -->
       <div class="flex flex-col gap-6">
-        <!-- Undergraduate Teaching -->
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-4">
-          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Undergraduate Teaching</h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs">
-              <thead>
-                <tr>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">No.</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course Code</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Number of Students</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-if="!teachingData">
-                  <td colspan="4" class="text-center py-4">Loading data...</td>
-                </tr>
-                <tr v-else-if="!teachingData.undergraduate?.length">
-                  <td colspan="4" class="text-center py-4">No undergraduate courses found</td>
-                </tr>
-                <template v-else>
-                  <tr v-for="(item, index) in teachingData.undergraduate" 
-                      :key="item.id" 
-                      :class="index % 2 === 0 ? '' : 'bg-[#E8F4FC]'">
-                    <td class="px-3 py-1 text-center">{{ item.id }}</td>
-                    <td class="px-3 py-1">{{ item.course_name }}</td>
-                    <td class="px-3 py-1 text-center">{{ item.course_code }}</td>
-                    <td class="px-3 py-1 text-center">{{ item.total_student }}</td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
+        <!-- Loading State for Tables Only -->
+        <div v-if="isLoadingData" class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-6 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
+          <p class="mt-2 text-sm text-gray-600">Loading table data...</p>
+        </div>
+
+        <!-- Error State for Tables Only -->
+        <div v-else-if="apiError" class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-6 text-center">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-red-600 text-sm">{{ apiError }}</p>
+            <button 
+              @click="fetchAllData" 
+              class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+            >
+              Retry
+            </button>
           </div>
         </div>
 
-        <!-- Graduate Teaching -->
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-4">
-          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Graduate Teaching</h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs">
-              <thead>
-                <tr>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">No.</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course Code</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Number of Students</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-if="!teachingData?.graduate?.length">
-                  <td colspan="4" class="text-center py-4">Loading data...</td>
-                </tr>
-                <template v-else>
-                  <tr v-for="(item, index) in teachingData.graduate" 
-                      :key="item.id" 
-                      :class="index % 2 === 0 ? '' : 'bg-[#E8F4FC]'">
-                    <td class="px-3 py-1 text-center">{{ item.id }}</td>
-                    <td class="px-3 py-1">{{ item.course_name }}</td>
-                    <td class="px-3 py-1 text-center">{{ item.course_code }}</td>
-                    <td class="px-3 py-1 text-center">{{ item.total_student }}</td>
+        <!-- Tables - Show when data is loaded successfully -->
+        <template v-else>
+          <!-- Undergraduate Teaching Table -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-4">
+            <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Undergraduate Teaching</h2>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs">
+                <thead>
+                  <tr>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">No.</th>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course</th>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course Code</th>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Number of Students</th>
                   </tr>
-                </template>
-              </tbody>
-            </table>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-if="!undergraduateData?.length">
+                    <td colspan="4" class="text-center py-4 text-gray-500">No undergraduate courses found</td>
+                  </tr>
+                  <template v-else>
+                    <tr v-for="(item, index) in undergraduateData" 
+                        :key="index" 
+                        :class="index % 2 === 0 ? '' : 'bg-[#E8F4FC]'">
+                      <td class="px-3 py-1 text-center">{{ index + 1 }}</td>
+                      <td class="px-3 py-1">{{ item.course_name || item.courseName || 'N/A' }}</td>
+                      <td class="px-3 py-1 text-center">{{ item.course_code || item.courseCode || 'N/A' }}</td>
+                      <td class="px-3 py-1 text-center">{{ item.total_student || item.totalStudents || item.students || 'N/A' }}</td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          <!-- Graduate Teaching Table -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-4">
+            <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Graduate Teaching</h2>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs">
+                <thead>
+                  <tr>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">No.</th>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course</th>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase">Course Code</th>
+                    <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Number of Students</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-if="!graduateData?.length">
+                    <td colspan="4" class="text-center py-4 text-gray-500">No graduate courses found</td>
+                  </tr>
+                  <template v-else>
+                    <tr v-for="(item, index) in graduateData" 
+                        :key="index" 
+                        :class="index % 2 === 0 ? '' : 'bg-[#E8F4FC]'">
+                      <td class="px-3 py-1 text-center">{{ index + 1 }}</td>
+                      <td class="px-3 py-1">{{ item.course_name || item.courseName || 'N/A' }}</td>
+                      <td class="px-3 py-1 text-center">{{ item.course_code || item.courseCode || 'N/A' }}</td>
+                      <td class="px-3 py-1 text-center">{{ item.total_student || item.totalStudents || item.students || 'N/A' }}</td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { useAirtableKpi } from '@/composables/useAirtableKpi';
+import { useFirebaseAuth } from '@/composables/useFirebaseAuth';
 import Chart from "chart.js/auto";
-import { useFetch } from '#app';
-
-const teachingData = ref<any>(null);
-
-onMounted(async () => {
-  console.log('Attempting to fetch teaching data...');
-  
-  try {
-    const { data } = await useFetch('http://localhost:4000/api/teaching-performance');
-    console.log('Raw response data:', data.value);
-    
-    if (data.value) {
-      teachingData.value = data.value;
-      console.log('Teaching data set:', teachingData.value);
-    } else {
-      console.log('No data received from API');
-    }
-  } catch (error) {
-    console.error('Error fetching teaching data:', error);
-    teachingData.value = null;
-  }
-});
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { useAirtableKpi } from '@/composables/useAirtableKpi'
-import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+import { onMounted, ref } from "vue";
 
 definePageMeta({
   layout: "lecturer",
 });
+
 const { kpiRounds, selectedRound, selectRound, isLoading, error } = useAirtableKpi()
 const selectedRoundId = ref(selectedRound.value?.id || '')
 const teachingChart = ref<HTMLCanvasElement | null>(null);
 const { user } = useFirebaseAuth()
 
-// Register the plugin
+// Debug states
+const componentMounted = ref(false)
+const consoleLogs = ref<Array<{timestamp: string, message: string, type: string}>>([])
+
+// API Data states
+const authToken = ref<string | null>(null)
+const undergraduateData = ref<any[]>([])
+const graduateData = ref<any[]>([])
+const isLoadingData = ref(false)
+const apiError = ref<string | null>(null)
+
+// API Configuration - UPDATE THESE WITH YOUR REAL CREDENTIALS!
+const API_BASE_URL = 'https://eport.mfu.ac.th/api/master'
+const API_CREDENTIALS = {
+  username: 'sombi', // ← UPDATE THIS with your actual username
+  password: 'kTzQmR7pWv9LbYD'   // ← UPDATE THIS with your actual password
+}
+
+// Required headers for GET requests (based on Postman collection)
+const REQUIRED_GET_HEADERS_COMMON = {
+  evaluateid: '9', // Assuming this is a default round ID, adjust if needed
+  lang: 'en'
+}
+
+// Specific staffcodes based on Postman collection
+const STAFF_CODES = {
+  undergraduate: '67212038',
+  graduate: '46212058',
+}
+
+// Logging function
+const addLog = (message: string, type: 'info' | 'error' = 'info') => {
+  const timestamp = new Date().toLocaleTimeString()
+  consoleLogs.value.push({ timestamp, message, type })
+  console.log(`[${timestamp}] ${message}`)
+  
+  if (consoleLogs.value.length > 30) {
+    consoleLogs.value = consoleLogs.value.slice(-30)
+  }
+}
+
+const clearLogs = () => {
+  consoleLogs.value = []
+}
+
+// Register the Chart.js plugin
 Chart.register(ChartDataLabels);
 
-onMounted(() => {
-  // Create bar chart
+// Test basic connection
+const testConnection = async () => {
+  isLoadingData.value = true
+  apiError.value = null
+  
+  try {
+    addLog('Testing basic connection...')
+    const response = await fetch(API_BASE_URL, { method: 'HEAD' })
+    addLog(`Connection test result: ${response.status} ${response.statusText}`)
+    
+    if (response.ok) {
+      addLog('✅ Basic connection successful!')
+    } else {
+      addLog(`❌ Connection failed: ${response.status}`, 'error')
+    }
+  } catch (error) {
+    addLog(`❌ Connection error: ${error.message}`, 'error')
+    apiError.value = `Connection failed: ${error.message}`
+  } finally {
+    isLoadingData.value = false
+  }
+}
+
+// Test authentication AND RETURN THE TOKEN
+const testAuthentication = async () => {
+  isLoadingData.value = true
+  apiError.value = null
+  
+  try {
+    addLog(`Attempting authentication with username: ${API_CREDENTIALS.username}`)
+    
+    if (API_CREDENTIALS.username === 'your_actual_username') {
+      throw new Error('Please update API_CREDENTIALS with your real username and password!')
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        username: API_CREDENTIALS.username,
+        password: API_CREDENTIALS.password
+      })
+    })
+    
+    const responseText = await response.text()
+    addLog(`Auth response status: ${response.status} ${response.statusText}. Body: ${responseText}`)
+    
+    if (response.ok) {
+      try {
+        const data = JSON.parse(responseText)
+        authToken.value = data.token || data.access_token || data.bearer_token
+        if (authToken.value) {
+          addLog('✅ Authentication successful! Token received.')
+          return authToken.value // <-- IMPORTANT: Return the token
+        } else {
+          addLog('❌ No token found in response', 'error')
+        }
+      } catch (e) {
+        addLog(`❌ Failed to parse JSON response: ${e.message}`, 'error')
+      }
+    } else {
+      addLog(`❌ Authentication failed: ${response.status} - ${responseText}`, 'error')
+      apiError.value = `Authentication failed: ${response.status}`
+    }
+    
+  } catch (error) {
+    addLog(`❌ Authentication error: ${error.message}`, 'error')
+    apiError.value = `Authentication error: ${error.message}`
+  } finally {
+    isLoadingData.value = false
+  }
+  return null // Return null if authentication fails or no token is found
+}
+
+// Test GET requests using Authorization: Bearer header and required parameters
+const testEndpointWithAuthHeader = async (endpoint: string, name: string) => {
+  try {
+    if (!authToken.value) {
+      addLog('No token available, please authenticate first', 'error')
+      return
+    }
+    
+    addLog(`Testing ${name} endpoint with Authorization: Bearer header...`)
+    
+    // Construct headers
+    const headers: Record<string, string> = {
+      ...REQUIRED_GET_HEADERS_COMMON, 
+      'Authorization': `Bearer ${authToken.value}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    // Add staffcode header if applicable based on the name
+    if (name === 'Undergraduate') {
+      headers['staffcode'] = STAFF_CODES.undergraduate;
+    } else if (name === 'Graduate') {
+      headers['staffcode'] = STAFF_CODES.graduate;
+    }
+    
+    try {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: headers
+      })
+      
+      const responseText = await response.text()
+      addLog(`${name} response: ${response.status} ${response.statusText} - ${responseText.substring(0, 300)}`)
+      
+      if (response.ok) {
+        try {
+          const data = JSON.parse(responseText)
+          // Check for a successful response structure
+          if (data.success === 1 || data.success === true || Array.isArray(data) || data.data) {
+            addLog(`🎉 ${name} SUCCESS! Authorization: Bearer header worked.`)
+            
+            let processedData: any[] = [];
+            if (Array.isArray(data)) {
+              processedData = data;
+            } else if (data.data && Array.isArray(data.data)) {
+              processedData = data.data;
+            } else if (data.result && Array.isArray(data.result)) {
+              processedData = data.result;
+            } else if (data.items && Array.isArray(data.items)) {
+              processedData = data.items;
+            }
+            
+            // Map fields for display in the table
+            const mappedData = processedData.map(item => ({
+              course_name: item.coursename || item.courseName || item.name || 'N/A',
+              course_code: item.coursecode || item.courseCode || item.code || 'N/A',
+              total_student: item.totalstudent || item.totalStudents || item.students || item.student_count || 'N/A',
+            }));
+
+            if (mappedData.length > 0) {
+              addLog(`${name} data count: ${mappedData.length}. First item keys: ${JSON.stringify(Object.keys(mappedData[0]))}`)
+            } else {
+              addLog(`${name} returned empty data.`)
+            }
+            
+            if (name === 'Undergraduate') undergraduateData.value = mappedData
+            else if (name === 'Graduate') graduateData.value = mappedData
+            
+            return { name: 'Authorization Header' }
+          } else if (data.success === 0) {
+            addLog(`${name} auth failed: ${data.message}. Token may be invalid or expired.`)
+            addLog(`Received Token: ${authToken.value}`)
+          } else {
+            addLog(`${name} unknown response structure: ${JSON.stringify(data)}`)
+          }
+        } catch (parseError) {
+          addLog(`${name} JSON parse error: ${parseError.message}`, 'error')
+        }
+      } else if (response.status === 401) {
+          addLog(`${name} received 401 Unauthorized. Token may be invalid or expired.`, 'error')
+      } else {
+        addLog(`❌ ${name} failed with status ${response.status}.`)
+      }
+      
+    } catch (fetchError) {
+      addLog(`${name} fetch error: ${fetchError.message}`, 'error')
+    }
+    
+    return null
+    
+  } catch (error) {
+    addLog(`❌ ${name} test failed: ${error.message}`, 'error')
+    return null
+  }
+}
+
+// Fetch all data using the authenticated header method
+const fetchAllData = async () => {
+  isLoadingData.value = true
+  apiError.value = null
+  
+  try {
+    addLog('Starting data fetch process...')
+    
+    // 1. Authenticate and capture the token
+    const token = await testAuthentication() 
+    
+    if (!token) {
+      throw new Error('Authentication failed - no token available')
+    }
+    
+    addLog('Proceeding to fetch data with authenticated token using Authorization: Bearer header...')
+    
+    // 2. Test undergraduate data endpoint
+    addLog('Testing undergraduate data endpoint...')
+    const undergradResult = await testEndpointWithAuthHeader(`${API_BASE_URL}/get_Undergraduate`, 'Undergraduate')
+    if (!undergradResult && !undergraduateData.value.length) {
+      addLog('Failed to fetch undergraduate data. Check token validity, API response, and required headers.', 'error')
+    }
+    
+    // 3. Test graduate data endpoint
+    addLog('Testing graduate data endpoint...')
+    const gradResult = await testEndpointWithAuthHeader(`${API_BASE_URL}/get_Graduate`, 'Graduate')
+    if (!gradResult && !graduateData.value.length) {
+      addLog('Failed to fetch graduate data. Check token validity and API response.', 'error')
+    }
+    
+    addLog('✅ Data fetch process completed!')
+    addLog(`Summary - Undergraduate: ${undergraduateData.value.length} items, Graduate: ${graduateData.value.length} items`)
+    
+  } catch (error) {
+    addLog(`❌ Overall data fetch error: ${error.message}`, 'error')
+    apiError.value = error.message
+  } finally {
+    isLoadingData.value = false
+  }
+}
+
+// Initialize chart with hardcoded data
+const initializeChart = () => {
   if (teachingChart.value) {
+    addLog('Initializing chart...');
     new Chart(teachingChart.value, {
       type: "bar",
       data: {
@@ -245,7 +505,7 @@ onMounted(() => {
         datasets: [
           {
             label: "Lecture (Score)",
-            data: [0, 0, 0, 3, 30, 90], // Example: 30 for grad, 90 for undergrad
+            data: [0, 0, 0, 3, 30, 90], // Hardcoded data
             backgroundColor: ["#172554", "#172554", "#172554", "#172554", "#172554", "#172554"],
             borderWidth: 0,
             borderRadius: 0,
@@ -253,7 +513,7 @@ onMounted(() => {
           },
           {
             label: "Lab (Score)",
-            data: [0, 0, 0, 0, 19.46, 61.5], // Example: 19.46 for grad, 61.5 for undergrad
+            data: [0, 0, 0, 0, 19.46, 61.5], // Hardcoded data
             backgroundColor: ["#a21a5b", "#a21a5b", "#a21a5b", "#a21a5b", "#a21a5b", "#a21a5b"],
             borderWidth: 0,
             borderRadius: 0,
@@ -329,7 +589,6 @@ onMounted(() => {
             align: 'end',
             anchor: 'end',
             formatter: function(value, context) {
-              // Only show the total for each group
               if (context.datasetIndex === context.chart.data.datasets.length - 1) {
                 const total = context.chart.data.datasets.reduce((sum, dataset) => sum + dataset.data[context.dataIndex], 0);
                 return total;
@@ -348,6 +607,26 @@ onMounted(() => {
         },
       },
     });
+    addLog('Chart initialized with hardcoded data');
+  } else {
+    addLog('Cannot initialize chart: teachingChart ref is null', 'error');
   }
-});
+};
+
+onMounted(async () => {
+  componentMounted.value = true
+  addLog('Component mounted successfully')
+  
+  // Initialize the chart with hardcoded data. This should make the chart visible.
+  // This is called once on mount.
+  initializeChart(); 
+  
+  addLog('API connection ready. Fetching data...')
+  
+  // Fetch the data for the tables automatically
+  await fetchAllData() 
+  
+  // The chart remains hardcoded and is NOT updated with fetched data.
+  // No further chart update logic is needed here.
+})
 </script>
