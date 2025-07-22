@@ -287,9 +287,10 @@ const testConnection = async () => {
     } else {
       addLog(`❌ Connection failed: ${response.status}`, 'error')
     }
-  } catch (error) {
-    addLog(`❌ Connection error: ${error.message}`, 'error')
-    apiError.value = `Connection failed: ${error.message}`
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    addLog(`❌ Connection error: ${errorMessage}`, 'error')
+    apiError.value = `Connection failed: ${errorMessage}`
   } finally {
     isLoadingData.value = false
   }
@@ -332,17 +333,19 @@ const testAuthentication = async () => {
         } else {
           addLog('❌ No token found in response', 'error')
         }
-      } catch (e) {
-        addLog(`❌ Failed to parse JSON response: ${e.message}`, 'error')
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Failed to parse JSON response'
+        addLog(`❌ ${errorMessage}`, 'error')
       }
     } else {
       addLog(`❌ Authentication failed: ${response.status} - ${responseText}`, 'error')
       apiError.value = `Authentication failed: ${response.status}`
     }
     
-  } catch (error) {
-    addLog(`❌ Authentication error: ${error.message}`, 'error')
-    apiError.value = `Authentication error: ${error.message}`
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    addLog(`❌ Authentication error: ${errorMessage}`, 'error')
+    apiError.value = `Authentication error: ${errorMessage}`
   } finally {
     isLoadingData.value = false
   }
@@ -424,7 +427,8 @@ const testEndpointWithAuthHeader = async (endpoint: string, name: string) => {
           } else {
             addLog(`${name} unknown response structure: ${JSON.stringify(data)}`)
           }
-        } catch (parseError) {
+        } catch (error) {
+          const parseError = error as Error
           addLog(`${name} JSON parse error: ${parseError.message}`, 'error')
         }
       } else if (response.status === 401) {
@@ -433,14 +437,15 @@ const testEndpointWithAuthHeader = async (endpoint: string, name: string) => {
         addLog(`❌ ${name} failed with status ${response.status}.`)
       }
       
-    } catch (fetchError) {
-      addLog(`${name} fetch error: ${fetchError.message}`, 'error')
+    } catch (fetchError: unknown) {
+      addLog(`${name} fetch error: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`, 'error')
     }
     
     return null
     
-  } catch (error) {
-    addLog(`❌ ${name} test failed: ${error.message}`, 'error')
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    addLog(`❌ ${name} test failed: ${errorMessage}`, 'error')
     return null
   }
 }
@@ -479,9 +484,10 @@ const fetchAllData = async () => {
     addLog('✅ Data fetch process completed!')
     addLog(`Summary - Undergraduate: ${undergraduateData.value.length} items, Graduate: ${graduateData.value.length} items`)
     
-  } catch (error) {
-    addLog(`❌ Overall data fetch error: ${error.message}`, 'error')
-    apiError.value = error.message
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    addLog(`❌ Overall data fetch error: ${errorMessage}`, 'error')
+    apiError.value = errorMessage
   } finally {
     isLoadingData.value = false
   }
@@ -590,7 +596,17 @@ const initializeChart = () => {
             anchor: 'end',
             formatter: function(value, context) {
               if (context.datasetIndex === context.chart.data.datasets.length - 1) {
-                const total = context.chart.data.datasets.reduce((sum, dataset) => sum + dataset.data[context.dataIndex], 0);
+                const total = context.chart.data.datasets.reduce((sum, dataset) => {
+                  const dataPoint = dataset.data[context.dataIndex];
+                  // Handle different data types
+                  if (typeof dataPoint === 'number') {
+                    return sum + dataPoint;
+                  }
+                  if (Array.isArray(dataPoint)) {
+                    return sum + dataPoint[0]; // Use first value if array
+                  }
+                  return sum;
+                }, 0);
                 return total;
               }
               return null;

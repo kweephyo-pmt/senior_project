@@ -324,8 +324,9 @@ onMounted(() => {
               font: {
                 size: 10
               },
-              callback: function(value) {
-                const label = this.getLabelForValue(value);
+              callback: function(value: string | number) {
+                const numValue = typeof value === 'string' ? parseFloat(value) : value;
+                const label = this.getLabelForValue(numValue);
                 return Array.isArray(label) ? label : [label];
               }
             }
@@ -353,7 +354,11 @@ onMounted(() => {
             formatter: function(value, context) {
               // Only show the total for each group
               if (context.datasetIndex === context.chart.data.datasets.length - 1) {
-                const total = context.chart.data.datasets.reduce((sum, dataset) => sum + dataset.data[context.dataIndex], 0);
+                const total = context.chart.data.datasets.reduce((sum, dataset) => {
+                  const dataValue = dataset.data[context.dataIndex];
+                  // Only add if it's a number
+                  return typeof dataValue === 'number' ? sum + dataValue : sum;
+                }, 0);
                 return total;
               }
               return null;
