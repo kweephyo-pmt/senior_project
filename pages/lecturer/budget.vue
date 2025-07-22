@@ -247,7 +247,11 @@ const { user, logout } = useFirebaseAuth()
 
 const selectedYear = ref('2025')
 const openDropdown = ref('')
-const selectedOwners = ref({
+interface ProjectOwners {
+  [key: string]: string;
+}
+
+const selectedOwners = ref<ProjectOwners>({
   'SoM Project': 'Dr. Korawit Fakkhong'
 })
 
