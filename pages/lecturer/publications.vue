@@ -52,8 +52,8 @@
               </a>
             </div>
             <div class="flex items-center gap-2 mt-4">
-              <img :src="user?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.displayName || 'User')" 
-                   :alt="user?.displayName" 
+              <img :src="user?.photoURL ?? 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.displayName || 'User')" 
+                   :alt="user?.displayName ?? 'User'" 
                    class="w-7 h-7 rounded-full border border-blue-300" />
               <span class="text-sm text-gray-700 font-medium">{{ user?.displayName }}</span>
             </div>
