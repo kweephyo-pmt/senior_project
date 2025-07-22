@@ -225,7 +225,7 @@
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-700">65-74</span>
               <span
-                class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+                class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full" 
                 >Moderate</span
               >
             </div>
@@ -239,7 +239,7 @@
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-700">85-100</span>
               <span
-                class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full"
+                class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full" 
                 >Excellent</span
               >
             </div>
