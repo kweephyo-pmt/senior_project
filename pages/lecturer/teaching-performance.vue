@@ -236,22 +236,22 @@ const isLoadingData = ref(false)
 const apiError = ref<string | null>(null)
 
 // API Configuration - UPDATE THESE WITH YOUR REAL CREDENTIALS!
-const API_BASE_URL = 'https://eport.mfu.ac.th/api/master'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const API_CREDENTIALS = {
-  username: 'sombi', // ← UPDATE THIS with your actual username
-  password: 'kTzQmR7pWv9LbYD'   // ← UPDATE THIS with your actual password
+  username: import.meta.env.VITE_API_USERNAME,
+  password: import.meta.env.VITE_API_PASSWORD
 }
 
 // Required headers for GET requests (based on Postman collection)
 const REQUIRED_GET_HEADERS_COMMON = {
-  evaluateid: '9', // Assuming this is a default round ID, adjust if needed
-  lang: 'en'
+  evaluateid: import.meta.env.VITE_EVALUATE_ID,
+  lang: import.meta.env.VITE_API_LANG
 }
 
 // Specific staffcodes based on Postman collection
 const STAFF_CODES = {
-  undergraduate: '67212038',
-  graduate: '46212058',
+  undergraduate: import.meta.env.VITE_STAFF_CODE_UNDERGRADUATE,
+  graduate: import.meta.env.VITE_STAFF_CODE_GRADUATE
 }
 
 // Logging function
