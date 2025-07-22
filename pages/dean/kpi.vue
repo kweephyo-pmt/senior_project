@@ -1,3 +1,3 @@
 <template>
-    kpi
+    kpi text
 </template>
