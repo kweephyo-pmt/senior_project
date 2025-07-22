@@ -119,7 +119,7 @@
       <div class="space-y-6">
         <!-- Self Development Projects -->
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4"> 
-          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Self Development Projects</h2>
+          <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Self Development</h2>
           <div class="max-h-[150px] overflow-y-auto pr-2"> 
             <table class="min-w-full text-xs">
               <tbody class="bg-white divide-y divide-gray-200">
