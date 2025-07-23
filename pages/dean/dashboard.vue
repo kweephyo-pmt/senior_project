@@ -1,105 +1,49 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dean Dashboard</h1>
-        <p class="text-gray-600">Welcome back, {{ user?.displayName }}</p>
-      </div>
-      <div class="relative">
-        <select class="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-4 pr-10 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-          <option>Academic Year 2025</option>
-          <option>Academic Year 2024</option>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+  <div class="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header Section -->
+      <div class="flex items-start mb-8">
+        <div class="bg-white p-4 rounded-lg shadow-sm mr-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-800" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 14l6.16-3.422A12.083 12.083 0 0121.485 12 12.083 12.083 0 0118.16 14.578L12 18l-6.16-3.422A12.083 12.083 0 012.515 12c0-1.25.37-2.434 1.02-3.422L12 14z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6" />
           </svg>
         </div>
-      </div>
-    </div>
-
-    <!-- Statistics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="p-3 bg-blue-100 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <h2 class="text-sm font-medium text-gray-600">Total Faculty</h2>
-            <p class="text-lg font-semibold text-gray-900">48</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="p-3 bg-green-100 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <h2 class="text-sm font-medium text-gray-600">KPI Achievement</h2>
-            <p class="text-lg font-semibold text-gray-900">92%</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="p-3 bg-yellow-100 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <h2 class="text-sm font-medium text-gray-600">Pending Reviews</h2>
-            <p class="text-lg font-semibold text-gray-900">12</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center">
-          <div class="p-3 bg-purple-100 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <h2 class="text-sm font-medium text-gray-600">Total Projects</h2>
-            <p class="text-lg font-semibold text-gray-900">156</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Faculty Performance -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Faculty Performance Overview</h2>
-        <div class="h-80">
-          <canvas ref="performanceChart"></canvas>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">Select Faculties Directory</h1>
+          <p class="text-gray-600 mt-1">Choose a department to view faculty performance metrics</p>
         </div>
       </div>
 
-      <!-- Recent Activities -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Recent Activities</h2>
-        <div class="space-y-4">
-          <div v-for="activity in recentActivities" :key="activity.id" class="flex items-start">
-            <span :class="[
-              'w-2 h-2 mt-2 rounded-full mr-3',
-              activity.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'
-            ]"></span>
-            <div>
-              <p class="text-gray-900">{{ activity.text }}</p>
-              <p class="text-sm text-gray-500">{{ activity.time }}</p>
+      <!-- Departments Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div v-for="(department, index) in departments" :key="index"
+          class="bg-white rounded-xl shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 ease-in-out">
+          <div class="p-6">
+            <div class="flex items-center">
+              <div :class="[department.color, 'p-3 rounded-lg mr-4']">
+                <component :is="department.icon" class="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-gray-800">{{ department.name }}</h2>
+                <p class="text-sm text-gray-500 flex items-center mt-1">
+                  <peopleIcon/>
+                  Total Faculty: {{ department.facultyCount }}
+                </p>
+              </div>
+            </div>
+            <div class="mt-6">
+              <button
+                :class="[department.buttonColor, department.textColor, 'w-full font-semibold py-2.5 rounded-lg flex items-center justify-center transition-colors duration-300 gap-2']">
+                <svg width="18" height="10" viewBox="0 0 18 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M9 0.178711C4.28375 0.178711 0.5625 4.99996 0.5625 4.99996C0.5625 4.99996 4.28375 9.82184 9 9.82184C12.6062 9.82184 17.4375 4.99996 17.4375 4.99996C17.4375 4.99996 12.6062 0.178711 9 0.178711ZM9 8.00371C7.34375 8.00371 5.99563 6.65621 5.99563 4.99996C5.99563 3.34371 7.34375 1.99559 9 1.99559C10.6562 1.99559 12.0044 3.34371 12.0044 4.99996C12.0044 6.65621 10.6562 8.00371 9 8.00371ZM9 3.24621C8.76695 3.24181 8.53536 3.28391 8.31877 3.37006C8.10218 3.4562 7.90494 3.58465 7.73857 3.74791C7.5722 3.91117 7.44004 4.10595 7.34983 4.32088C7.25961 4.5358 7.21314 4.76656 7.21314 4.99965C7.21314 5.23274 7.25961 5.46349 7.34983 5.67842C7.44004 5.89334 7.5722 6.08813 7.73857 6.25139C7.90494 6.41464 8.10218 6.5431 8.31877 6.62924C8.53536 6.71538 8.76695 6.75749 9 6.75309C9.45931 6.74441 9.89688 6.55587 10.2186 6.22798C10.5404 5.90009 10.7206 5.45904 10.7206 4.99965C10.7206 4.54026 10.5404 4.09921 10.2186 3.77132C9.89688 3.44343 9.45931 3.25488 9 3.24621Z" />
+                </svg>
+                View Faculty List
+              </button>
             </div>
           </div>
         </div>
@@ -108,70 +52,108 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import Chart from 'chart.js/auto'
-import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+<script setup>
+import { shallowRef } from 'vue';
+import peopleIcon from '../assets/peopleIcon.vue';
 
-const { user } = useFirebaseAuth()
+// Define icons as shallow references
+const AccountingIcon = shallowRef({ template: `<svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 0H2C0.9 0 0 0.9 0 2V22C0 23.1 0.9 24 2 24H18C19.1 24 20 23.1 20 22V2C20 0.9 19.1 0 18 0ZM6 20C6 20.55 5.55 21 5 21H3C2.45 21 2 20.55 2 20V19.5C2 18.95 2.45 18.5 3 18.5H5C5.55 18.5 6 18.95 6 19.5V20ZM6 16C6 16.55 5.55 17 5 17H3C2.45 17 2 16.55 2 16V15.5C2 14.95 2.45 14.5 3 14.5H5C5.55 14.5 6 14.95 6 15.5V16ZM6 12C6 12.55 5.55 13 5 13H3C2.45 13 2 12.55 2 12V11.5C2 10.95 2.45 10.5 3 10.5H5C5.55 10.5 6 10.95 6 11.5V12ZM12 20C12 20.55 11.55 21 11 21H9C8.45 21 8 20.55 8 20V19.5C8 18.95 8.45 18.5 9 18.5H11C11.55 18.5 12 18.95 12 19.5V20ZM12 16C12 16.55 11.55 17 11 17H9C8.45 17 8 16.55 8 16V15.5C8 14.95 8.45 14.5 9 14.5H11C11.55 14.5 12 14.95 12 15.5V16ZM12 12C12 12.55 11.55 13 11 13H9C8.45 13 8 12.55 8 12V11.5C8 10.95 8.45 10.5 9 10.5H11C11.55 10.5 12 10.95 12 11.5V12ZM18 20C18 20.55 17.55 21 17 21H15C14.45 21 14 20.55 14 20V19.5C14 18.95 14.45 18.5 15 18.5H17C17.55 18.5 18 18.95 18 19.5V20ZM18 16C18 16.55 17.55 17 17 17H15C14.45 17 14 16.55 14 16V15.5C14 14.95 14.45 14.5 15 14.5H17C17.55 14.5 18 14.95 18 15.5V16ZM18 12C18 12.55 17.55 13 17 13H15C14.45 13 14 12.55 14 12V11.5C14 10.95 14.45 10.5 15 10.5H17C17.55 10.5 18 10.95 18 11.5V12ZM18 7.5C18 8.05 17.55 8.5 17 8.5H3C2.45 8.5 2 8.05 2 7.5V3.5C2 2.95 2.45 2.5 3 2.5H17C17.55 2.5 18 2.95 18 3.5V7.5Z" fill="#3F63C5"/>
+</svg>
+` });
+const AviationIcon = shallowRef({ template: `<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.11229 22.6562H7.81249C7.68188 22.6562 7.55337 22.6234 7.43871 22.5609C7.32405 22.4984 7.22689 22.4081 7.15612 22.2983C7.08536 22.1885 7.04324 22.0628 7.03362 21.9325C7.024 21.8023 7.04719 21.6717 7.10106 21.5527L10.2485 14.6069L5.52245 14.502L3.79881 16.5903C3.4702 17.0034 3.20799 17.1875 2.53905 17.1875H1.66405C1.52551 17.192 1.38794 17.163 1.26299 17.1029C1.13804 17.0429 1.0294 16.9537 0.946275 16.8428C0.830065 16.686 0.715807 16.4204 0.827135 16.0415L1.79491 12.5747C1.80223 12.5488 1.81102 12.5229 1.82079 12.4976C1.82125 12.4951 1.82125 12.4927 1.82079 12.4902C1.81072 12.4649 1.80208 12.4389 1.79491 12.4126L0.826158 8.92383C0.721178 8.55225 0.835924 8.29248 0.951158 8.13965C1.02854 8.03697 1.12893 7.95388 1.24427 7.89706C1.3596 7.84025 1.48666 7.81128 1.61522 7.8125H2.53905C3.03856 7.8125 3.52342 8.03662 3.80858 8.39844L5.49657 10.4517L10.2485 10.3813L7.10204 3.44775C7.04809 3.32883 7.02481 3.19829 7.03433 3.06805C7.04385 2.93781 7.08586 2.81204 7.15653 2.70222C7.22719 2.59241 7.32426 2.50206 7.43885 2.43944C7.55344 2.37682 7.6819 2.34392 7.81249 2.34375H9.12645C9.30976 2.34743 9.48989 2.39236 9.65346 2.47521C9.81703 2.55805 9.95983 2.67667 10.0713 2.82227L16.1772 10.2441L18.998 10.1699C19.2046 10.1587 19.7768 10.1548 19.9092 10.1548C22.6074 10.1562 24.2187 11.0322 24.2187 12.5C24.2187 12.9619 24.0342 13.8184 22.7993 14.3633C22.0703 14.6855 21.0976 14.8486 19.9082 14.8486C19.7773 14.8486 19.2065 14.8447 18.9971 14.8335L16.1767 14.7583L10.0556 22.1802C9.94412 22.3251 9.80144 22.4432 9.63815 22.5256C9.47487 22.608 9.29515 22.6526 9.11229 22.6562Z" fill="#358DB7"/>
+</svg>
+` });
+const BusinessIcon = shallowRef({ template: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11 15V13H13V15H11ZM10 7H14V5.615C14 5.46167 13.936 5.32067 13.808 5.192C13.68 5.06334 13.539 4.99934 13.385 5H10.615C10.4617 5 10.3207 5.064 10.192 5.192C10.0633 5.32 9.99933 5.461 10 5.615V7ZM4.616 20C4.15533 20 3.771 19.846 3.463 19.538C3.155 19.23 3.00067 18.8453 3 18.384V14.5H10V15.192C10 15.424 10.0767 15.6167 10.23 15.77C10.3833 15.9233 10.576 16 10.808 16H13.192C13.424 16 13.6167 15.9233 13.77 15.77C13.9233 15.6167 14 15.424 14 15.192V14.5H21V18.385C21 18.845 20.846 19.229 20.538 19.537C20.23 19.845 19.8457 19.9993 19.385 20H4.616ZM3 13.5V8.616C3 8.15534 3.15433 7.771 3.463 7.463C3.77167 7.155 4.15567 7.00067 4.615 7H9V5.615C9 5.155 9.15433 4.77067 9.463 4.462C9.77167 4.15334 10.156 3.99934 10.616 4H13.385C13.845 4 14.2293 4.154 14.538 4.462C14.8467 4.77 15.0007 5.15434 15 5.615V7H19.385C19.845 7 20.229 7.15434 20.537 7.463C20.845 7.77167 20.9993 8.156 21 8.616V13.5H14V12.808C14 12.576 13.9233 12.3833 13.77 12.23C13.6167 12.0767 13.424 12 13.192 12H10.808C10.576 12 10.3833 12.0767 10.23 12.23C10.0767 12.3833 10 12.576 10 12.808V13.5H3Z" fill="#17966B"/>
+</svg>
+` });
+const EconomicsIcon = shallowRef({ template: `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.4 9.75556L20.064 1.61111L21.967 2.72222L16.214 12.7778L9.053 8.61111L3.806 17.7778H22V20H0V0H2.2V16.1556L8.25 5.55556L15.4 9.75556Z" fill="#7C51AA"/>
+</svg>
+` });
+const HospitalityIcon = shallowRef({ template: `<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15 16H17V8H11V16H13V10H15V16ZM1 16V1C1 0.734784 1.10536 0.48043 1.29289 0.292893C1.48043 0.105357 1.73478 0 2 0H16C16.2652 0 16.5196 0.105357 16.7071 0.292893C16.8946 0.48043 17 0.734784 17 1V6H19V16H20V18H0V16H1ZM5 8V10H7V8H5ZM5 12V14H7V12H5ZM5 4V6H7V4H5Z" fill="#CD3774"/>
+</svg>
+` });
+const TourismIcon = shallowRef({ template: `<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_906_273)">
+<path d="M12.4999 2C6.74695 2 2.08325 6.47715 2.08325 12C2.08325 17.5228 6.74695 22 12.4999 22C18.2529 22 22.9166 17.5228 22.9166 12C22.9166 9.34784 21.8191 6.8043 19.8656 4.92893C17.9121 3.05357 15.2626 2 12.4999 2ZM18.7499 17.27V17C18.7499 16.4477 18.2835 16 17.7083 16H17.1874C16.8998 16 16.6666 15.7761 16.6666 15.5C16.6666 15.2239 16.4334 15 16.1458 15H15.1041C14.8164 15 14.5833 14.7761 14.5833 14.5C14.5833 14.2239 14.3501 14 14.0624 14H12.4999V15.5C12.5027 15.6353 12.5613 15.764 12.6629 15.8577C12.7644 15.9515 12.9007 16.0027 13.0416 16C13.1779 15.9999 13.3083 16.0532 13.4027 16.1476C13.4971 16.242 13.5473 16.3693 13.5416 16.5V19.93C13.1962 19.9736 12.8483 19.9969 12.4999 20C9.52423 19.9971 6.77597 18.4711 5.28945 15.9965C3.80292 13.5218 3.80374 10.4739 5.29159 8H5.72909C6.01673 8 6.24992 8.22386 6.24992 8.5V11C6.24992 11.5523 6.71629 12 7.29159 12H7.81242C8.10007 12 8.33325 12.2239 8.33325 12.5V13C8.33325 13.5523 8.79962 14 9.37492 14H12.4999V12.5C12.4999 12.2239 12.2667 12 11.9791 12H10.9374C10.6498 12 10.4166 11.7761 10.4166 11.5C10.4166 11.2239 10.6498 11 10.9374 11H11.4583C12.0335 11 12.4999 10.5523 12.4999 10V9C12.4999 8.44772 12.9663 8 13.5416 8H14.0624C14.3501 8 14.5833 7.77614 14.5833 7.5V6.5C14.5833 6.22386 14.3501 6 14.0624 6H7.01034C10.3205 3.33711 15.2014 3.54324 18.2552 6.47491C21.309 9.40658 21.5238 14.0922 18.7499 17.27Z" fill="#EC5101"/>
+</g>
+<defs>
+<clipPath id="clip0_906_273">
+<rect width="25" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+` });
+const LogisticsIcon = shallowRef({ template: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 18.5C17.6022 18.5 17.2206 18.342 16.9393 18.0607C16.658 17.7794 16.5 17.3978 16.5 17C16.5 16.6022 16.658 16.2206 16.9393 15.9393C17.2206 15.658 17.6022 15.5 18 15.5C18.3978 15.5 18.7794 15.658 19.0607 15.9393C19.342 16.2206 19.5 16.6022 19.5 17C19.5 17.3978 19.342 17.7794 19.0607 18.0607C18.7794 18.342 18.3978 18.5 18 18.5ZM19.5 9.5L21.46 12H17V9.5M6 18.5C5.60218 18.5 5.22064 18.342 4.93934 18.0607C4.65804 17.7794 4.5 17.3978 4.5 17C4.5 16.6022 4.65804 16.2206 4.93934 15.9393C5.22064 15.658 5.60218 15.5 6 15.5C6.39782 15.5 6.77936 15.658 7.06066 15.9393C7.34196 16.2206 7.5 16.6022 7.5 17C7.5 17.3978 7.34196 17.7794 7.06066 18.0607C6.77936 18.342 6.39782 18.5 6 18.5ZM20 8H17V4H3C1.89 4 1 4.89 1 6V17H3C3 17.7956 3.31607 18.5587 3.87868 19.1213C4.44129 19.6839 5.20435 20 6 20C6.79565 20 7.55871 19.6839 8.12132 19.1213C8.68393 18.5587 9 17.7956 9 17H15C15 17.7956 15.3161 18.5587 15.8787 19.1213C16.4413 19.6839 17.2044 20 18 20C18.7956 20 19.5587 19.6839 20.1213 19.1213C20.6839 18.5587 21 17.7956 21 17H23V12L20 8Z" fill="#C92E32"/>
+</svg>
+` });
 
 definePageMeta({
   layout: 'dean'
-})
+});
 
-const performanceChart = ref<HTMLCanvasElement | null>(null)
+const departments = [
+  {
+    name: 'Accounting',
+    facultyCount: 6,
+    icon: AccountingIcon,
+    color: 'bg-[#E0EFFF]',
+    buttonColor: 'bg-[#E0EFFF]',
+    textColor: 'text-[#3F63C5]'
+  },
 
-const recentActivities = ref([
-  { id: 1, text: 'Dr. Johnson submitted KPI review for Q2', time: '2 hours ago', status: 'completed' },
-  { id: 2, text: 'New research project proposal from Dr. Chen', time: '4 hours ago', status: 'pending' },
-  { id: 3, text: 'Faculty meeting minutes uploaded', time: '1 day ago', status: 'completed' },
-  { id: 4, text: 'Budget report for Q2 ready for review', time: '1 day ago', status: 'pending' },
-  { id: 5, text: 'Updated teaching assignments for Fall 2025', time: '2 days ago', status: 'completed' }
-])
-
-onMounted(() => {
-  if (performanceChart.value) {
-    new Chart(performanceChart.value, {
-      type: 'bar',
-      data: {
-        labels: ['Teaching', 'Research', 'Academic Service', 'Administration', 'Art & Culture'],
-        datasets: [{
-          label: 'Average Performance',
-          data: [85, 78, 92, 88, 75],
-          backgroundColor: '#2563eb',
-          borderRadius: 4,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 100,
-            grid: {
-              display: false
-            },
-            ticks: {
-              color: '#64748b'
-            }
-          },
-          x: {
-            grid: {
-              display: false
-            },
-            ticks: {
-              color: '#64748b'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            display: false
-          }
-        }
-      }
-    })
+  {
+    name: 'Aviation Business Management',
+    facultyCount: 9,
+    icon: AviationIcon,
+    color: 'bg-[#DEF3FA]',
+    buttonColor: 'bg-[#DEF3FA]',
+    textColor: 'text-[#1D7DAA]'
+  },
+  {
+    name: 'Business Administration',
+    facultyCount: 15,
+    icon: BusinessIcon,
+    color: 'bg-[#D3F3E3]',
+    buttonColor: 'bg-[#D3F3E3]',
+    textColor: 'text-[#0D875E]'
+  },
+  {
+    name: 'Economics',
+    facultyCount: 10,
+    icon: EconomicsIcon,
+    color: 'bg-[#F1E8FD]',
+    buttonColor: 'bg-[#F1E8FD]',
+    textColor: 'text-[#7C51AA]'
+  },
+  {
+    name: 'Hospitality Business Management',
+    facultyCount: 9,
+    icon: HospitalityIcon,
+    color: 'bg-[#FFE2F1]',
+    buttonColor: 'bg-[#FFE2F1]',
+    textColor: 'text-[#CD3774]'
+  },
+  {
+    name: 'Tourism Business and Event',
+    facultyCount: 8,
+    icon: TourismIcon,
+    color: 'bg-[#FFEBD3]',
+    buttonColor: 'bg-[#FFEBD3]',
+    textColor: 'text-[#EC5101]'
+  },
+  {
+    name: 'Logistics and Supply Chain Management',
+    facultyCount: 8,
+    icon: LogisticsIcon,
+    color: 'bg-[#FCE2E5]',
+    buttonColor: 'bg-[#FCE2E5]',
+    textColor: 'text-[#EC5101]'
   }
-})
+];
 </script>
