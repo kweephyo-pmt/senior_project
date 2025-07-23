@@ -85,6 +85,12 @@
                   <th scope="col" class="px-8 py-4 text-right text-sm font-bold text-white uppercase tracking-wider">
                     Allocated
                   </th>
+                  <th scope="col" class="px-8 py-4 text-right text-sm font-bold text-white uppercase tracking-wider">
+                    Spent
+                  </th>
+                  <th scope="col" class="px-8 py-4 text-right text-sm font-bold text-white uppercase tracking-wider">
+                    Remaining
+                  </th>
                   <th scope="col" class="px-8 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
                     Action
                   </th>
@@ -95,17 +101,24 @@
                   <td class="px-8 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-3 w-3 rounded-full mr-3" :class="{
-                        'bg-blue-500': item.category === 'Research',
-                        'bg-green-500': item.category === 'Travel',
-                        'bg-yellow-500': item.category === 'Equipment',
-                        'bg-purple-500': item.category === 'Publication',
-                        'bg-red-500': item.category === 'Conference'
+                        'bg-blue-500': item.category === 'Research Project',
+                        'bg-green-500': item.category === 'Self Development',
+                        'bg-yellow-500': item.category === 'Academic Service',
+                        'bg-purple-500': item.category === 'Guest Speaker',
+                        'bg-red-500': item.category === 'Guest Lecturer',
+                        'bg-indigo-500': item.category === 'Student Activity'
                       }"></div>
                       <div class="text-sm font-medium text-gray-900">{{ item.category }}</div>
                     </div>
                   </td>
                   <td class="px-8 py-4 whitespace-nowrap text-right text-sm text-gray-900">
                     ฿ {{ formatCurrency(item.allocated) }}
+                  </td>
+                  <td class="px-8 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                    ฿ {{ formatCurrency(item.spent) }}
+                  </td>
+                  <td class="px-8 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                    ฿ {{ formatCurrency(item.allocated - item.spent) }}
                   </td>
                   <td class="px-8 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div class="flex justify-center space-x-2">
@@ -137,7 +150,7 @@
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search categories..."
+                placeholder="Search project..."
                 class="pl-8 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -165,11 +178,12 @@
                 <div class="mt-3 flex items-center text-sm">
                   <div class="flex items-center">
                     <span class="h-2.5 w-2.5 rounded-full mr-2" :class="{
-                      'bg-blue-500': item.category === 'Research',
-                      'bg-green-500': item.category === 'Travel',
-                      'bg-yellow-500': item.category === 'Equipment',
-                      'bg-purple-500': item.category === 'Publication',
-                      'bg-red-500': item.category === 'Conference'
+                      'bg-blue-500': item.category === 'Research Project',
+                      'bg-green-500': item.category === 'Self Development',
+                      'bg-yellow-500': item.category === 'Academic Service',
+                      'bg-purple-500': item.category === 'Guest Speaker',
+                      'bg-red-500': item.category === 'Guest Lecturer',
+                      'bg-indigo-500': item.category === 'Student Activity'
                     }"></span>
                     <span class="text-gray-900">Budget: ฿{{ formatCurrency(item.allocated) }} | </span>
                     <span class="text-green-600 ml-1">{{ item.duration }}</span>
@@ -215,7 +229,7 @@
       <div v-if="showAddBudgetPopup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-lg">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Add New Budget Detail</h2>
+            <h2 class="text-xl font-bold text-gray-800">Add Budget Details</h2>
             <button @click="closeAddBudgetPopup" class="text-gray-400 hover:text-gray-600 focus:outline-none">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -223,54 +237,96 @@
             </button>
           </div>
           <form @submit.prevent="submitAddBudget">
-            <div class="grid grid-cols-1 gap-4">
+            <div class="space-y-4">
+              <!-- Budget Title -->
               <div>
-                <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                <select v-model="newBudgetItem.category" id="category" class="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                  <option disabled value="">Select Category</option>
-                  <option v-for="item in budgetItems" :key="item.category" :value="item.category">{{ item.category }}</option>
+                <label for="budgetTitle" class="block text-sm font-medium text-gray-700 mb-1">Budget Title:</label>
+                <input 
+                  v-model="newBudgetItem.title"
+                  type="text" 
+                  id="budgetTitle" 
+                  placeholder="Enter budget title" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+              </div>
+
+              <!-- Professor Name -->
+              <div>
+                <label for="professorName" class="block text-sm font-medium text-gray-700 mb-1">Professor Name:</label>
+                <input 
+                  v-model="newBudgetItem.professor"
+                  type="text" 
+                  id="professorName" 
+                  placeholder="Enter professor name" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+              </div>
+
+              <!-- Budget Category -->
+              <div>
+                <label for="budgetCategory" class="block text-sm font-medium text-gray-700 mb-1">Category:</label>
+                <select 
+                  v-model="newBudgetItem.category"
+                  id="budgetCategory" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="" disabled selected>Select category</option>
+                  <option value="Self Development">Self Development</option>
+                  <option value="Academic Service">Academic Service</option>
+                  <option value="Research Project">Research Project</option>
+                  <option value="Guest Speaker">Guest Speaker</option>
+                  <option value="Guest Lecturer">Guest Lecturer</option>
+                  <option value="Student Activity">Student Activity</option>
                 </select>
               </div>
+
+              <!-- Budget Amount -->
               <div>
-                <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
-                <input v-model="newBudgetItem.department" type="text" id="department" placeholder="Enter department" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label for="allocated" class="block text-sm font-medium text-gray-700">Allocated</label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span class="text-gray-500 sm:text-sm">฿</span>
-                    </div>
-                    <input v-model="newBudgetItem.allocated" type="number" id="allocated" placeholder="0.00" class="mt-1 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <label for="budgetAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount(THB):</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500">฿</span>
                   </div>
-                </div>
-                <div>
-                  <label for="spent" class="block text-sm font-medium text-gray-700">Spent</label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span class="text-gray-500 sm:text-sm">฿</span>
-                    </div>
-                    <input v-model="newBudgetItem.spent" type="number" id="spent" placeholder="0.00" class="mt-1 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                  </div>
+                  <input 
+                    v-model="newBudgetItem.amount"
+                    type="number" 
+                    id="budgetAmount" 
+                    placeholder="0.00" 
+                    min="0"
+                    step="0.01"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
                 </div>
               </div>
+
+              <!-- Date Picker -->
               <div>
-                <label for="duration" class="block text-sm font-medium text-gray-700">Duration</label>
-                <input v-model="newBudgetItem.duration" type="text" id="duration" placeholder="e.g., 6 Month" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <label for="budgetDate" class="block text-sm font-medium text-gray-700 mb-1">Date:</label>
+                <input 
+                  v-model="newBudgetItem.date"
+                  type="date" 
+                  id="budgetDate" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
               </div>
             </div>
+
             <div class="mt-6 flex justify-end space-x-3">
               <button
                 type="button"
                 @click="closeAddBudgetPopup"
-                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#036E94] transition-colors"
+                class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 style="background-color: #036E94;"
               >
                 Save Changes
@@ -297,28 +353,27 @@ import { useRouter } from 'vue-router';
   
   // Dummy data for budget items
   const budgetItems = ref([
-    { category: 'Research', allocated: 50000, spent: 32000, department: 'Dr. Supansa Chaising', duration: '12 Months' },
-    { category: 'Travel', allocated: 30000, spent: 15000, department: 'Dr. Supansa Chaising', duration: '6 Months' },
-    { category: 'Equipment', allocated: 20000, spent: 10000, department: 'Dr. Supansa Chaising', duration: '12 Months' },
-    { category: 'Publication', allocated: 15000, spent: 8000, department: 'Dr. Supansa Chaising', duration: '6 Months' },
-    { category: 'Conference', allocated: 10000, spent: 5000, department: 'Dr. Supansa Chaising', duration: '3 Months' }
+    { category: 'Research Project', allocated: 50000, spent: 32000, professor: 'Dr. Supansa Chaising', duration: '12 Months' },
+    { category: 'Self Development', allocated: 30000, spent: 15000, professor: 'Dr. Supansa Chaising', duration: '6 Months' },
+    { category: 'Academic Service', allocated: 20000, spent: 10000, professor: 'Dr. Supansa Chaising', duration: '12 Months' },
+    { category: 'Guest Speaker', allocated: 15000, spent: 8000, professor: 'Dr. Supansa Chaising', duration: '6 Months' },
+    { category: 'Guest Lecturer', allocated: 18000, spent: 9000, professor: 'Dr. Supansa Chaising', duration: '9 Months' },
+    { category: 'Student Activity', allocated: 10000, spent: 5000, professor: 'Dr. Supansa Chaising', duration: '3 Months' }
   ]);
   
   const newBudgetItem = ref({
+    title: '',
+    professor: '',
     category: '',
-    department: '',
-    allocated: 0,
-    spent: 0,
-    remaining: 0,
-    duration: '',
-    icon: ''
+    amount: 0,
+    date: new Date().toISOString().split('T')[0] // Set default to today's date
   });
   
   // Filtered budget items based on search query
   const filteredBudgetItems = computed(() => {
     return budgetItems.value.filter(item =>
       item.category.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      item.department.toLowerCase().includes(searchQuery.value.toLowerCase())
+      item.professor.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   });
   
@@ -345,13 +400,11 @@ import { useRouter } from 'vue-router';
     showAddBudgetPopup.value = false;
     // Reset the form
     newBudgetItem.value = {
+      title: '',
+      professor: '',
       category: '',
-      department: '',
-      allocated: 0,
-      spent: 0,
-      remaining: 0,
-      duration: '',
-      icon: ''
+      amount: 0,
+      date: new Date().toISOString().split('T')[0] // Set default to today's date
     };
   };
   
@@ -360,9 +413,9 @@ import { useRouter } from 'vue-router';
     // Create new item with required fields
     const newItem = {
       category: newBudgetItem.value.category || 'New Category',
-      allocated: newBudgetItem.value.allocated || 0,
-      spent: newBudgetItem.value.spent || 0,
-      department: 'Dr. Supansa Chaising',
+      allocated: newBudgetItem.value.amount || 0,
+      spent: 0,
+      professor: newBudgetItem.value.professor || 'Dr. Supansa Chaising',
       duration: '12 Months' // Default duration
     };
   
