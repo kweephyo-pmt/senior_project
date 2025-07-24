@@ -1,214 +1,212 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-      <p class="mt-2 text-gray-600">Manage KPI evaluation system and user roles</p>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Total Users -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Total Users</p>
-            <p class="text-2xl font-bold text-gray-900">156</p>
-          </div>
-          <div class="bg-blue-100 rounded-full p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          </div>
+  <div class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Main Dashboard Title Section -->
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-5xl font-extrabold text-gray-900">Faculty Analytics Dashboard</h1>
+          <p class="text-gray-600 text-sm mt-1">Faculty Performance Overview</p>
         </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-green-500 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-            12%
-          </span>
-          <span class="text-gray-600 ml-2">vs last month</span>
-        </div>
-      </div>       <!-- Active KPI Rounds -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Active KPI Rounds</p>
-            <p class="text-2xl font-bold text-gray-900">3</p>
-          </div>
-          <div class="bg-green-100 rounded-full p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-gray-600">Current Academic Year</span>
-        </div>
+        <!-- Placeholder for potential right-aligned elements, keeping the layout consistent -->
+        <div class="w-32"></div>
       </div>
 
-      <!-- Pending Reviews -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between">
+      <!-- "Select Faculties Directory" Section -->
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center">
+          <div class="bg-[#004086] p-3.5 rounded-xl mr-5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422A12.083 12.083 0 0121.485 12 12.083 12.083 0 0118.16 14.578L12 18l-6.16-3.422A12.083 12.083 0 012.515 12c0-1.25.37-2.434 1.02-3.422L12 14z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6" />
+            </svg>
+          </div>
           <div>
-            <p class="text-sm font-medium text-gray-600">Pending Reviews</p>
-            <p class="text-2xl font-bold text-gray-900">24</p>
-          </div>
-          <div class="bg-yellow-100 rounded-full p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <h2 class="text-3xl font-bold text-gray-900">Select Faculties Directory</h2>
+            <p class="text-base text-gray-600 mt-1.5">Choose a department to view faculty performance metrics</p>
           </div>
         </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-red-500 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-            8%
-          </span>
-          <span class="text-gray-600 ml-2">vs last week</span>
-        </div>
-      </div>
 
-      <!-- System Health -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between">
+        <!-- Year Selector Dropdown -->
+        <div class="relative inline-block text-left" ref="dropdownRef">
           <div>
-            <p class="text-sm font-medium text-gray-600">System Health</p>
-            <p class="text-2xl font-bold text-gray-900">99.9%</p>
+            <button
+              type="button"
+              @click="toggleDropdown"
+              class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              id="menu-button" aria-expanded="true" aria-haspopup="true">
+              Year/ {{ selectedYear }}
+              <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
           </div>
-          <div class="bg-purple-100 rounded-full p-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span class="text-green-500">Operational</span>
-        </div>
-      </div>
-    </div>     <!-- Recent Activity and Quick Actions -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Recent Activity -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">Recent Activity</h2>
-        </div>
-        <div class="p-6">
-          <ul class="space-y-4">
-            <li v-for="activity in recentActivities" :key="activity.id" class="flex items-center space-x-4">
-              <div :class="[
-                'w-8 h-8 rounded-full flex items-center justify-center',
-                activity.type === 'user' ? 'bg-blue-100' : 
-                activity.type === 'kpi' ? 'bg-green-100' : 
-                'bg-yellow-100'
-              ]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="[
-                  activity.type === 'user' ? 'text-blue-600' : 
-                  activity.type === 'kpi' ? 'text-green-600' : 
-                  'text-yellow-600'
-                ]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path v-if="activity.type === 'user'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  <path v-else-if="activity.type === 'kpi'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+
+          <!-- Dropdown menu -->
+          <transition enter-active-class="transition ease-out duration-100"
+                      enter-from-class="transform opacity-0 scale-95"
+                      enter-to-class="transform opacity-100 scale-100"
+                      leave-active-class="transition ease-in duration-75"
+                      leave-from-class="transform opacity-100 scale-100"
+                      leave-to-class="transform opacity-0 scale-95">
+            <div v-if="isDropdownOpen"
+                 class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+              <div class="py-1" role="none">
+                <a href="#" @click.prevent="selectYear(2025)" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem" tabindex="-1" id="menu-item-0">2025</a>
+                <a href="#" @click.prevent="selectYear(2024)" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem" tabindex="-1" id="menu-item-1">2024</a>
+                <a href="#" @click.prevent="selectYear(2023)" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem" tabindex="-1" id="menu-item-2">2023</a>
               </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">{{ activity.message }}</p>
-                <p class="text-sm text-gray-500">{{ activity.time }}</p>
-              </div>
-            </li>
-          </ul>
+            </div>
+          </transition>
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">Quick Actions</h2>
-        </div>
-        <div class="p-6">
-          <div class="grid grid-cols-2 gap-4">
-            <button @click="navigateTo('/admin/kpi-management')" class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span class="text-sm font-medium text-gray-900">New KPI Round</span>
-            </button>
+      <!-- Departments Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="(department, index) in departments" :key="index"
+          class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
 
-            <button @click="navigateTo('/admin/users')" class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              <span class="text-sm font-medium text-gray-900">Add User</span>
-            </button>
-
-            <button @click="navigateTo('/admin/reports')" class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span class="text-sm font-medium text-gray-900">Generate Report</span>
-            </button>
-
-            <button @click="navigateTo('/admin/settings')" class="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span class="text-sm font-medium text-gray-900">System Settings</span>
-            </button>
+          <!-- Department Header -->
+          <div class="flex items-center mb-5">
+            <div :class="[department.color, 'p-4 rounded-xl mr-5 shadow-sm border-2 border-white/20']">
+              <component :is="department.icon" class="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 text-xl leading-tight">{{ department.name }}</h3>
+            </div>
           </div>
+
+          <!-- Faculty Count -->
+          <div class="flex items-center mb-6">
+            <peopleIcon class="h-5 w-5 text-gray-500 mr-2"/>
+            <span class="text-base text-gray-700">Total Faculty: {{ department.facultyCount }}</span>
+          </div>
+
+          <!-- Action Button -->
+          <button
+            :class="[department.buttonColor, department.textColor, 'w-full py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity duration-200']">
+            <svg width="16" height="10" viewBox="0 0 18 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 0.178711C4.28375 0.178711 0.5625 4.99996 0.5625 4.99996C0.5625 4.99996 4.28375 9.82184 9 9.82184C12.6062 9.82184 17.4375 4.99996 17.4375 4.99996C17.4375 4.99996 12.6062 0.178711 9 0.178711ZM9 8.00371C7.34375 8.00371 5.99563 6.65621 5.99563 4.99996C5.99563 3.34371 7.34375 1.99559 9 1.99559C10.6562 1.99559 12.0044 3.34371 12.0044 4.99996C12.0044 6.65621 10.6562 8.00371 9 8.00371ZM9 3.24621C8.76695 3.24181 8.53536 3.28391 8.31877 3.37006C8.10218 3.4562 7.90494 3.58465 7.73857 3.74791C7.5722 3.91117 7.44004 4.10595 7.34983 4.32088C7.25961 4.5358 7.21314 4.76656 7.21314 4.99965C7.21314 5.23274 7.25961 5.46349 7.34983 5.67842C7.44004 5.89334 7.5722 6.08813 7.73857 6.25139C7.90494 6.41464 8.10218 6.5431 8.31877 6.62924C8.53536 6.71538 8.76695 6.75749 9 6.75309C9.45931 6.74441 9.89688 6.55587 10.2186 6.22798C10.5404 5.90009 10.7206 5.45904 10.7206 4.99965C10.7206 4.54026 10.5404 4.09921 10.2186 3.77132C9.89688 3.44343 9.45931 3.25488 9 3.24621Z" />
+            </svg>
+            View Faculty List
+          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
-<script setup lang="ts">
-import { navigateTo } from '#app'
+
+<script setup>
+import { onMounted, onUnmounted, ref } from 'vue';
+import AccountingIcon from '~/components/accountingIcon.vue';
+import AviationIcon from '~/components/aviationIcon.vue';
+import BusinessIcon from '~/components/businessIcon.vue';
+import EconomicsIcon from '~/components/economicsIcon.vue';
+import HospitalityIcon from '~/components/hospitalityIcon.vue';
+import LogisticIcon from '~/components/logisticIcon.vue';
+import TourismIcon from '~/components/tourismIcon.vue';
+import peopleIcon from '../assets/peopleIcon.vue';
 
 definePageMeta({
   layout: 'admin'
-})
+});
 
-interface Activity {
-  id: number
-  type: 'user' | 'kpi' | 'review'
-  message: string
-  time: string
-}
+const selectedYear = ref(2025);
+const isDropdownOpen = ref(false);
+const dropdownRef = ref(null);
 
-const recentActivities: Activity[] = [
-  {
-    id: 1,
-    type: 'user',
-    message: 'New user Dr. Sarah Johnson registered',
-    time: '5 minutes ago'
-  },
-  {
-    id: 2,
-    type: 'kpi',
-    message: 'KPI Round 2024-1 started',
-    time: '1 hour ago'
-  },
-  {
-    id: 3,
-    type: 'review',
-    message: 'Dr. Michael Chang submitted KPI review',
-    time: '2 hours ago'
-  },
-  {
-    id: 4,
-    type: 'user',
-    message: 'Updated role for Dr. Emily White',
-    time: '3 hours ago'
-  },
-  {
-    id: 5,
-    type: 'kpi',
-    message: 'Modified KPI criteria for Research category',
-    time: '4 hours ago'
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const selectYear = (year) => {
+  selectedYear.value = year;
+  isDropdownOpen.value = false;
+  console.log(`Year selected: ${year}`);
+};
+
+const handleClickOutside = (event) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    isDropdownOpen.value = false;
   }
-]
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
+const departments = [
+  {
+    name: 'Accounting',
+    facultyCount: 6,
+    icon: AccountingIcon,
+    color: 'bg-[#E0EFFF]',
+    buttonColor: 'bg-[#E0EFFF]',
+    textColor: 'text-[#3F63C5]'
+  },
+  {
+    name: 'Aviation Business Management',
+    facultyCount: 9,
+    icon: AviationIcon,
+    color: 'bg-[#DEF3FA]',
+    buttonColor: 'bg-[#DEF3FA]',
+    textColor: 'text-[#1D7DAA]'
+  },
+  {
+    name: 'Business Administration',
+    facultyCount: 15,
+    icon: BusinessIcon,
+    color: 'bg-[#D3F3E3]',
+    buttonColor: 'bg-[#D3F3E3]',
+    textColor: 'text-[#0D875E]'
+  },
+  {
+    name: 'Economics',
+    facultyCount: 10,
+    icon: EconomicsIcon,
+    color: 'bg-[#F1E8FD]',
+    buttonColor: 'bg-[#F1E8FD]',
+    textColor: 'text-[#7C51AA]'
+  },
+  {
+    name: 'Hospitality Business Management',
+    facultyCount: 9,
+    icon: HospitalityIcon,
+    color: 'bg-[#FFE2F1]',
+    buttonColor: 'bg-[#FFE2F1]',
+    textColor: 'text-[#CD3774]'
+  },
+  {
+    name: 'Tourism Business and Event',
+    facultyCount: 8,
+    icon: TourismIcon,
+    color: 'bg-[#FFEBD3]',
+    buttonColor: 'bg-[#FFEBD3]',
+    textColor: 'text-[#EC5101]'
+  },
+  {
+    name: 'Logistics and Supply Chain Management',
+    facultyCount: 8,
+    icon: LogisticIcon,
+    color: 'bg-[#FCE2E5]',
+    buttonColor: 'bg-[#FCE2E5]',
+    textColor: 'text-[#EC5101]'
+  }
+];
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+</style>
