@@ -414,7 +414,7 @@ const formatCurrency = (value: number) => {
 
 // Function to handle navigation back
 const goBack = () => {
-  router.push('/admin/budget'); // Adjust the route as needed
+  router.push('/admin/faculty-member');
 };
 
 // Function to open the add budget popup
