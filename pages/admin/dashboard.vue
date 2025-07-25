@@ -84,8 +84,17 @@
 
           <!-- Action Button -->
           <button
-            :class="[department.buttonColor, department.textColor, 'w-full py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity duration-200']">
-            <svg width="16" height="10" viewBox="0 0 18 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            @click="navigateToFaculty(department)"
+            :class="[
+              department.buttonColor, 
+              department.textColor, 
+              'w-full py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2',
+              'transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md',
+              'active:scale-95 active:opacity-90',
+              'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50',
+              department.textColor.replace('text-', 'focus:ring-') + '/20'
+            ]">
+            <svg width="16" height="10" viewBox="0 0 18 10" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="transition-transform duration-200 group-hover:translate-x-0.5">
               <path d="M9 0.178711C4.28375 0.178711 0.5625 4.99996 0.5625 4.99996C0.5625 4.99996 4.28375 9.82184 9 9.82184C12.6062 9.82184 17.4375 4.99996 17.4375 4.99996C17.4375 4.99996 12.6062 0.178711 9 0.178711ZM9 8.00371C7.34375 8.00371 5.99563 6.65621 5.99563 4.99996C5.99563 3.34371 7.34375 1.99559 9 1.99559C10.6562 1.99559 12.0044 3.34371 12.0044 4.99996C12.0044 6.65621 10.6562 8.00371 9 8.00371ZM9 3.24621C8.76695 3.24181 8.53536 3.28391 8.31877 3.37006C8.10218 3.4562 7.90494 3.58465 7.73857 3.74791C7.5722 3.91117 7.44004 4.10595 7.34983 4.32088C7.25961 4.5358 7.21314 4.76656 7.21314 4.99965C7.21314 5.23274 7.25961 5.46349 7.34983 5.67842C7.44004 5.89334 7.5722 6.08813 7.73857 6.25139C7.90494 6.41464 8.10218 6.5431 8.31877 6.62924C8.53536 6.71538 8.76695 6.75749 9 6.75309C9.45931 6.74441 9.89688 6.55587 10.2186 6.22798C10.5404 5.90009 10.7206 5.45904 10.7206 4.99965C10.7206 4.54026 10.5404 4.09921 10.2186 3.77132C9.89688 3.44343 9.45931 3.25488 9 3.24621Z" />
             </svg>
             View Faculty List
@@ -98,14 +107,18 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AccountingIcon from '~/components/accountingIcon.vue';
 import AviationIcon from '~/components/aviationIcon.vue';
 import BusinessIcon from '~/components/businessIcon.vue';
+import DeanIcon from '~/components/deanIcon.vue';
 import EconomicsIcon from '~/components/economicsIcon.vue';
 import HospitalityIcon from '~/components/hospitalityIcon.vue';
 import LogisticIcon from '~/components/logisticIcon.vue';
 import TourismIcon from '~/components/tourismIcon.vue';
 import peopleIcon from '../assets/peopleIcon.vue';
+
+const router = useRouter();
 
 definePageMeta({
   layout: 'admin'
@@ -123,6 +136,13 @@ const selectYear = (year) => {
   selectedYear.value = year;
   isDropdownOpen.value = false;
   console.log(`Year selected: ${year}`);
+};
+
+const navigateToFaculty = (department) => {
+  navigateTo({
+    path: '/admin/faculty-member',
+    query: { department: department.name.toLowerCase().replace(/\s+/g, '-') }
+  });
 };
 
 const handleClickOutside = (event) => {
@@ -195,6 +215,14 @@ const departments = [
     color: 'bg-[#FCE2E5]',
     buttonColor: 'bg-[#FCE2E5]',
     textColor: 'text-[#EC5101]'
+  },
+  {
+    name: 'Dean',
+    facultyCount: 3,
+    icon: DeanIcon,
+    color: 'bg-[#F6F3FC]',
+    buttonColor: 'bg-[#F6F3FC]',
+    textColor: 'text-[#BEADE8]'
   }
 ];
 </script>
