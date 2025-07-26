@@ -2,7 +2,14 @@
     <div class="container mx-auto px-4 py-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Faculty Analytics Dashboard</h1>
+        <div class="flex items-center mb-2">
+          <button @click="goBack" class="mr-4 text-gray-600 hover:text-blue-600 focus:outline-none" aria-label="Back">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <h1 class="text-3xl font-bold text-gray-900">Faculty Analytics Dashboard</h1>
+        </div>
         <p class="text-gray-600">Faculty Performance Overview</p>
       </div>
   
@@ -88,7 +95,7 @@
       <!-- Faculty Members Section -->
       <div class="mb-8">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-900">Faculty Members</h2>
+          <h2 class="text-3xl font-bold text-gray-900">Hospitality Business Management</h2>
   
           <!-- Controls -->
           <div class="flex gap-4 items-center">
@@ -195,6 +202,12 @@
   </template>
   
   <script setup lang="ts">
+import { definePageMeta } from '#imports';
+import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+
+  const router = useRouter();
+
   definePageMeta({
     layout: 'admin'
   })
@@ -318,6 +331,10 @@
       path: '/admin/profile',
       query: { id: facultyId }
     })
+  }
+  
+  const goBack = () => {
+    router.back();
   }
   
   const previousPage = () => {

@@ -139,9 +139,22 @@ const selectYear = (year) => {
 };
 
 const navigateToFaculty = (department) => {
+  // Map department names to their corresponding paths
+  const departmentPaths = {
+    'Accounting': 'accounting',
+    'Aviation Business Management': 'aviation',
+    'Business Administration': 'business',
+    'Economics': 'economics',
+    'Hospitality Business Management': 'hospitality',
+    'Tourism Business and Event': 'tourism',
+    'Logistics and Supply Chain Management': 'logistics',
+    'Dean': 'dean'
+  };
+  
+  const path = departmentPaths[department.name] || department.name.toLowerCase().replace(/\s+/g, '-');
+  
   navigateTo({
-    path: '/admin/faculty-member',
-    query: { department: department.name.toLowerCase().replace(/\s+/g, '-') }
+    path: `/admin/faculty/${path}`
   });
 };
 

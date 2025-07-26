@@ -282,7 +282,7 @@ const profile = ref({
 // ...existing code...
 
 const goBack = () => {
-  router.push('/admin/faculty-member');
+  router.back();
 };
 
 const addEducation = () => {

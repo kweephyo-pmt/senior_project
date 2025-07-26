@@ -527,7 +527,7 @@ const getCategoryColor = (category: string) => {
 
 // Function to handle navigation back
 const goBack = () => {
-  router.push('/admin/faculty-member');
+  router.back();
 };
 
 // Function to open the add budget popup
