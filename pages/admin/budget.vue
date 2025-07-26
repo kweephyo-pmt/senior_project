@@ -29,8 +29,6 @@
         <div class="flex items-center space-x-3">
           <!-- Profile Picture Placeholder -->
           <div class="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center">
-            <!-- You can add an img tag here if you have a profile picture URL -->
-            <!-- <img src="path/to/profile-pic.jpg" alt="Profile Picture" class="w-full h-full rounded-full object-cover"> -->
             <span class="text-sm font-semibold text-pink-600">SA</span>
           </div>
           <!-- Profile Name -->
@@ -58,7 +56,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">Total Budget</p>
-            <p class="text-2xl font-bold text-gray-800">฿ 125,000</p>
+            <p class="text-2xl font-bold text-gray-800">฿ {{ formatCurrency(totalAllocated) }}</p>
           </div>
         </div>
 
@@ -71,7 +69,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">Spent Amount</p>
-            <p class="text-2xl font-bold text-gray-800">฿ 78,500</p>
+            <p class="text-2xl font-bold text-gray-800">฿ {{ formatCurrency(totalSpent) }}</p>
           </div>
         </div>
 
@@ -84,7 +82,8 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">Research Projects</p>
-            <p class="text-2xl font-bold text-gray-800">฿ 25,000</p>
+            <!-- <p class="text-2xl font-bold text-gray-800">฿ {{ formatCurrency(researchProjectTotal) }}</p> -->
+            <p class="text-2xl font-bold text-gray-800">฿ 18,000.00 </p>
           </div>
         </div>
       </div>
@@ -110,22 +109,15 @@
                   Remaining
                 </th>
                 <th scope="col" class="px-8 py-4 text-center text-sm font-bold text-white uppercase tracking-wider">
-                  Progress
+                  Available Budget
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(item, index) in budgetItems" :key="index" class="hover:bg-gray-50">
+              <tr v-for="(item, index) in budgetSummary" :key="index" class="hover:bg-gray-50">
                 <td class="px-8 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="flex-shrink-0 h-3 w-3 rounded-full mr-3" :class="{
-                      'bg-blue-500': item.category === 'Research Project',
-                      'bg-green-500': item.category === 'Self Development',
-                      'bg-yellow-500': item.category === 'Academic Service',
-                      'bg-purple-500': item.category === 'Guest Speaker',
-                      'bg-red-500': item.category === 'Guest Lecturer',
-                      'bg-indigo-500': item.category === 'Student Activity'
-                    }"></div>
+                    <div class="flex-shrink-0 h-3 w-3 rounded-full mr-3" :class="getCategoryColor(item.category)"></div>
                     <div class="text-sm font-medium text-gray-900">{{ item.category }}</div>
                   </div>
                 </td>
@@ -143,19 +135,12 @@
                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
                         class="h-2.5 rounded-full" 
-                        :class="{
-                          'bg-blue-500': item.category === 'Research Project',
-                          'bg-green-500': item.category === 'Self Development',
-                          'bg-yellow-500': item.category === 'Academic Service',
-                          'bg-purple-500': item.category === 'Guest Speaker',
-                          'bg-red-500': item.category === 'Guest Lecturer',
-                          'bg-indigo-500': item.category === 'Student Activity'
-                        }"
-                        :style="{ width: `${Math.min(100, (item.spent / item.allocated) * 100)}%` }"
+                        :class="getCategoryColor(item.category)"
+                        :style="{ width: `${Math.min(100, ((item.allocated - item.spent) / item.allocated) * 100)}%` }"
                       ></div>
                     </div>
                     <span class="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                      {{ Math.round((item.spent / item.allocated) * 100) || 0 }}%
+                      {{ Math.round(((item.allocated - item.spent) / item.allocated) * 100) || 0 }}%
                     </span>
                   </div>
                 </td>
@@ -175,7 +160,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search project..."
+              placeholder="Search event..."
               class="pl-8 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -190,43 +175,39 @@
         </div>
       </div>
 
-      <!-- Budget Details List -->
-      <div class="grid grid-cols-1 gap-3">
-        <div v-for="(item, index) in budgetItems" :key="index" class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center">
-                <h3 class="text-sm font-semibold text-gray-900">{{ item.category }}</h3>
-              </div>
-              <p class="text-xs text-gray-500 mt-1">Dr. Korawit Fakkhong</p>
-              
-              <div class="mt-3 flex items-center text-sm">
+      <!-- Budget Details List - Scrollable Container -->
+      <div class="max-h-96 overflow-y-auto pr-2">
+        <div class="grid grid-cols-1 gap-3">
+          <div v-for="(event, index) in filteredBudgetEvents" :key="index" class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
                 <div class="flex items-center">
-                  <span class="h-2.5 w-2.5 rounded-full mr-2" :class="{
-                    'bg-blue-500': item.category === 'Research Project',
-                    'bg-green-500': item.category === 'Self Development',
-                    'bg-yellow-500': item.category === 'Academic Service',
-                    'bg-purple-500': item.category === 'Guest Speaker',
-                    'bg-red-500': item.category === 'Guest Lecturer',
-                    'bg-indigo-500': item.category === 'Student Activity'
-                  }"></span>
-                  <span class="text-gray-900">Budget: ฿{{ formatCurrency(item.allocated) }} | </span>
-                  <span class="text-green-600 ml-1">{{ item.duration }}</span>
+                  <h3 class="text-sm font-semibold text-gray-900">{{ event.eventName }}</h3>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">{{ event.professors.join(', ') }}</p> <!-- Displaying professors -->
+                
+                <div class="mt-3 flex items-center text-sm">
+                  <div class="flex items-center">
+                    <span class="h-2.5 w-2.5 rounded-full mr-3" :class="getCategoryColor(event.category)"></span>
+                    <span class="text-gray-900">Budget: ฿{{ formatCurrency(event.spentAmount) }}</span>
+                    <span class="text-gray-400 mx-2">|</span>
+                    <span class="text-green-600 ml-1">{{ event.duration }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="ml-4 flex-shrink-0 flex space-x-2">
-              <button @click="editItem(item)" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Edit">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-              <button @click="deleteItem(index)" class="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Delete">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              
+              <div class="ml-4 flex-shrink-0 flex space-x-2">
+                <button @click="editEvent(event)" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+                <button @click="deleteEvent(index)" class="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Delete">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -263,37 +244,62 @@
         </div>
         <form @submit.prevent="submitAddBudget">
           <div class="space-y-4">
-            <!-- Budget Title -->
+            <!-- Event Name -->
             <div>
-              <label for="budgetTitle" class="block text-sm font-medium text-gray-700 mb-1">Budget Title:</label>
+              <label for="eventName" class="block text-sm font-medium text-gray-700 mb-1">Event Name:</label>
               <input 
-                v-model="newBudgetItem.title"
+                v-model="newBudgetEvent.eventName"
                 type="text" 
-                id="budgetTitle" 
-                placeholder="Enter budget title" 
+                id="eventName" 
+                placeholder="Enter event name" 
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
             </div>
 
-            <!-- Professor Name -->
+            <!-- Professor Name Input -->
             <div>
-              <label for="professorName" class="block text-sm font-medium text-gray-700 mb-1">Professor Name:</label>
+              <label for="professorName" class="block text-sm font-medium text-gray-700 mb-1">Professor Name(s):</label>
+              <!-- Main Professor Input -->
               <input 
-                v-model="newBudgetItem.professor"
+                v-model="newBudgetEvent.professor"
                 type="text" 
                 id="professorName" 
                 placeholder="Enter professor name" 
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
+
+              <!-- Dynamic Professor Inputs - Only shown after clicking the button -->
+              <div v-for="(prof, index) in extraProfessorInputs" :key="index" class="mt-2 flex items-center space-x-2">
+                <input 
+                  v-model="newBudgetEvent.professors[index]"
+                  type="text" 
+                  :placeholder="'Professor ' + (index + 2) + ' name'" 
+                  class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                <button type="button" @click="removeProfessorInput(index)" class="text-red-500 hover:text-red-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Add Another Professor Button -->
+              <button 
+                type="button" 
+                @click="addProfessorInput" 
+                class="w-full mt-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+              >
+                + Add Another Professor
+              </button>
             </div>
 
             <!-- Budget Category -->
             <div>
               <label for="budgetCategory" class="block text-sm font-medium text-gray-700 mb-1">Category:</label>
               <select 
-                v-model="newBudgetItem.category"
+                v-model="newBudgetEvent.category"
                 id="budgetCategory" 
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
@@ -308,23 +314,46 @@
               </select>
             </div>
 
-            <!-- Budget Amount -->
-            <div>
-              <label for="budgetAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount(THB):</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span class="text-gray-500">฿</span>
+            <!-- Budget Amounts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Spent Amount -->
+              <div>
+                <label for="spentAmount" class="block text-sm font-medium text-gray-700 mb-1">Spent Amount (THB):</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500">฿</span>
+                  </div>
+                  <input 
+                    v-model="newBudgetEvent.spentAmount"
+                    type="number" 
+                    id="spentAmount" 
+                    placeholder="0.00" 
+                    min="0"
+                    step="0.01"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
                 </div>
-                <input 
-                  v-model="newBudgetItem.amount"
-                  type="number" 
-                  id="budgetAmount" 
-                  placeholder="0.00" 
-                  min="0"
-                  step="0.01"
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
+              </div>
+              
+              <!-- Allocated Amount -->
+              <div>
+                <label for="allocatedAmount" class="block text-sm font-medium text-gray-700 mb-1">Allocated Amount (THB):</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500">฿</span>
+                  </div>
+                  <input 
+                    v-model="newBudgetEvent.allocatedAmount"
+                    type="number" 
+                    id="allocatedAmount" 
+                    placeholder="0.00" 
+                    min="0"
+                    step="0.01"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                </div>
               </div>
             </div>
 
@@ -332,7 +361,7 @@
             <div>
               <label for="budgetDate" class="block text-sm font-medium text-gray-700 mb-1">Date:</label>
               <input 
-                v-model="newBudgetItem.date"
+                v-model="newBudgetEvent.date"
                 type="date" 
                 id="budgetDate" 
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -364,7 +393,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'; // Removed unused import: computed, onMounted, onUnmounted
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 definePageMeta({
@@ -376,31 +405,102 @@ const searchQuery = ref('');
 const selectedYear = ref('Year / 2025');
 const showAddBudgetPopup = ref(false);
 
-// Dummy data for budget items
-// I've added professor and duration to the dummy data to better match potential use cases
-const budgetItems = ref([
-  { category: 'Research Project', allocated: 50000, spent: 32000, professor: 'Dr. Korawit Fakkhong', duration: '12 Months' },
-  { category: 'Self Development', allocated: 30000, spent: 15000, professor: 'Dr. Supansa Chaising', duration: '6 Months' },
-  { category: 'Academic Service', allocated: 20000, spent: 10000, professor: 'Dr. Korawit Fakkhong', duration: '12 Months' },
-  { category: 'Guest Speaker', allocated: 15000, spent: 8000, professor: 'Dr. Supansa Chaising', duration: '6 Months' },
-  { category: 'Guest Lecturer', allocated: 18000, spent: 9000, professor: 'Dr. Korawit Fakkhong', duration: '9 Months' },
-  { category: 'Student Activity', allocated: 10000, spent: 5000, professor: 'Dr. Supansa Chaising', duration: '3 Months' }
+// Updated data structure with events for each category
+const budgetEvents = ref([
+  // Research Project Events
+  { eventName: 'AI Research Conference 2025', category: 'Research Project', spentAmount: 25000, allocatedAmount: 30000, professors: ['Dr. Supansa Chaising'], duration: '12 Months', date: '2025-01-15' },
+  { eventName: 'Machine Learning Study', category: 'Research Project', spentAmount: 18000, allocatedAmount: 20000, professors: ['Dr. Supansa Chaising', 'Dr. Korawit Fakkhong'], duration: '8 Months', date: '2025-02-01' },
+  
+  // Self Development Events
+  { eventName: 'Leadership Training Program', category: 'Self Development', spentAmount: 15000, allocatedAmount: 20000, professors: ['Dr. Supansa Chaising'], duration: '3 Months', date: '2025-01-20' },
+  { eventName: 'Digital Literacy Course', category: 'Self Development', spentAmount: 7000, allocatedAmount: 10000, professors: ['Dr. Supansa Chaising', 'Dr. Korawit Fakkhong'], duration: '4 Months', date: '2025-03-01' },
+  
+  // Academic Service Events
+  { eventName: 'Student Assessment Board', category: 'Academic Service', spentAmount: 8000, allocatedAmount: 10000, professors: ['Dr. Supansa Chaising'], duration: '6 Months', date: '2025-02-10' },
+  
+  // Guest Speaker Events
+  { eventName: 'International Conference Speaker', category: 'Guest Speaker', spentAmount: 15000, allocatedAmount: 20000, professors: ['Dr. Supansa Chaising'], duration: '2 Days', date: '2025-02-20' },
+  
+  // Guest Lecturer Events
+  { eventName: 'Visiting Professor Program', category: 'Guest Lecturer', spentAmount: 20000, allocatedAmount: 25000, professors: ['Dr. Korawit Fakkhong'], duration: '1 Semester', date: '2025-01-10' },
+  { eventName: 'Special Topics Lecture Series', category: 'Guest Lecturer', spentAmount: 12000, allocatedAmount: 15000, professors: ['Dr. Supansa Chaising', 'Dr. Korawit Fakkhong'], duration: '2 Months', date: '2025-02-05' },
+  
+  // Student Activity Events
+  { eventName: 'Student Innovation Competition', category: 'Student Activity', spentAmount: 8000, allocatedAmount: 10000, professors: ['Dr. Supansa Chaising'], duration: '3 Months', date: '2025-01-30' },
+  { eventName: 'Academic Excellence Awards', category: 'Student Activity', spentAmount: 6000, allocatedAmount: 8000, professors: ['Dr. Supansa Chaising', 'Dr. Korawit Fakkhong'], duration: '1 Month', date: '2025-03-15' },
 ]);
 
-// State for the new budget item form
-const newBudgetItem = ref({
-  title: '',
-  professor: '', // This will be used for the "Add Budget Details" form
+// Define a type for the category allocations
+type CategoryAllocations = {
+  'Research Project': number;
+  'Self Development': number;
+  'Academic Service': number;
+  'Guest Speaker': number;
+  'Guest Lecturer': number;
+  'Student Activity': number;
+};
+
+// State for the new budget event form
+const newBudgetEvent = ref({
+  eventName: '',
+  professor: '', // Holds the comma-separated string input
+  professors: [] as string[], // Holds the array of professor names
   category: '',
-  amount: 0,
-  date: new Date().toISOString().split('T')[0] // Set default to today's date
+  spentAmount: 0,
+  allocatedAmount: 0,
+  duration: '3 Months',
+  date: new Date().toISOString().split('T')[0]
 });
 
-// Filtered budget items based on search query
-const filteredBudgetItems = computed(() => {
-  return budgetItems.value.filter(item =>
-    item.category.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    item.professor.toLowerCase().includes(searchQuery.value.toLowerCase()) // Searching by professor name too
+// State for managing dynamic professor inputs
+const extraProfessorInputs = ref<number[]>([]); // Start with no input fields
+
+// Computed properties for budget summary
+const budgetSummary = computed(() => {
+  const categories = ['Research Project', 'Self Development', 'Academic Service', 'Guest Speaker', 'Guest Lecturer', 'Student Activity'] as const;
+  
+  const categoryAllocations: CategoryAllocations = {
+    'Research Project': 60000,
+    'Self Development': 35000,
+    'Academic Service': 25000,
+    'Guest Speaker': 30000,
+    'Guest Lecturer': 40000,
+    'Student Activity': 25000
+  };
+
+  return categories.map(category => {
+    const categoryEvents = budgetEvents.value.filter(event => event.category === category);
+    const spent = categoryEvents.reduce((sum, event) => sum + event.spentAmount, 0);
+    const allocated = categoryEvents.reduce((sum, event) => sum + event.allocatedAmount, 0);
+    
+    return {
+      category,
+      allocated: allocated,
+      spent
+    };
+  });
+});
+
+const totalAllocated = computed(() => {
+  return budgetSummary.value.reduce((sum, item) => sum + item.allocated, 0);
+});
+
+const totalSpent = computed(() => {
+  return budgetSummary.value.reduce((sum, item) => sum + item.spent, 0);
+});
+
+// Research Project Total for the third card
+const researchProjectTotal = computed(() => {
+  const researchEvents = budgetEvents.value.filter(event => event.category === 'Research Project');
+  return researchEvents.reduce((sum, event) => sum + event.spentAmount, 0);
+});
+
+// Filtered budget events based on search query
+const filteredBudgetEvents = computed(() => {
+  return budgetEvents.value.filter(event =>
+    event.eventName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    event.category.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    event.professors.some(p => p.toLowerCase().includes(searchQuery.value.toLowerCase()))
   );
 });
 
@@ -410,6 +510,19 @@ const formatCurrency = (value: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value);
+};
+
+const getCategoryColor = (category: string) => {
+  const colorMap = {
+    'Research Project': 'bg-blue-500',
+    'Self Development': 'bg-green-500',
+    'Academic Service': 'bg-yellow-500',
+    'Guest Speaker': 'bg-purple-500',
+    'Guest Lecturer': 'bg-red-500',
+    'Student Activity': 'bg-indigo-500'
+  } as const;
+  
+  return (colorMap as Record<string, string>)[category] || 'bg-gray-500';
 };
 
 // Function to handle navigation back
@@ -426,54 +539,120 @@ const openAddBudgetPopup = () => {
 const closeAddBudgetPopup = () => {
   showAddBudgetPopup.value = false;
   // Reset the form
-  newBudgetItem.value = {
-    title: '',
-    professor: '',
+  newBudgetEvent.value = {
+    eventName: '',
+    professor: '', // Holds the comma-separated string input
+    professors: [] as string[], // Holds the array of professor names
     category: '',
-    amount: 0,
-    date: new Date().toISOString().split('T')[0] // Set default to today's date
+    spentAmount: 0,
+    allocatedAmount: 0,
+    duration: '3 Months',
+    date: new Date().toISOString().split('T')[0]
   };
+  extraProfessorInputs.value = []; // Reset dynamic inputs
 };
 
-// Function to submit the new budget item
+// Function to add a professor input field
+const addProfessorInput = () => {
+  extraProfessorInputs.value.push(extraProfessorInputs.value.length);
+};
+
+// Function to remove a professor input field
+const removeProfessorInput = (index: number) => {
+  extraProfessorInputs.value.splice(index, 1);
+  // Also remove the corresponding entry from newBudgetEvent.professors if it exists
+  if (newBudgetEvent.value.professors.length > index) {
+    newBudgetEvent.value.professors.splice(index, 1);
+  }
+};
+
+// Function to submit the new budget event
 const submitAddBudget = () => {
-  // Basic validation to ensure at least a title, professor, category and amount are entered
-  if (!newBudgetItem.value.title || !newBudgetItem.value.professor || !newBudgetItem.value.category || newBudgetItem.value.amount <= 0) {
+  // Process comma-separated professor names
+  const processedProfessors = newBudgetEvent.value.professor
+    .split(',')
+    .map(p => p.trim())
+    .filter(p => p !== '');
+
+  // Combine the initial input with dynamically added ones
+  const allProfessors = [...processedProfessors, ...newBudgetEvent.value.professors];
+
+  // Basic validation
+  if (!newBudgetEvent.value.eventName || allProfessors.length === 0 || !newBudgetEvent.value.category || 
+      newBudgetEvent.value.spentAmount <= 0 || newBudgetEvent.value.allocatedAmount <= 0) {
     alert('Please fill in all required fields correctly.');
     return;
   }
 
-  // Create new item with required fields from the form
-  const newItem = {
-    category: newBudgetItem.value.category,
-    allocated: newBudgetItem.value.amount,
-    spent: 0, // New items start with 0 spent
-    professor: newBudgetItem.value.professor,
-    duration: '12 Months' // Default duration, can be made dynamic
-    // You might want to add a 'title' field to budgetItems if it's going to be displayed
+  // Create new event
+  const newEvent = {
+    eventName: newBudgetEvent.value.eventName,
+    category: newBudgetEvent.value.category,
+    spentAmount: Number(newBudgetEvent.value.spentAmount),
+    allocatedAmount: Number(newBudgetEvent.value.allocatedAmount),
+    professors: allProfessors,
+    duration: newBudgetEvent.value.duration,
+    date: newBudgetEvent.value.date
   };
 
-  // Add to budget items
-  budgetItems.value.push(newItem);
+  // Add to budget events
+  budgetEvents.value.push(newEvent);
 
   // Close the popup and reset form
   closeAddBudgetPopup();
+  
+  // Show success message
+  alert('Budget event added successfully!');
 };
 
-// Function to edit an item (placeholder)
-const editItem = (item: any) => {
-  console.log('Editing item:', item);
-  // For editing, you would typically populate the newBudgetItem form with the item's data
-  // and potentially change the form title to "Edit Budget Details".
-  // Then, you'd have a logic to update the existing item in budgetItems.value
-  // For now, this is just a placeholder.
-  alert('Edit functionality not yet implemented.');
+// Function to edit an event
+const editEvent = (event: any) => {
+  // Populate the form with the event's data
+  newBudgetEvent.value = {
+    eventName: event.eventName,
+    professor: event.professors.join(', '), // Join array to string for the initial input
+    professors: [...event.professors], // Copy existing professors for dynamic inputs
+    category: event.category,
+    spentAmount: event.spentAmount,
+    allocatedAmount: event.allocatedAmount,
+    duration: event.duration,
+    date: event.date
+  };
+  
+  // Reset and set dynamic professor inputs based on existing professors
+  extraProfessorInputs.value = event.professors.slice(1).map((_: unknown, i: number) => i);
+
+  // Remove the old event from the array (we'll add the updated one when form is submitted)
+  const index = budgetEvents.value.findIndex(e => 
+    e.eventName === event.eventName && 
+    e.professors.join(',') === event.professors.join(',') && 
+    e.date === event.date
+  );
+  
+  if (index !== -1) {
+    budgetEvents.value.splice(index, 1);
+  }
+  
+  // Open the popup for editing
+  showAddBudgetPopup.value = true;
 };
 
-// Function to delete an item
-const deleteItem = (index: number) => {
-  if (confirm('Are you sure you want to delete this budget item?')) {
-    budgetItems.value.splice(index, 1);
+// Function to delete an event
+const deleteEvent = (index: number) => {
+  const eventToDelete = filteredBudgetEvents.value[index];
+  
+  if (confirm(`Are you sure you want to delete "${eventToDelete.eventName}"?`)) {
+    // Find the actual index in the original array
+    const actualIndex = budgetEvents.value.findIndex(event => 
+      event.eventName === eventToDelete.eventName && 
+      event.professors.join(',') === eventToDelete.professors.join(',') && 
+      event.date === eventToDelete.date
+    );
+    
+    if (actualIndex !== -1) {
+      budgetEvents.value.splice(actualIndex, 1);
+      alert('Budget event deleted successfully!');
+    }
   }
 };
 </script>
