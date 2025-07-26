@@ -231,7 +231,7 @@ const departments = [
   },
   {
     name: 'Dean',
-    facultyCount: 3,
+    facultyCount: 7,
     icon: DeanIcon,
     color: 'bg-[#F6F3FC]',
     buttonColor: 'bg-[#F6F3FC]',
