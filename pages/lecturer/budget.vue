@@ -6,10 +6,12 @@
         <h1 class="text-2xl font-bold text-gray-900">Budget Management</h1>
         <div class="relative">
           <select
+            @change="onYearChange"
+            v-model="selectedYear"
             class="appearance-none bg-white border-0 rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm w-44">
-            <option>Year/ 2025</option>
-            <option>Year/ 2024</option>
-            <option>Year/ 2023</option>
+            <option value="2025">Year/ 2025</option>
+            <option value="2024">Year/ 2024</option>
+            <option value="2023">Year/ 2023</option>
           </select>
           <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
             <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +30,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">Total Budget</p>
-            <h3 class="text-2xl font-bold text-gray-900">฿ 125,000</h3>
+            <h3 class="text-2xl font-bold text-gray-900">฿ {{ totalBudget.toLocaleString() }}</h3>
             <p class="text-sm text-blue-50">s</p>
           </div>
           <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -44,8 +46,8 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">Spent Amount</p>
-            <h3 class="text-2xl font-bold text-gray-900">฿ 78,500</h3>
-            <p class="text-sm text-gray-500">62.8% of total budget</p>
+            <h3 class="text-2xl font-bold text-gray-900">฿ {{ budgetOverview?.totalSpent?.toLocaleString() }}</h3>
+            <p class="text-sm text-gray-500">{{ budgetOverview?.spentPercentage }}% of total budget</p>
           </div>
           <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,8 +62,8 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">Research Projects</p>
-            <h3 class="text-2xl font-bold text-gray-900">฿ 25,000</h3>
-            <p class="text-sm text-gray-500">3 share projects</p>
+            <h3 class="text-2xl font-bold text-gray-900">฿ {{ budgetOverview?.researchAmount?.toLocaleString() }}</h3>
+            <p class="text-sm text-gray-500">{{ budgetOverview?.researchProjectCount }} share projects</p>
           </div>
           <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +88,7 @@
         </div>
 
         <!-- Budget Items -->
-        <div class="space-y-6">
+        <div class="space-y-6" v-if="!loading">
           <div
             v-for="(item, index) in budgetItems"
             :key="index"
@@ -172,7 +174,7 @@
       <div class="lg:col-span-1">
         <div class="bg-white rounded-2xl shadow-lg p-5 h-full flex flex-col">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Budget Details</h2>
-          <div class="space-y-3 overflow-y-scroll pr-2 h-[400px] custom-scrollbar">
+          <div class="space-y-3 overflow-y-scroll pr-2 h-[400px] custom-scrollbar" v-if="!loading">
             <div v-for="detail in budgetDetails" :key="detail.title"
                  class="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-100">
               <h3 class="text-base font-medium text-gray-900 mb-2">{{ detail.title }}</h3>
@@ -227,7 +229,7 @@
                     </span>
                   </span>
                   <p class="text-gray-900 font-semibold text-base">
-                    Budget: ฿ {{ detail.budget.toLocaleString() }}
+                    Budget: ฿ {{ detail.budget?.toLocaleString() }}
                   </p>
                 </div>
               </div>
@@ -240,13 +242,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+import { useBudget } from '@/composables/useBudget'
 
-const { user, logout } = useFirebaseAuth()
+const { user } = useFirebaseAuth()
+const { getBudgetOverview, getBudgetProjects } = useBudget()
 
-const selectedYear = ref('2025')
-const openDropdown = ref('')
 interface ProjectOwners {
   [key: string]: string;
 }
@@ -254,6 +256,16 @@ interface ProjectOwners {
 const selectedOwners = ref<ProjectOwners>({
   'SoM Project': 'Dr. Korawit Fakkhong'
 })
+
+// Reactive data from database
+const budgetOverview = ref<any>(null)
+const budgetProjects = ref<any[]>([])
+const loading = ref(true)
+const selectedYear = ref(2025)
+const openDropdown = ref('')
+
+// Mock lecturer ID for now (in real app, this would come from auth)
+const lecturerId = 'mock_lecturer_1'
 
 function toggleOwnerSelect(projectTitle: string) {
   openDropdown.value = openDropdown.value === projectTitle ? '' : projectTitle
@@ -281,42 +293,63 @@ definePageMeta({
   layout: 'lecturer'
 })
 
-const budgetItems = ref([
-  { name: 'Self Development', spent: 6400, total: 10000, color: '#3B82F6' },
-  { name: 'Academic Service Project', spent: 14112, total: 42000, color: '#EC4899' },
-  { name: 'Research Project', spent: 5472, total: 18000, color: '#8B5CF6' },
-  { name: 'Guest Speaker', spent: 1800, total: 15000, color: '#10B981' },
-  { name: 'Guest Lecturer', spent: 1800, total: 15000, color: '#F59E0B' },
-  { name: 'Student Activity', spent: 1800, total: 15000, color: '#EF4444' }
-]);
+// Computed properties for reactive data
+const budgetItems = computed(() => {
+  return budgetOverview.value?.categories || []
+})
 
-const budgetDetails = [
-  {
-    title: 'Guest Speaker 130S305',
-    owner: 'Dr. Supansa Chaising',
-    budget: 12000,
-    duration: '6 Month',
-    category: 'Guest Speaker'
-  },
-  {
-    title: 'SoM Project',
-    owners: [
-      'Dr. Korawit Fakkhong',
-      'Dr. Supansa Chaising',
-      'Dr. John Smith'
-    ],
-    budget: 8000,
-    duration: '6 Month',
-    category: 'Research Project'
-  },
-  {
-    title: 'Guest Lecturer 130S305',
-    owner: 'Dr. Supansa Chaising',
-    budget: 5000,
-    duration: '6 Month',
-    category: 'Guest Lecturer'
-  },
-]
+const budgetDetails = computed(() => {
+  return budgetProjects.value || []
+})
+
+const totalBudget = computed(() => {
+  return budgetOverview.value?.totalBudget || 0
+})
+
+const spentAmount = computed(() => {
+  return budgetOverview.value?.totalSpent || 0
+})
+
+const spentPercentage = computed(() => {
+  return budgetOverview.value?.spentPercentage || 0
+})
+
+const researchAmount = computed(() => {
+  return budgetOverview.value?.researchAmount || 0
+})
+
+const researchProjectCount = computed(() => {
+  return budgetOverview.value?.researchProjectCount || 0
+})
+
+// Load data from database
+const loadBudgetData = async () => {
+  try {
+    loading.value = true
+    const [overview, projects] = await Promise.all([
+      getBudgetOverview(lecturerId, selectedYear.value),
+      getBudgetProjects(lecturerId, selectedYear.value)
+    ])
+    budgetOverview.value = overview
+    budgetProjects.value = projects as any[]
+  } catch (error) {
+    console.error('Error loading budget data:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load data on component mount
+onMounted(() => {
+  loadBudgetData()
+})
+
+// Watch for year changes
+const onYearChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement
+  selectedYear.value = parseInt(target.value)
+  loadBudgetData()
+}
 </script>
 
 <style scoped>
