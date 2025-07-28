@@ -10,7 +10,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </button>
-            <h1 class="text-2xl font-bold text-gray-800">Executive Management Dashboard</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Executive Management Dashboard</h1>
           </div>
           <p class="text-sm text-gray-600 ml-12">Manage and review the School of Management's leadership history and current appointments</p>
         </div>
@@ -18,10 +18,10 @@
         <!-- Right side of the header (Year Selector, Add Executive Button) -->
         <div class="flex items-center">
           <div class="relative mr-4">
-            <select v-model="selectedYear" class="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>Year / 2025</option>
-              <option>Year / 2024</option>
-              <option>Year / 2023</option>
+            <select v-model="selectedYear" class="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700">
+              <option value="2025">Year/ 2025</option>
+              <option value="2024">Year/ 2024</option>
+              <option value="2023">Year/ 2023</option>
             </select>
             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
               <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -122,7 +122,7 @@
                   </div>
                   <div>
                     <h3 class="text-sm font-semibold text-gray-900">{{ member.name }}</h3>
-                    <p class="text-xs text-gray-500">{{ member.position }}</p>
+                    <p class="text-xs" :class="getPositionTextColor(member.position)">{{ member.position }}</p>
                   </div>
                 </div>
                 
@@ -141,7 +141,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </button>
-                    <button @click="deleteExecutive(member.id)" class="p-1 text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Delete">
+                    <button @click="confirmDelete(member)" class="p-1 text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Delete">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
@@ -244,15 +244,54 @@
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              <button 
+                type="submit" 
+                class="px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#036E94] transition-all duration-200 hover:opacity-90 hover:shadow-md"
                 style="background-color: #036E94;"
               >
                 Save Changes
               </button>
             </div>
           </form>
+        </div>
+      </div>
+  
+      <!-- Delete Confirmation Popup -->
+      <div v-if="showDeleteConfirmation" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+          <div class="flex flex-col items-center">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+              <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+              <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Delete Executive
+              </h3>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500">
+                  Are you sure you want to delete this executive? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+            <button
+              type="button"
+              @click="executeDelete"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors"
+            >
+              Delete
+            </button>
+            <button
+              type="button"
+              @click="cancelDelete"
+              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
   
@@ -317,7 +356,8 @@
               </button>
               <button 
                 type="submit" 
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                class="px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#036E94] transition-all duration-200 hover:opacity-90 hover:shadow-md"
+                style="background-color: #036E94;"
               >
                 Save Changes
               </button>
@@ -338,9 +378,11 @@ import { useRouter } from 'vue-router';
   
   const router = useRouter();
   const searchQuery = ref('');
-  const selectedYear = ref('2025');
+  const selectedYear = ref('2025'); // Set default value to 2025
   const showAddExecutivePopup = ref(false); // Control for the popup visibility
   const showEditExecutivePopup = ref(false); // Control for the edit popup visibility
+  const showDeleteConfirmation = ref(false);
+  const executiveToDelete = ref<number | null>(null);
   
   // Mock data for Executive Members matching the screenshot
   const executiveMembers = ref([
@@ -432,6 +474,20 @@ import { useRouter } from 'vue-router';
     return status === 'Currently Serving' ? 'text-green-600' : 'text-gray-500';
   };
   
+  // Helper function to get position text color
+  const getPositionTextColor = (position: string): string => {
+    switch(position) {
+      case 'Dean':
+        return 'text-[#02319E]';
+      case 'Associate Dean':
+        return 'text-[#016D06]';
+      case 'Assistant Dean':
+        return 'text-[#8E02B5]';
+      default:
+        return 'text-gray-500';
+    }
+  };
+  
   // Function to handle navigation back
   const goBack = () => {
     // Adjust the route as necessary to navigate to the previous page or dashboard
@@ -521,12 +577,28 @@ import { useRouter } from 'vue-router';
     closeEditExecutivePopup();
   };
   
+  const confirmDelete = (member: any) => {
+    executiveToDelete.value = member.id;
+    showDeleteConfirmation.value = true;
+  };
+
+  const executeDelete = () => {
+    if (executiveToDelete.value !== null) {
+      deleteExecutive(executiveToDelete.value);
+      showDeleteConfirmation.value = false;
+      executiveToDelete.value = null;
+    }
+  };
+
+  const cancelDelete = () => {
+    showDeleteConfirmation.value = false;
+    executiveToDelete.value = null;
+  };
+
   const deleteExecutive = (id: number) => {
-    if (confirm('Are you sure you want to delete this executive member?')) {
-      const index = executiveMembers.value.findIndex(member => member.id === id);
-      if (index !== -1) {
-        executiveMembers.value.splice(index, 1);
-      }
+    const index = executiveMembers.value.findIndex(member => member.id === id);
+    if (index !== -1) {
+      executiveMembers.value.splice(index, 1);
     }
   };
   </script>

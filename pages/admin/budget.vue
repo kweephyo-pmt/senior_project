@@ -202,7 +202,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
-                <button @click="deleteEvent(index)" class="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Delete">
+                <button @click="confirmDeleteEvent(index)" class="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Delete">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
@@ -231,11 +231,11 @@
       </div>
     </div>
 
-    <!-- Add Budget Details Popup -->
+    <!-- Add/Edit Budget Details Popup -->
     <div v-if="showAddBudgetPopup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-lg">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800">Add Budget Details</h2>
+          <h2 class="text-xl font-bold text-gray-800">{{ isEditing ? 'Edit Budget Details' : 'Add Budget Details' }}</h2>
           <button @click="closeAddBudgetPopup" class="text-gray-400 hover:text-gray-600 focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -389,6 +389,31 @@
         </form>
       </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <div v-if="showDeleteConfirmation" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-lg">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Confirm Delete</h2>
+        <p class="text-sm text-gray-600 mb-6">Are you sure you want to delete "{{ eventToDelete?.eventName }}"?</p>
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            @click="showDeleteConfirmation = false"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            @click="confirmDelete"
+            class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+            style="background-color: #EF4444;"
+          >
+            Confirm Delete
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -404,6 +429,7 @@ const router = useRouter();
 const searchQuery = ref('');
 const selectedYear = ref('Year / 2025');
 const showAddBudgetPopup = ref(false);
+const isEditing = ref(false);
 
 // Updated data structure with events for each category
 const budgetEvents = ref([
@@ -454,6 +480,10 @@ const newBudgetEvent = ref({
 
 // State for managing dynamic professor inputs
 const extraProfessorInputs = ref<number[]>([]); // Start with no input fields
+
+// State for delete confirmation
+const showDeleteConfirmation = ref(false);
+const eventToDelete = ref<{eventName: string; index: number} | null>(null);
 
 // Computed properties for budget summary
 const budgetSummary = computed(() => {
@@ -514,12 +544,12 @@ const formatCurrency = (value: number) => {
 
 const getCategoryColor = (category: string) => {
   const colorMap = {
-    'Research Project': 'bg-blue-500',
-    'Self Development': 'bg-green-500',
-    'Academic Service': 'bg-yellow-500',
-    'Guest Speaker': 'bg-purple-500',
-    'Guest Lecturer': 'bg-red-500',
-    'Student Activity': 'bg-indigo-500'
+    'Research Project': 'bg-[#8B5CF6]',
+    'Self Development': 'bg-[#47B0E7]',
+    'Academic Service': 'bg-[#AC0078]',
+    'Guest Speaker': 'bg-[#10B981]',
+    'Guest Lecturer': 'bg-[#F59E0B]',
+    'Student Activity': 'bg-[#EF4444]'
   } as const;
   
   return (colorMap as Record<string, string>)[category] || 'bg-gray-500';
@@ -533,6 +563,7 @@ const goBack = () => {
 // Function to open the add budget popup
 const openAddBudgetPopup = () => {
   showAddBudgetPopup.value = true;
+  isEditing.value = false;
 };
 
 // Function to close the add budget popup
@@ -550,6 +581,7 @@ const closeAddBudgetPopup = () => {
     date: new Date().toISOString().split('T')[0]
   };
   extraProfessorInputs.value = []; // Reset dynamic inputs
+  isEditing.value = false;
 };
 
 // Function to add a professor input field
@@ -580,7 +612,6 @@ const submitAddBudget = () => {
   // Basic validation
   if (!newBudgetEvent.value.eventName || allProfessors.length === 0 || !newBudgetEvent.value.category || 
       newBudgetEvent.value.spentAmount <= 0 || newBudgetEvent.value.allocatedAmount <= 0) {
-    alert('Please fill in all required fields correctly.');
     return;
   }
 
@@ -600,9 +631,39 @@ const submitAddBudget = () => {
 
   // Close the popup and reset form
   closeAddBudgetPopup();
-  
-  // Show success message
-  alert('Budget event added successfully!');
+};
+
+// Function to show delete confirmation
+const confirmDeleteEvent = (index: number) => {
+  const event = filteredBudgetEvents.value[index];
+  eventToDelete.value = {
+    eventName: event.eventName,
+    index: index
+  };
+  showDeleteConfirmation.value = true;
+};
+
+// Function to confirm and delete the event
+const confirmDelete = () => {
+  if (eventToDelete.value !== null) {
+    const { index } = eventToDelete.value;
+    const eventToRemove = filteredBudgetEvents.value[index];
+    
+    // Find the actual index in the original array
+    const actualIndex = budgetEvents.value.findIndex(e => 
+      e.eventName === eventToRemove.eventName && 
+      e.professors.join(',') === eventToRemove.professors.join(',') && 
+      e.date === eventToRemove.date
+    );
+    
+    if (actualIndex !== -1) {
+      budgetEvents.value.splice(actualIndex, 1);
+    }
+    
+    // Reset and close
+    showDeleteConfirmation.value = false;
+    eventToDelete.value = null;
+  }
 };
 
 // Function to edit an event
@@ -635,24 +696,6 @@ const editEvent = (event: any) => {
   
   // Open the popup for editing
   showAddBudgetPopup.value = true;
-};
-
-// Function to delete an event
-const deleteEvent = (index: number) => {
-  const eventToDelete = filteredBudgetEvents.value[index];
-  
-  if (confirm(`Are you sure you want to delete "${eventToDelete.eventName}"?`)) {
-    // Find the actual index in the original array
-    const actualIndex = budgetEvents.value.findIndex(event => 
-      event.eventName === eventToDelete.eventName && 
-      event.professors.join(',') === eventToDelete.professors.join(',') && 
-      event.date === eventToDelete.date
-    );
-    
-    if (actualIndex !== -1) {
-      budgetEvents.value.splice(actualIndex, 1);
-      alert('Budget event deleted successfully!');
-    }
-  }
+  isEditing.value = true;
 };
 </script>
