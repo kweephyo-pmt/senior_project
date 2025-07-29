@@ -13,6 +13,8 @@ node_modules
 logs
 *.log
 
+.env
+
 # Misc
 .DS_Store
 .fleet
