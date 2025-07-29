@@ -13,7 +13,12 @@ node_modules
 logs
 *.log
 
+
+
+# Environment variables
 .env
+.env.local
+.env.*.local
 
 # Misc
 .DS_Store
