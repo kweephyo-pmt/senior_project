@@ -30,8 +30,8 @@
       <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
     </div>
 
-    <!-- KPI Categories with NuxtLink-->
-    <div class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+     <!-- KPI Categories with NuxtLink-->
+     <div class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -41,8 +41,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching (0%)</p>
-        <p class="text-xl font-bold text-inherit">0%</p>
+        <p class="text-sm text-inherit">Teaching ({{ kpiCategories[0]?.weight || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiCategories[0]?.value || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -54,8 +54,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research (0%)</p>
-        <p class="text-xl font-bold text-inherit">0%</p>
+        <p class="text-sm text-inherit">Research ({{ kpiCategories[1]?.weight || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiCategories[1]?.value || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -67,8 +67,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service (0%)</p>
-        <p class="text-xl font-bold text-inherit">0%</p>
+        <p class="text-sm text-inherit">Academic Service ({{ kpiCategories[2]?.weight || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiCategories[2]?.value || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -80,8 +80,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration (0%)</p>
-        <p class="text-xl font-bold text-inherit">0%</p>
+        <p class="text-sm text-inherit">Administration ({{ kpiCategories[3]?.weight || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiCategories[3]?.value || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -93,8 +93,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">10%</p>
+        <p class="text-sm text-inherit">Arts and Culture ({{ kpiCategories[4]?.weight || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiCategories[4]?.value || 0 }}%</p>
       </NuxtLink>
     </div>
 
@@ -182,6 +182,7 @@ import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { onMounted, ref } from 'vue'
+import { useKpiData } from '@/composables/useKpiData'
 
 definePageMeta({
   layout: 'lecturer'
@@ -189,8 +190,46 @@ definePageMeta({
 
 const administrationChart = ref<HTMLCanvasElement | null>(null)
 const showMobileMenu = ref(false)
-const { user, logout } = useFirebaseAuth()
+const { getKpiData } = useKpiData()
+const { user,logout } = useFirebaseAuth()
 
+
+// Reactive data
+const selectedRound = ref('round2-2025')
+const kpiData = ref<any>(null)
+const loading = ref(true)
+
+// Dynamic KPI categories from database
+const kpiCategories = computed(() => {
+  if (kpiData.value?.categories) {
+    return kpiData.value.categories
+  }
+  // Fallback to mock data
+  return [
+    { name: 'Teaching', weight: 60, value: 60, color: '#1e40af', bgColor: '#dbeafe', textColor: '#1e40af' },
+    { name: 'Research', weight: 15, value: 15, color: '#0891b2', bgColor: '#cffafe', textColor: '#0891b2' },
+    { name: 'Academic Service', weight: 10, value: 10, color: '#059669', bgColor: '#d1fae5', textColor: '#059669' },
+    { name: 'Administration', weight: 5, value: 5, color: '#7c3aed', bgColor: '#ede9fe', textColor: '#7c3aed' },
+    { name: 'Arts and Culture', weight: 10, value: 3.75, color: '#dc2626', bgColor: '#fecaca', textColor: '#dc2626' }
+  ]
+})
+
+// Load KPI data
+const loadKpiData = async () => {
+  try {
+    loading.value = true
+    if (user.value?.email) {
+      console.log('Loading KPI data for:', user.value.email)
+      const data = await getKpiData(user.value.email)
+      console.log('KPI data loaded:', data)
+      kpiData.value = data as any
+    }
+  } catch (err) {
+    console.error('Failed to load KPI data:', err)
+  } finally {
+    loading.value = false
+  }
+}
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
@@ -273,5 +312,8 @@ onMounted(() => {
       plugins: [ChartDataLabels]        // Register datalabels plugin here
     })
   }
+})
+onMounted(() => {
+  loadKpiData()
 })
 </script>

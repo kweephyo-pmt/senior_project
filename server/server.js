@@ -33,40 +33,83 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Teaching performance endpoint
-app.get('/api/teaching-performance', async (req, res) => {
+// KPI endpoint - Get KPI percentages by staff code
+app.get('/api/kpi/:staffCode', async (req, res) => {
   try {
-    // Fetch undergraduate data
-    const [undergradRows] = await pool.query(
-      'SELECT course_code, course_name, total_student FROM undergraduate'
+    const { staffCode } = req.params;
+    
+    // Fetch KPI data from percentage table
+    const [rows] = await pool.query(
+      'SELECT staff_code, staff_name, domain1_weight, domain2_weight, domain3_weight, domain4_weight, domain5_weight FROM percentage WHERE staff_code = ?',
+      [staffCode]
     );
 
-    const undergraduateData = undergradRows.map((item, index) => ({
-      id: index + 1,
-      course_code: item.course_code,
-      course_name: item.course_name,
-      total_student: item.total_student
-    }));
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
 
-    // Fetch graduate data
-    const [gradRows] = await pool.query(
-      'SELECT course_code, course_name, total_student FROM graduate'
-    );
+    const staffData = rows[0];
+    
+    // Transform data into frontend format
+    const kpiData = {
+      staffCode: staffData.staff_code,
+      staffName: staffData.staff_name,
+      categories: [
+        {
+          name: 'Teaching',
+          weight: parseFloat(staffData.domain1_weight) || 0,
+          value: parseFloat(staffData.domain1_weight) || 0,
+          color: '#1e40af',
+          bgColor: '#dbeafe',
+          textColor: '#1e40af'
+        },
+        {
+          name: 'Research',
+          weight: parseFloat(staffData.domain2_weight) || 0,
+          value: parseFloat(staffData.domain2_weight) || 0,
+          color: '#0891b2',
+          bgColor: '#cffafe',
+          textColor: '#0891b2'
+        },
+        {
+          name: 'Academic Service',
+          weight: parseFloat(staffData.domain3_weight) || 0,
+          value: parseFloat(staffData.domain3_weight) || 0,
+          color: '#059669',
+          bgColor: '#d1fae5',
+          textColor: '#059669'
+        },
+        {
+          name: 'Administration',
+          weight: parseFloat(staffData.domain4_weight) || 0,
+          value: parseFloat(staffData.domain4_weight) || 0,
+          color: '#7c3aed',
+          bgColor: '#ede9fe',
+          textColor: '#7c3aed'
+        },
+        {
+          name: 'Arts and Culture',
+          weight: parseFloat(staffData.domain5_weight) || 0,
+          value: parseFloat(staffData.domain5_weight) || 0,
+          color: '#dc2626',
+          bgColor: '#fecaca',
+          textColor: '#dc2626'
+        }
+      ]
+    };
 
-    const graduateData = gradRows.map((item, index) => ({
-      id: index + 1,
-      course_code: item.course_code,
-      course_name: item.course_name,
-      total_student: item.total_student
-    }));
-
+    // Calculate totals
+    const totalScore = kpiData.categories.reduce((sum, cat) => sum + cat.value, 0);
+    
     res.json({
-      undergraduate: undergraduateData,
-      graduate: graduateData
+      ...kpiData,
+      totalScore: totalScore.toFixed(2),
+      performanceLevel: totalScore >= 90 ? 'Excellent' : totalScore >= 80 ? 'Good' : totalScore >= 70 ? 'Satisfactory' : 'Needs Improvement'
     });
+
   } catch (error) {
-    console.error('Error fetching teaching data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching KPI data:', error);
+    res.status(500).json({ error: 'Failed to fetch KPI data' });
   }
 });
 
