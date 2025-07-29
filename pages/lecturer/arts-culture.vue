@@ -29,7 +29,7 @@
       </div>
   
      <!-- KPI Categories with NuxtLink-->
-     <div v-if="selectedRound" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -39,8 +39,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching ({{ selectedRound?.categories[0]?.percent || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ selectedRound?.categories[0]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Teaching (0%)</p>
+        <p class="text-xl font-bold text-inherit">0%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -52,8 +52,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research ({{ selectedRound?.categories[1]?.percent || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ selectedRound?.categories[1]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Research (0%)</p>
+        <p class="text-xl font-bold text-inherit">0%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -65,8 +65,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service ({{ selectedRound?.categories[2]?.percent || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ selectedRound?.categories[2]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Academic Service (0%)</p>
+        <p class="text-xl font-bold text-inherit">0%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -78,8 +78,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration ({{ selectedRound?.categories[3]?.percent || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ selectedRound?.categories[3]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Administration (0%)</p>
+        <p class="text-xl font-bold text-inherit">0%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -92,7 +92,7 @@
         "
       >
         <p class="text-sm text-inherit">Arts and culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ selectedRound?.categories[4]?.value || 0 }}%</p>
+        <p class="text-xl font-bold text-inherit">10%</p>
       </NuxtLink>
     </div>
   
@@ -276,14 +276,6 @@ import { ref, onMounted } from 'vue'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'   
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-import { useAirtableKpi } from '@/composables/useAirtableKpi'
-
-const { kpiRounds, selectedRound, selectRound, isLoading, error } = useAirtableKpi()
-const selectedRoundId = ref(selectedRound.value?.id || '')
-
-function onRoundChange() {
-  selectRound(selectedRoundId.value)
-}
 
 definePageMeta({
   layout: 'lecturer'
