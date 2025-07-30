@@ -12,7 +12,7 @@
         <select
           class="w-full sm:w-auto appearance-none bg-white border-0  rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
         >
-        <option>Round 2/2025</option>
+          <option>Round 2/2025</option>
           <option>Round 1/2025</option>
           <option>Round 2/2024</option>
         </select>
@@ -35,8 +35,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching ({{ kpiCategories[0]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[0]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Teaching (60%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[0]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -48,8 +48,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research ({{ kpiCategories[1]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[1]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Research (15%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[1]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -61,8 +61,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service ({{ kpiCategories[2]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[2]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Academic Service (10%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[2]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -74,8 +74,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration ({{ kpiCategories[3]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[3]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Administration (5%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[3]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -87,12 +87,18 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and Culture ({{ kpiCategories[4]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[4]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Arts and Culture (10%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[4]?.value) }}%</p>
       </NuxtLink>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Loading State for KPI Data -->
+    <div v-if="loading" class="flex justify-center items-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
+      <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
+    </div>
+
+    <div v-if="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Teaching Track Chart -->
       <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div class="text-center mb-6">
@@ -101,10 +107,10 @@
         </div>
         
         <!-- Chart Container -->
-        <div class="relative h-80 mx-auto" style="max-width: 400px">
+        <div class="relative w-full h-80 mx-auto flex items-center justify-center">
           <canvas ref="performanceChart" class="w-full h-full"></canvas>
         </div>
-        
+
         <!-- Legend -->
         <div class="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3">
           <div v-for="(category, index) in kpiCategories" :key="index" class="flex items-center">
@@ -127,59 +133,59 @@
           </h2>
           
           <div class="space-y-4">
-            <div v-if="selectedRound">
+            <div>
               <div class="flex justify-between mb-1">
                 <span class="text-sm font-medium text-gray-700"
                   >Academic Performance (60%)</span
                 >
-                <span class="text-sm font-medium text-gray-700">{{ mockData.academicPerformance }}%</span>
+                <span class="text-sm font-medium text-gray-700">{{ overallPerformance.academicPerformance }}%</span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   class="bg-blue-600 h-2 rounded-full"
-                  :style="{ width: mockData.academicPerformance + '%' }"
+                  :style="{ width: overallPerformance.academicPerformance + '%' }"
                 ></div>
               </div>
             </div>
             
-            <div v-if="selectedRound">
+            <div>
               <div class="flex justify-between mb-1">
                 <span class="text-sm font-medium text-gray-700"
                   >Behavior (40%)</span
                 >
-                <span class="text-sm font-medium text-gray-700">{{ mockData.behavior }}%</span>
+                <span class="text-sm font-medium text-gray-700">{{ overallPerformance.behavior }}%</span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   class="bg-green-600 h-2 rounded-full"
-                  :style="{ width: mockData.behavior + '%' }"
+                  :style="{ width: overallPerformance.behavior + '%' }"
                 ></div>
               </div>
             </div>
             
-            <div v-if="selectedRound">
+            <div>
               <div class="flex justify-between mb-1">
                 <span class="text-sm font-medium text-gray-700"
                   >Total Score (100%)</span
                 >
-                <span class="text-sm font-medium text-gray-700">{{ mockData.totalScore }}%</span>
+                <span class="text-sm font-medium text-gray-700">{{ overallPerformance.totalScore }}%</span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div
                   class="bg-indigo-600 h-2 rounded-full"
-                  :style="{ width: mockData.totalScore + '%' }"
+                  :style="{ width: overallPerformance.totalScore + '%' }"
                 ></div>
               </div>
             </div>
 
-            <div class="pt-4 border-t border-gray-200" v-if="selectedRound">
+            <div class="pt-4 border-t border-gray-200">
               <div class="flex justify-between items-center">
                 <span class="text-sm font-medium text-gray-700"
                   >Performance Level</span
                 >
                 <span 
                   class="px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800 rounded-full"
-                  >{{ mockData.performanceLevel }}</span
+                  >{{ overallPerformance.performanceLevel }}</span
                 >
               </div>
             </div>
@@ -236,63 +242,255 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { useFirebaseAuth } from '@/composables/useFirebaseAuth';
 import Chart from "chart.js/auto";
-import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-import { useKpiData } from '@/composables/useKpiData'
+import { computed, onMounted, ref, watch, onActivated, onUnmounted } from "vue";
+
+// Try to import the composable
+let getKpiData: any = null;
+try {
+  const kpiComposable = await import('@/composables/useKpiData');
+  getKpiData = kpiComposable.useKpiData?.().getKpiData;
+} catch (error) {
+  console.warn('KPI composable not available. Data fetching will be skipped.', error);
+}
 
 const { user, logout } = useFirebaseAuth()
-const { getKpiData } = useKpiData()
 
-// Reactive data
-const selectedRound = ref('round2-2025')
-const kpiData = ref<any>(null)
+// State management
 const loading = ref(true)
+const kpiData = ref<any>(null)
+const fetchError = ref<string | null>(null)
+const dataSource = ref<'database' | 'fallback'>('fallback')
 
-// Dynamic KPI categories from database
-const kpiCategories = computed(() => {
-  if (kpiData.value?.categories) {
-    return kpiData.value.categories
+// Fixed KPI weights
+const FIXED_KPI_WEIGHTS = {
+  teaching: 60,
+  research: 15,
+  academicService: 10,
+  administration: 5,
+  artsCulture: 10
+}
+
+// Fallback data
+const fallbackKpiData = {
+  teaching: 45.5,
+  research: 8.2,
+  academicService: 6.1,
+  administration: 2.8,
+  artsCulture: 7.3
+}
+
+const fallbackPerformanceData = {
+  academicPerformance: 96.25,
+  behavior: 36,
+  totalScore: 92.25,
+  performanceLevel: 'Excellent'
+}
+
+// Format value helper
+const formatValue = (value: any) => {
+  if (value === null || value === undefined) return '0';
+  if (typeof value === 'number') return Math.round(value * 100) / 100;
+  if (typeof value === 'string') {
+    const num = parseFloat(value);
+    return isNaN(num) ? '0' : Math.round(num * 100) / 100;
   }
-  // Fallback to mock data
-  return [
-    { name: 'Teaching', weight: 60, value: 60, color: '#1e40af', bgColor: '#dbeafe', textColor: '#1e40af' },
-    { name: 'Research', weight: 15, value: 15, color: '#0891b2', bgColor: '#cffafe', textColor: '#0891b2' },
-    { name: 'Academic Service', weight: 10, value: 10, color: '#059669', bgColor: '#d1fae5', textColor: '#059669' },
-    { name: 'Administration', weight: 5, value: 5, color: '#7c3aed', bgColor: '#ede9fe', textColor: '#7c3aed' },
-    { name: 'Arts and Culture', weight: 10, value: 3.75, color: '#dc2626', bgColor: '#fecaca', textColor: '#dc2626' }
-  ]
-})
+  return '0';
+}
 
-// Load KPI data
+// Logging function
+const addLog = (message: string, type: 'info' | 'error' = 'info') => {
+  const timestamp = new Date().toLocaleTimeString()
+  const logMessage = `[KPI Dashboard ${timestamp}] ${message}`
+  console.log(logMessage)
+  
+  if (type === 'error') {
+    console.error(logMessage)
+  }
+}
+
+// Load KPI data from database
 const loadKpiData = async () => {
   try {
     loading.value = true
-    if (user.value?.email) {
-      console.log('Loading KPI data for:', user.value.email)
-      const data = await getKpiData(user.value.email)
-      console.log('KPI data loaded:', data)
-      kpiData.value = data as any
+    fetchError.value = null
+    
+    addLog('Starting KPI data fetch...')
+    
+    if (!getKpiData) {
+      throw new Error('KPI composable not available')
     }
+    
+    if (!user.value?.email) {
+      throw new Error('User email not available')
+    }
+    
+    addLog('Loading KPI data for: ' + user.value.email)
+    
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout')), 10000)
+    )
+    
+    const dataPromise = getKpiData(user.value.email)
+    const data = await Promise.race([dataPromise, timeoutPromise])
+    
+    addLog('Raw KPI data received:')
+    console.log('Raw Data:', data)
+    
+    if (data && typeof data === 'object') {
+      kpiData.value = data as any
+      dataSource.value = 'database'
+      addLog('✅ Successfully loaded data from database')
+    } else {
+      throw new Error('Invalid data format received')
+    }
+    
   } catch (err) {
-    console.error('Failed to load KPI data:', err)
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    addLog('❌ Failed to load KPI data: ' + errorMessage, 'error')
+    fetchError.value = errorMessage
+    dataSource.value = 'fallback'
+    kpiData.value = null
+    addLog('📝 Using fallback data instead')
   } finally {
     loading.value = false
   }
 }
 
-const mockData = computed(() => ({
-  academicPerformance: 96.25,
-  behavior: 36,
-  totalScore: 92.25,
-  performanceLevel: 'Excellent'
-}))
+// Retry fetch function
+const retryFetch = async () => {
+  addLog('🔄 Retrying data fetch...')
+  await loadKpiData()
+}
+
+// Enhanced data parsing
+const currentKpiData = computed(() => {
+  if (dataSource.value === 'database' && kpiData.value) {
+    addLog('Parsing database KPI data...')
+    
+    // Strategy 1: Look for categories array
+    if (kpiData.value.categories && Array.isArray(kpiData.value.categories)) {
+      const mapped: any = {}
+      kpiData.value.categories.forEach((cat: any) => {
+        if (cat.key && typeof cat.value !== 'undefined') {
+          mapped[cat.key] = parseFloat(cat.value) || 0
+        } else if (cat.name) { // Map by name if key is not available
+          const name = cat.name.toLowerCase().replace(/\s+/g, '')
+          if (name.includes('teaching')) mapped.teaching = parseFloat(cat.value) || 0
+          else if (name.includes('research')) mapped.research = parseFloat(cat.value) || 0
+          else if (name.includes('academic') || name.includes('service')) mapped.academicService = parseFloat(cat.value) || 0
+          else if (name.includes('administration')) mapped.administration = parseFloat(cat.value) || 0
+          else if (name.includes('arts') || name.includes('culture')) mapped.artsCulture = parseFloat(cat.value) || 0
+        }
+      })
+      return mapped
+    }
+    
+    // Strategy 2: Look for direct properties
+    if (typeof kpiData.value.teaching !== 'undefined' || 
+        typeof kpiData.value.research !== 'undefined') {
+      return {
+        teaching: parseFloat(kpiData.value.teaching) || 0,
+        research: parseFloat(kpiData.value.research) || 0,
+        academicService: parseFloat(kpiData.value.academicService || kpiData.value.academic_service) || 0,
+        administration: parseFloat(kpiData.value.administration) || 0,
+        artsCulture: parseFloat(kpiData.value.artsCulture || kpiData.value.arts_culture) || 0
+      }
+    }
+    
+    // Strategy 3: Look for nested data
+    if (kpiData.value.data && typeof kpiData.value.data === 'object') {
+      return currentKpiData.value // Recursively process nested data
+    }
+    
+    // Strategy 4: Look for any numeric values
+    const numericFields = Object.keys(kpiData.value).filter(key => 
+      typeof kpiData.value[key] === 'number' && kpiData.value[key] >= 0
+    )
+    
+    if (numericFields.length >= 5) {
+      return {
+        teaching: parseFloat(kpiData.value[numericFields[0]]) || 0,
+        research: parseFloat(kpiData.value[numericFields[1]]) || 0,
+        academicService: parseFloat(kpiData.value[numericFields[2]]) || 0,
+        administration: parseFloat(kpiData.value[numericFields[3]]) || 0,
+        artsCulture: parseFloat(kpiData.value[numericFields[4]]) || 0
+      }
+    }
+    
+    addLog('Could not parse database structure, using fallback')
+  }
+  
+  addLog('Using fallback KPI data')
+  return fallbackKpiData
+})
+
+// KPI categories with enhanced data mapping
+const kpiCategories = computed(() => {
+  const currentValues = currentKpiData.value
+  
+  const categories = [
+    { 
+      name: 'Teaching', 
+      weight: FIXED_KPI_WEIGHTS.teaching,
+      value: currentValues.teaching || 0,
+      color: '#005F99', 
+      key: 'teaching' 
+    },
+    { 
+      name: 'Research', 
+      weight: FIXED_KPI_WEIGHTS.research,
+      value: currentValues.research || 0,
+      color: '#00BFFF', 
+      key: 'research' 
+    },
+    { 
+      name: 'Academic Service', 
+      weight: FIXED_KPI_WEIGHTS.academicService,
+      value: currentValues.academicService || 0,
+      color: '#7FD6D6', 
+      key: 'academicService' 
+    },
+    { 
+      name: 'Administration', 
+      weight: FIXED_KPI_WEIGHTS.administration,
+      value: currentValues.administration || 0,
+      color: '#7c3aed', 
+      key: 'administration' 
+    },
+    { 
+      name: 'Arts and Culture', 
+      weight: FIXED_KPI_WEIGHTS.artsCulture,
+      value: currentValues.artsCulture || 0,
+      color: '#8A8BE6', 
+      key: 'artsCulture' 
+    }
+  ]
+  
+  addLog('Final KPI categories computed')
+  return categories
+})
+
+// Overall performance data
+const overallPerformance = computed(() => {
+  if (dataSource.value === 'database' && kpiData.value?.performance) {
+    return kpiData.value.performance
+  }
+  
+  if (dataSource.value === 'database' && kpiData.value?.academicPerformance !== undefined) {
+    return {
+      academicPerformance: kpiData.value.academicPerformance || 0,
+      behavior: kpiData.value.behavior || 0,
+      totalScore: kpiData.value.totalScore || 0,
+      performanceLevel: kpiData.value.performanceLevel || 'No Data'
+    }
+  }
+  
+  return fallbackPerformanceData
+})
 
 definePageMeta({ layout: 'lecturer' })
-
-function onRoundChange() {
-  console.log('Round changed to:', selectedRound.value)
-}
 
 // Chart logic
 const performanceChart = ref<HTMLCanvasElement | null>(null)
@@ -301,38 +499,35 @@ let chartInstance: Chart | null = null
 function renderChart() {
   if (!performanceChart.value) return;
   if (chartInstance) chartInstance.destroy();
-  
-  const categories = kpiCategories.value;
-  const totalCategories = categories.length;
-  
-  // Create radial chart with multiple rings
-  const datasets = categories.map((cat: any, idx: number) => {
-    // Calculate the size of the ring (thickness and position)
-    const ringThickness = 12; // pixels
-    const ringSpacing = 8;    // pixels between rings
-    
-    // Calculate radius and cutout to create concentric rings
-    const outerRadius = 100 - ((ringThickness + ringSpacing) * idx);
-    const innerRadius = outerRadius - ringThickness;
-    
-    return {
-      data: [cat.value, 100 - cat.value],
-      backgroundColor: [cat.color, 'transparent'],
-      borderWidth: 0,
-      cutout: `${innerRadius}%`,
-      radius: `${outerRadius}%`,
-      circumference: 360,
-      rotation: -90,
-      spacing: 0,
-      weight: 1,
-    };
-  });
-  
-  // Get the 2D context for custom drawing
+
   const ctx = performanceChart.value.getContext('2d');
   if (!ctx) return;
-  
-  // Create the chart
+
+  const categories = kpiCategories.value;
+  const ringThickness = 60;
+  const ringSpacing = -60;
+
+  addLog('Rendering chart with data from: ' + dataSource.value)
+
+  const datasets = categories.map((cat, index) => {
+    const outerRadius = 100 - (index * (ringThickness + ringSpacing));
+    const innerRadius = outerRadius - ringThickness;
+    
+    const softGrey = '#E5E7EB';
+    const remainingValue = Math.max(0, cat.weight - cat.value);
+
+    return {
+      data: [cat.value, remainingValue],
+      backgroundColor: [cat.color, softGrey],
+      cutout: `${innerRadius}%`,
+      radius: `${outerRadius}%`,
+      borderWidth: 2,
+      borderRadius: [14, 14],
+      rotation: -90,
+      circumference: 360,
+    };
+  });
+
   chartInstance = new Chart(performanceChart.value, {
     type: 'doughnut',
     data: { datasets },
@@ -340,71 +535,92 @@ function renderChart() {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        animateRotate: false,
-        animateScale: false
+        animateRotate: true,
+        duration: 1000,
+        easing: 'easeOutQuart',
       },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function(context) {
-              const category = categories[context.datasetIndex];
-              return [
-                category.name,
-                `Value: ${category.value}%`,
-                `Weight: ${category.weight}%`
-              ];
-            }
-          }
-        }
+            label: function (context) {
+              const idx = context.datasetIndex;
+              const cat = categories[idx];
+              if (context.dataIndex === 0) {
+                return `${cat.name}: ${cat.value.toFixed(1)}% of ${cat.weight}%`;
+              } else {
+                const remaining = cat.weight - cat.value;
+                return `Remaining: ${remaining.toFixed(1)}%`;
+              }
+            },
+          },
+        },
       },
-      // Add center text
-      onHover: (event, elements) => {
-        const canvas = performanceChart.value;
-        if (!canvas) return;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        
-        // Redraw the chart to clear any hover effects
-        chartInstance?.update();
-      }
     },
-    plugins: [{
-      id: 'centerText',
-      beforeDraw: function(chart) {
-        if (!chart.ctx) return;
-        
-        const width = chart.width;
-        const height = chart.height;
-        const ctx = chart.ctx;
-        
-        ctx.restore();
-        
-        // Draw center text
-        ctx.font = 'bold 20px Arial';
-        ctx.fillStyle = '#374151';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // Center text position
-        const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
-        const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-        
-        // Draw main text
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('Academic', centerX, centerY - 10);
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('Performance', centerX, centerY + 10);
-        
-        ctx.save();
-      }
-    }]
+    plugins: [
+      {
+        id: 'centerText',
+        beforeDraw(chart) {
+          const ctx = chart.ctx;
+          const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+          const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
+
+          ctx.save();
+          ctx.font = 'bold 16px Arial';
+          ctx.fillStyle = '#1f2937';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('Academic', centerX, centerY - 10);
+          ctx.fillText('Performance', centerX, centerY + 10);
+          ctx.restore();
+        },
+      },
+    ],
   });
 }
 
-onMounted(() => {
-  renderChart()
-  loadKpiData()
-})
+// Watch for changes in data and update chart
+const stopDataWatcher = watch([kpiData, dataSource], () => {
+  // Only re-render if not currently loading AND data is available
+  if (!loading.value && (kpiData.value || dataSource.value === 'fallback')) {
+    addLog('Data source or data changed, re-rendering chart')
+    renderChart();
+  }
+}, { deep: true, immediate: false }); // immediate: false ensures it doesn't run on initial setup
+
+
+// Fetch data on initial mount and also when the component is activated
+let chartInitialized = false; // Flag to ensure chart is initialized only once after data is ready
+
+const initializeComponentData = async () => {
+  addLog('🚀 Initializing component data...')
+  await loadKpiData();
+  
+  if (Chart.registry) {
+    const datalabelsPlugin = Chart.registry.plugins.get('datalabels');
+    if (datalabelsPlugin) {
+      Chart.unregister(datalabelsPlugin);
+    }
+  }
+  
+  addLog('📊 Initializing chart with ' + dataSource.value + ' data...');
+  renderChart();
+  addLog('✅ Chart initialized successfully');
+};
+
+// Fetch data on mount
+onMounted(initializeComponentData);
+
+// Fetch data when component is activated
+onActivated(initializeComponentData);
+
+// Clean up chart instance when the component is unmounted
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    addLog('Chart instance destroyed on unmount.')
+  }
+  // Stop the watcher when the component is unmounted to prevent memory leaks
+  stopDataWatcher();
+});
 </script>
