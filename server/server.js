@@ -113,6 +113,100 @@ app.get('/api/kpi/:staffCode', async (req, res) => {
   }
 });
 
+// Lecturer Dashboard API endpoints
+// Get lecturer profile by staff code
+app.get('/api/lecturer/profile/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    
+    // Fetch lecturer profile from database
+    const [rows] = await pool.query(
+      'SELECT staff_code, staff_name, phone, location, program, position FROM lecturer_profiles WHERE staff_code = ?',
+      [staffCode]
+    );
+
+    if (rows.length === 0) {
+      // Return default profile structure if not found
+      return res.json({
+        staffCode,
+        phone: 'n/a',
+        location: 'n/a',
+        program: 'n/a',
+        position: 'n/a'
+      });
+    }
+
+    const profile = rows[0];
+    res.json({
+      staffCode: profile.staff_code,
+      phone: profile.phone || 'n/a',
+      location: profile.location || 'n/a',
+      program: profile.program || 'n/a',
+      position: profile.position || 'n/a'
+    });
+
+  } catch (error) {
+    console.error('Error fetching lecturer profile:', error);
+    res.status(500).json({ error: 'Failed to fetch lecturer profile' });
+  }
+});
+
+// Get lecturer education by staff code
+app.get('/api/lecturer/education/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    
+    const [rows] = await pool.query(
+      'SELECT degree, institution, year FROM lecturer_education WHERE staff_code = ? ORDER BY year DESC',
+      [staffCode]
+    );
+
+    res.json(rows);
+
+  } catch (error) {
+    console.error('Error fetching lecturer education:', error);
+    res.status(500).json({ error: 'Failed to fetch lecturer education' });
+  }
+});
+
+// Get lecturer research areas by staff code
+app.get('/api/lecturer/research/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    
+    const [rows] = await pool.query(
+      'SELECT research_area FROM lecturer_research_areas WHERE staff_code = ? ORDER BY id',
+      [staffCode]
+    );
+
+    const researchAreas = rows.map(row => row.research_area);
+    res.json(researchAreas);
+
+  } catch (error) {
+    console.error('Error fetching lecturer research areas:', error);
+    res.status(500).json({ error: 'Failed to fetch lecturer research areas' });
+  }
+});
+
+// Get lecturer publications by staff code
+app.get('/api/lecturer/publications/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const limit = req.query.limit || 10;
+    
+    const [rows] = await pool.query(
+      'SELECT title, venue, year, link FROM lecturer_publications WHERE staff_code = ? ORDER BY year DESC, id DESC LIMIT ?',
+      [staffCode, parseInt(limit)]
+    );
+
+    res.json(rows);
+
+  } catch (error) {
+    console.error('Error fetching lecturer publications:', error);
+    res.status(500).json({ error: 'Failed to fetch lecturer publications' });
+  }
+});
+
 // Budget API endpoints
 // Get budget overview for a lecturer
 app.get('/api/budget/overview/:lecturerId', async (req, res) => {

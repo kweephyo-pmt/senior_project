@@ -18,7 +18,10 @@
       <div class="md:col-span-1">
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
           <h3 class="text-xl font-bold text-gray-800 mb-3 border-b pb-2">Education</h3>
-          <ul class="space-y-3">
+          <div v-if="educationLoading" class="flex justify-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+          <ul v-else class="space-y-3">
             <li v-for="(edu, idx) in education" :key="idx" class="relative pl-8">
               <span class="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-blue-500"></span>
               <div class="flex flex-col">
@@ -30,10 +33,16 @@
           </ul>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
-          <h3 class="text-xl font-bold text-gray-800 mb-2 border-b pb-2">Research Area</h3>
-          <ul class="space-y-3 list-disc list-inside ml-2">
-            <li v-for="(area, idx) in researchAreas" :key="idx" class="text-gray-700 text-base">{{ area }}</li>
-          </ul>
+          <h3 class="text-xl font-bold text-gray-800 mb-3 border-b pb-2">Research Areas</h3>
+          <div v-if="researchLoading" class="flex justify-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+          <div v-else class="space-y-3">
+            <div v-for="(area, idx) in researchAreas" :key="idx" class="flex items-start gap-3">
+              <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></span>
+              <span class="text-gray-700 text-base leading-relaxed">{{ area }}</span>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Right Column: Contact & Publications -->
@@ -46,8 +55,8 @@
             </div>
           </div>
           <div class="flex-1 min-w-0">
-            <h2 class="text-2xl font-bold text-gray-800">{{ user?.displayName || 'User' }}(SA)</h2>
-            <p class="text-gray-600 mb-2">Accounting Program</p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ user?.displayName || 'User' }}{{ profile?.position ? ` (${profile.position})` : '' }}</h2>
+            <p class="text-gray-600 mb-2">{{ profile?.program || 'Accounting Program' }}</p>
             <div class="flex flex-col gap-4 mt-4 text-gray-700">
               <!-- Email -->
               <div class="flex items-center gap-3">
@@ -61,14 +70,14 @@
                 <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-green-100">
                   <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h2.28a2 2 0 011.7 1.06l1.1 2.21a2 2 0 01-.45 2.32l-.7.7a16.06 16.06 0 006.58 6.58l.7-.7a2 2 0 012.32-.45l2.21 1.1A2 2 0 0121 18.72V21a2 2 0 01-2 2h-1C7.82 23 1 16.18 1 8V7a2 2 0 012-2z"/></svg>
                 </span>
-                <span class="text-base">{{ userInfo.phone || 'n/a' }}</span>
+                <span class="text-base">{{ profile?.phone || 'n/a' }}</span>
               </div>
               <!-- Location -->
               <div class="flex items-center gap-3">
                 <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-purple-100">
                   <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-6-5.686-6-10a6 6 0 1112 0c0 4.314-6 10-6 10zm0-8a2 2 0 100-4 2 2 0 000 4z"/></svg>
                 </span>
-                <span class="text-base">{{ userInfo.location || 'n/a' }}</span>
+                <span class="text-base">{{ profile?.location || 'n/a' }}</span>
               </div>
             </div>
           </div>
@@ -79,7 +88,10 @@
             <h3 class="text-xl font-bold text-gray-800">Recent Publications</h3>
             <NuxtLink to="/lecturer/publications" class="text-blue-600 text-base hover:underline">View All</NuxtLink>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div v-if="publicationsLoading" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+          <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div v-for="(pub, idx) in publications" :key="idx" class="bg-blue-50 rounded-lg p-3 flex flex-col justify-between shadow hover:shadow-lg transition">
               <div>
                 <p class="font-semibold text-blue-900 text-base mb-1">{{ pub.title }}</p>
@@ -99,39 +111,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+import { useLecturerProfile } from '@/composables/useLecturerProfile'
+import { useLecturerEducation } from '@/composables/useLecturerEducation'
+import { useLecturerResearch } from '@/composables/useLecturerResearch'
+import { useLecturerPublications } from '@/composables/useLecturerPublications'
 import bgImage from '~/assets/background.png'
 
 definePageMeta({
   layout: 'lecturer'
 })
 
-// Mockup data
+// Authentication
 const { user } = useFirebaseAuth()
 
-// Example user info (replace with real data or API call as needed)
-const userInfo = ref({
-  phone: '081-234-5678',
-  location: 'Chiang Rai, Thailand',
+// Backend data composables
+const { profile, isLoading: profileLoading, fetchProfile } = useLecturerProfile()
+const { education, isLoading: educationLoading, fetchEducation } = useLecturerEducation()
+const { researchAreas, isLoading: researchLoading, fetchResearchAreas } = useLecturerResearch()
+const { publications, isLoading: publicationsLoading, fetchPublications } = useLecturerPublications()
+
+// Function to load all lecturer data
+const loadLecturerData = async () => {
+  await Promise.all([
+    fetchProfile(),
+    fetchEducation(),
+    fetchResearchAreas(),
+    fetchPublications(3) // Limit to 3 publications for dashboard
+  ])
+}
+
+// Watch for user email and fetch data when available
+watch(
+  () => user.value?.email,
+  (email) => {
+    if (email) {
+      loadLecturerData()
+    }
+  },
+  { immediate: true }
+)
+
+// Also load data when component mounts (fallback)
+onMounted(() => {
+  if (user.value?.email) {
+    loadLecturerData()
+  }
 })
-
-const education = ref([
-  { degree: 'Ph.D. in Management', institution: 'Mae Fah Luang University', year: 2020 },
-  { degree: 'M.B.A.', institution: 'Chulalongkorn University', year: 2015 },
-  { degree: 'B.B.A.', institution: 'Chiang Mai University', year: 2012 },
-])
-
-const researchAreas = ref([
-  'Business Intelligence and Data Analytics',
-  'Machine Learning Applications in Management',
-  'Higher Education Administration',
-  'Research Collaboration Networks',
-])
-
-const publications = ref([
-  { title: 'A Novel Approach to Sentiment Analysis', venue: 'Journal of Data Science', year: 2024, link: '#' },
-  { title: 'Machine Learning in Education', venue: 'International Conference on AI', year: 2023, link: '#' },
-  { title: 'Optimizing Research Collaboration', venue: 'Research Management Review', year: 2023, link: '#' },
-])
 </script>
