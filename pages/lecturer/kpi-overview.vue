@@ -365,7 +365,15 @@ const retryFetch = async () => {
 }
 
 // Enhanced data parsing
-const currentKpiData = computed(() => {
+interface KpiCategoryValues {
+  teaching: number;
+  research: number;
+  academicService: number;
+  administration: number;
+  artsCulture: number;
+}
+
+const currentKpiData = computed<KpiCategoryValues>(() => {
   if (dataSource.value === 'database' && kpiData.value) {
     addLog('Parsing database KPI data...')
     
@@ -401,7 +409,14 @@ const currentKpiData = computed(() => {
     
     // Strategy 3: Look for nested data
     if (kpiData.value.data && typeof kpiData.value.data === 'object') {
-      return currentKpiData.value // Recursively process nested data
+      const nestedData = kpiData.value.data
+      return {
+        teaching: parseFloat(nestedData.teaching) || 0,
+        research: parseFloat(nestedData.research) || 0,
+        academicService: parseFloat(nestedData.academicService || nestedData.academic_service) || 0,
+        administration: parseFloat(nestedData.administration) || 0,
+        artsCulture: parseFloat(nestedData.artsCulture || nestedData.arts_culture) || 0
+      }
     }
     
     // Strategy 4: Look for any numeric values
@@ -514,7 +529,8 @@ function renderChart() {
     const innerRadius = outerRadius - ringThickness;
     
     const softGrey = '#E5E7EB';
-    const remainingValue = Math.max(0, cat.weight - cat.value);
+    // Ensure remainingValue is never exactly zero for hover detection
+    const remainingValue = Math.max(0.1, cat.weight - cat.value);
 
     return {
       data: [cat.value, remainingValue],
@@ -535,7 +551,6 @@ function renderChart() {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        animateRotate: true,
         duration: 1000,
         easing: 'easeOutQuart',
       },
@@ -543,16 +558,20 @@ function renderChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function (context) {
-              const idx = context.datasetIndex;
-              const cat = categories[idx];
-              if (context.dataIndex === 0) {
-                return `${cat.name}: ${cat.value.toFixed(1)}% of ${cat.weight}%`;
-              } else {
-                const remaining = cat.weight - cat.value;
-                return `Remaining: ${remaining.toFixed(1)}%`;
+            // Use a closure to capture the categories snapshot at render time
+            label: (function(categoriesSnapshot) {
+              return function (context) {
+                const idx = context.datasetIndex;
+                const cat = categoriesSnapshot[idx];
+                if (!cat) return '';
+                if (context.dataIndex === 0) {
+                  return `${cat.name}: ${cat.value.toFixed(1)}% of ${cat.weight}%`;
+                } else {
+                  const remaining = cat.weight - cat.value;
+                  return `Remaining: ${remaining.toFixed(1)}%`;
+                }
               }
-            },
+            })(categories),
           },
         },
       },
@@ -608,11 +627,16 @@ const initializeComponentData = async () => {
   addLog('✅ Chart initialized successfully');
 };
 
-// Fetch data on mount
-onMounted(initializeComponentData);
-
-// Fetch data when component is activated
-onActivated(initializeComponentData);
+// Watch for user email and fetch data when available
+watch(
+  () => user.value?.email,
+  (email) => {
+    if (email) {
+      initializeComponentData();
+    }
+  },
+  { immediate: true }
+);
 
 // Clean up chart instance when the component is unmounted
 onUnmounted(() => {

@@ -404,7 +404,15 @@ onMounted(() => {
         }
         }) 
         
-onMounted(() => {
-loadKpiData()
-})
+import { watch } from "vue";
+
+watch(
+  () => user.value?.email,
+  (email) => {
+    if (email) {
+      loadKpiData();
+    }
+  },
+  { immediate: true }
+);
 </script>

@@ -681,7 +681,15 @@ onMounted(async () => {
   // The chart remains hardcoded and is NOT updated with fetched data.
   // No further chart update logic is needed here.
 })
-onMounted(() => {
-  loadKpiData()
-})
+import { watch } from "vue";
+
+watch(
+  () => user.value?.email,
+  (email) => {
+    if (email) {
+      loadKpiData();
+    }
+  },
+  { immediate: true }
+);
 </script>

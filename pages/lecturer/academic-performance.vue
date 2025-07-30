@@ -26,7 +26,7 @@
 
     <!-- Administration Track -->
     <div class="mb-6">
-      <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Teaching Track</h2>
+      <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Academic Service Track</h2>
       <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
     </div>
 
@@ -343,7 +343,15 @@ onMounted(() => {
     })
   }
 })
-onMounted(() => {
-  loadKpiData()
-})
+import { watch } from "vue";
+
+watch(
+  () => user.value?.email,
+  (email) => {
+    if (email) {
+      loadKpiData();
+    }
+  },
+  { immediate: true }
+);
 </script>
