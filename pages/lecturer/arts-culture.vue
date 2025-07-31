@@ -28,8 +28,14 @@
         <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
       </div>
   
-     <!-- KPI Categories with NuxtLink-->
-     <div class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+     <!-- Loading spinner -->
+     <div v-if="loading" class="flex justify-center items-center py-8">
+       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
+       <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
+     </div>
+
+     <!-- KPI Categories with NuxtLink, only when not loading -->
+     <div v-else class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -39,8 +45,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching ({{ kpiCategories[0]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[0]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Teaching (60%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[0]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -52,8 +58,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research ({{ kpiCategories[1]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[1]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Research (15%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[1]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -65,8 +71,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service ({{ kpiCategories[2]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[2]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Academic Service (10%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[2]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -78,8 +84,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration ({{ kpiCategories[3]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[3]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Administration (5%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[3]?.value) }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -91,8 +97,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and Culture ({{ kpiCategories[4]?.weight || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiCategories[4]?.value || 0 }}%</p>
+        <p class="text-sm text-inherit">Arts and Culture (10%)</p>
+        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[4]?.value) }}%</p>
       </NuxtLink>
     </div>
   
@@ -287,9 +293,17 @@ const showMobileMenu = ref(false)
 const { getKpiData } = useKpiData()
 const { user,logout } = useFirebaseAuth()
 
-
+// Format value helper
+const formatValue = (value: any) => {
+  if (value === null || value === undefined) return '0';
+  if (typeof value === 'number') return Math.round(value * 100) / 100;
+  if (typeof value === 'string') {
+    const num = parseFloat(value);
+    return isNaN(num) ? '0' : Math.round(num * 100) / 100;
+  }
+  return '0';
+}
 // Reactive data
-const selectedRound = ref('round2-2025')
 const kpiData = ref<any>(null)
 const loading = ref(true)
 

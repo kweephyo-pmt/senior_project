@@ -25,7 +25,14 @@
     </div>
 
      <!-- KPI Categories with NuxtLink-->
-     <div class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+    <!-- Loading spinner -->
+    <div v-if="loading" class="flex justify-center items-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
+      <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
+    </div>
+
+    <!-- KPI Categories with NuxtLink, only when not loading -->
+    <div v-else class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
