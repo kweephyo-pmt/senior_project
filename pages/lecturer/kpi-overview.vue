@@ -126,7 +126,7 @@
               :style="{ backgroundColor: category.color }"
             ></div>
             <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
-              {{ category.name }} ({{ category.weight }}%)
+              {{ category.name }} 
             </span>
           </div>
         </div>

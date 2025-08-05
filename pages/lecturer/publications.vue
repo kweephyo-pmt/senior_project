@@ -3,7 +3,14 @@
     <!-- Header Section with Controls -->
     <div class="mb-8">
       <div class="flex justify-between items-center mb-1">
-        <h1 class="text-3xl font-bold text-gray-900">Recent Publications</h1>
+        <div class="flex items-center">
+          <button @click="goBack" class="mr-4 text-gray-600 hover:text-blue-600 focus:outline-none" aria-label="Back">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <h1 class="text-3xl font-bold text-gray-900">Recent Publications</h1>
+        </div>
         <div class="flex items-center gap-4">
           <!-- Year Filter -->
           <div class="relative inline-block">
@@ -65,9 +72,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+import { useFirebaseAuth } from '@/composables/useFirebaseAuth';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+
+// Function to handle back navigation
+const goBack = () => {
+  router.go(-1); // Go back to the previous page
+};
 
 definePageMeta({
   layout: 'lecturer'
