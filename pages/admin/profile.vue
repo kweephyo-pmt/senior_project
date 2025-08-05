@@ -88,12 +88,7 @@
                     class="input pl-10 pr-16 py-1 ring-1 ring-inset ring-gray-300 rounded-md focus:ring-2 focus:ring-inset focus:ring-[#036E94] transition-colors border-0 w-full"
                   />
                 </template>
-                <template v-else>
-                  <input
-                    v-model="profile[field.model]"
-                    class="input pl-10 pr-16 py-1 ring-1 ring-inset ring-gray-300 rounded-md focus:ring-2 focus:ring-inset focus:ring-[#036E94] transition-colors border-0 w-full"
-                  />
-                </template>
+                
               </div>
             </div>
           </template>

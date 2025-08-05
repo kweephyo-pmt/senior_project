@@ -9,7 +9,10 @@
           </h1>
           <p class="text-gray-600 mt-1 text-sm">Manage user roles and system access</p>
         </div>
-        <div class="bg-indigo-50 text-indigo-700 px-6 py-2.5 rounded-lg font-medium border border-indigo-100 shadow-sm flex items-center gap-2">
+        <div v-if="initialLoading" class="bg-gray-100 px-6 py-2.5 rounded-lg animate-pulse">
+          <div class="h-6 bg-gray-200 rounded w-24"></div>
+        </div>
+        <div v-else class="bg-indigo-50 text-indigo-700 px-6 py-2.5 rounded-lg font-medium border border-indigo-100 shadow-sm flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
@@ -79,15 +82,46 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="user in filteredUsers" :key="user.email" class="hover:bg-gray-50 transition-colors duration-150">
+              <!-- Loading skeleton rows -->
+              <tr v-if="initialLoading || isLoading" v-for="i in 5" :key="i" class="animate-pulse">
+                <td class="px-6 py-5 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-gray-200 mr-4"></div>
+                    <div>
+                      <div class="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                      <div class="h-3 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-5 whitespace-nowrap">
+                  <div class="h-4 bg-gray-200 rounded w-48 mb-1"></div>
+                  <div class="h-3 bg-gray-200 rounded w-20"></div>
+                </td>
+                <td class="px-6 py-5 whitespace-nowrap">
+                  <div class="h-6 bg-gray-200 rounded w-16"></div>
+                </td>
+                <td class="px-6 py-5 whitespace-nowrap">
+                  <div class="h-6 bg-gray-200 rounded w-16"></div>
+                </td>
+                <td class="px-6 py-5 whitespace-nowrap text-right">
+                  <div class="flex items-center justify-end space-x-3">
+                    <div class="w-8 h-8 bg-gray-200 rounded"></div>
+                    <div class="w-8 h-8 bg-gray-200 rounded"></div>
+                    <div class="w-8 h-8 bg-gray-200 rounded"></div>
+                  </div>
+                </td>
+              </tr>
+              <!-- Actual user rows -->
+              <tr v-else-if="!initialLoading && !isLoading" v-for="user in filteredUsers" :key="user.email" class="hover:bg-gray-50 transition-colors duration-150">
                 <td class="px-6 py-5 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="relative">
                       <img 
-                        :src="user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random`" 
-                        :alt="user.displayName"
+                        :src="getUserPhotoURL(user)"
+                        :alt="user.displayName || 'User'"
                         class="h-12 w-12 rounded-full object-cover ring-4 ring-gray-100"
                         loading="lazy"
+                        @error="handleImageError"
                       />
                       <span 
                         class="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white"
@@ -181,6 +215,16 @@
                       </span>
                     </button>
                   </div>
+                </td>
+              </tr>
+              <!-- Empty state -->
+              <tr v-else-if="!initialLoading && !isLoading && filteredUsers.length === 0">
+                <td colspan="5" class="px-6 py-12 text-center">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+                  <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
                 </td>
               </tr>
             </tbody>
@@ -289,6 +333,33 @@ const editingUser = ref<User | null>(null)
 const showDeleteConfirm = ref(false)
 const userToDelete = ref<User | null>(null)
 
+// Initial loading state to prevent flash of empty content
+const initialLoading = ref(true)
+const isLoading = ref(false)
+
+// Get standardized photo URL with fallback
+const getUserPhotoURL = (user: User): string => {
+  // Priority 1: User's photoURL from Firestore
+  if (user.photoURL) {
+    return user.photoURL
+  }
+  // Priority 2: Generate fallback avatar with consistent styling
+  const displayName = user.displayName || 'User'
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4F46E5&color=ffffff&size=96`
+}
+
+// Handle image loading errors by falling back to generated avatar
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  const altText = img.alt || 'User'
+  const fallbackURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(altText)}&background=4F46E5&color=ffffff&size=96`
+  
+  // Only change if it's not already the fallback URL to prevent infinite loops
+  if (img.src !== fallbackURL) {
+    img.src = fallbackURL
+  }
+}
+
 // Fetch users on mount
 onMounted(async () => {
   await fetchUsers()
@@ -296,14 +367,23 @@ onMounted(async () => {
 
 // Fetch all users from Firestore
 const fetchUsers = async () => {
-  const db = getFirestore()
-  const usersCollection = collection(db, 'users')
-  const querySnapshot = await getDocs(usersCollection)
-  
-  users.value = querySnapshot.docs.map(doc => ({
-    email: doc.id,
-    ...doc.data()
-  })) as User[]
+  try {
+    isLoading.value = true
+    const db = getFirestore()
+    const usersCollection = collection(db, 'users')
+    const querySnapshot = await getDocs(usersCollection)
+    
+    users.value = querySnapshot.docs.map(doc => ({
+      email: doc.id,
+      ...doc.data()
+    })) as User[]
+  } catch (error) {
+    console.error('Error fetching users:', error)
+    showAlert('error', 'Error', 'Failed to load users')
+  } finally {
+    isLoading.value = false
+    initialLoading.value = false
+  }
 }
 
 // Filter users based on search query and role filter

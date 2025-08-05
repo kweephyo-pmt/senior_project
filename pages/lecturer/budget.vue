@@ -25,53 +25,70 @@
 
     <!-- Budget Overview Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Total Budget -->
-      <div class="bg-blue-50 rounded-lg shadow-md p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Total Budget</p>
-            <h3 class="text-2xl font-bold text-gray-900">฿ {{ totalBudget.toLocaleString() }}</h3>
-            <p class="text-sm text-blue-50">s</p>
-          </div>
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" viewBox="0 0 24 24" fill="none">
-              <text x="13" y="18" text-anchor="middle" font-size="18" font-family="Arial, Helvetica, sans-serif" fill="currentColor">฿</text>
-            </svg>
+      <!-- Loading State for Cards -->
+      <template v-if="loading">
+        <div v-for="i in 3" :key="i" class="bg-gray-50 rounded-lg shadow-md p-6 animate-pulse">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+              <div class="h-8 bg-gray-200 rounded w-32 mb-1"></div>
+              <div class="h-3 bg-gray-200 rounded w-20"></div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-gray-200"></div>
           </div>
         </div>
-      </div>
+      </template>
+      
+      <!-- Actual Cards -->
+      <template v-else>
+        <!-- Total Budget -->
+        <div class="bg-blue-50 rounded-lg shadow-md p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Total Budget</p>
+              <h3 class="text-2xl font-bold text-gray-900">฿ {{ totalBudget.toLocaleString() }}</h3>
+              <p class="text-sm text-blue-50">s</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" viewBox="0 0 24 24" fill="none">
+                <text x="13" y="18" text-anchor="middle" font-size="18" font-family="Arial, Helvetica, sans-serif" fill="currentColor">฿</text>
+              </svg>
+            </div>
+          </div>
+        </div>
 
-      <!-- Spent Amount -->
-      <div class="bg-purple-50 rounded-lg shadow-md p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Spent Amount</p>
-            <h3 class="text-2xl font-bold text-gray-900">฿ {{ budgetOverview?.totalSpent?.toLocaleString() }}</h3>
-            <p class="text-sm text-gray-500">{{ budgetOverview?.spentPercentage }}% of total budget</p>
-          </div>
-          <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
+        <!-- Spent Amount -->
+        <div class="bg-purple-50 rounded-lg shadow-md p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Spent Amount</p>
+              <h3 class="text-2xl font-bold text-gray-900">฿ {{ budgetOverview?.totalSpent?.toLocaleString() }}</h3>
+              <p class="text-sm text-gray-500">{{ budgetOverview?.spentPercentage }}% of total budget</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Research Projects -->
-      <div class="bg-orange-50 rounded-lg shadow-md p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Research Projects</p>
-            <h3 class="text-2xl font-bold text-gray-900">฿ {{ budgetOverview?.researchAmount?.toLocaleString() }}</h3>
-            <p class="text-sm text-gray-500">{{ budgetOverview?.researchProjectCount }} share projects</p>
-          </div>
-          <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
+        <!-- Research Projects -->
+        <div class="bg-orange-50 rounded-lg shadow-md p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Research Projects</p>
+              <h3 class="text-2xl font-bold text-gray-900">฿ {{ budgetOverview?.researchAmount?.toLocaleString() }}</h3>
+              <p class="text-sm text-gray-500">{{ budgetOverview?.researchProjectCount }} share projects</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
 
     <!-- Budget Distribution and Details -->
@@ -88,7 +105,24 @@
         </div>
 
         <!-- Budget Items -->
-        <div class="space-y-6" v-if="!loading">
+        <!-- Loading State for Budget Items -->
+        <div v-if="loading" class="space-y-6">
+          <div v-for="i in 6" :key="i" class="flex items-center animate-pulse">
+            <div class="w-64 flex items-center gap-2">
+              <div class="w-4 h-4 rounded-full bg-gray-200"></div>
+              <div class="h-4 bg-gray-200 rounded w-32"></div>
+            </div>
+            <div class="w-32 ml-2">
+              <div class="h-4 bg-gray-200 rounded w-24"></div>
+            </div>
+            <div class="flex-1 mx-6">
+              <div class="w-full bg-gray-200 rounded-full h-3"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actual Budget Items -->
+        <div class="space-y-6" v-else-if="budgetItems.length > 0">
           <div
             v-for="(item, index) in budgetItems"
             :key="index"
@@ -174,7 +208,17 @@
       <div class="lg:col-span-1">
         <div class="bg-white rounded-2xl shadow-lg p-5 h-full flex flex-col">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Budget Details</h2>
-          <div class="space-y-3 overflow-y-scroll pr-2 h-[400px] custom-scrollbar" v-if="!loading">
+          <!-- Loading State for Budget Details -->
+          <div v-if="loading" class="space-y-3 h-[400px]">
+            <div v-for="i in 4" :key="i" class="p-4 bg-gray-50 rounded-xl animate-pulse">
+              <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/3"></div>
+            </div>
+          </div>
+          
+          <!-- Actual Budget Details -->
+          <div v-else-if="budgetDetails.length > 0" class="space-y-3 overflow-y-scroll pr-2 h-[400px] custom-scrollbar">
             <div v-for="detail in budgetDetails" :key="detail.title"
                  class="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-100">
               <h3 class="text-base font-medium text-gray-900 mb-2">{{ detail.title }}</h3>
@@ -235,6 +279,18 @@
               </div>
             </div>
           </div>
+          
+          <!-- No Data State for Budget Details -->
+          <div v-else class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+              <div class="text-gray-400 mb-2">
+                <svg class="mx-auto h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p class="text-gray-500 text-sm">No budget projects found</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -242,20 +298,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import { useBudget } from '@/composables/useBudget'
 
 const { user } = useFirebaseAuth()
-const { getBudgetOverview, getBudgetProjects } = useBudget()
+const { extractStaffCode, getBudgetOverview, getBudgetProjects } = useBudget()
 
 interface ProjectOwners {
   [key: string]: string;
 }
 
-const selectedOwners = ref<ProjectOwners>({
-  'SoM Project': 'Dr. Korawit Fakkhong'
-})
+const selectedOwners = ref<ProjectOwners>({})
 
 // Reactive data from database
 const budgetOverview = ref<any>(null)
@@ -264,8 +318,11 @@ const loading = ref(true)
 const selectedYear = ref(2025)
 const openDropdown = ref('')
 
-// Mock lecturer ID for now (in real app, this would come from auth)
-const lecturerId = 'mock_lecturer_1'
+// Extract staff code from user email
+const staffCode = computed(() => {
+  if (!user.value?.email) return ''
+  return extractStaffCode(user.value.email)
+})
 
 function toggleOwnerSelect(projectTitle: string) {
   openDropdown.value = openDropdown.value === projectTitle ? '' : projectTitle
@@ -324,24 +381,66 @@ const researchProjectCount = computed(() => {
 
 // Load data from database
 const loadBudgetData = async () => {
+  const currentStaffCode = staffCode.value
+  if (!currentStaffCode) {
+    console.log('No staff code available yet')
+    return
+  }
+  
   try {
     loading.value = true
     const [overview, projects] = await Promise.all([
-      getBudgetOverview(lecturerId, selectedYear.value),
-      getBudgetProjects(lecturerId, selectedYear.value)
+      getBudgetOverview(currentStaffCode, selectedYear.value),
+      getBudgetProjects(currentStaffCode, selectedYear.value)
     ])
     budgetOverview.value = overview
     budgetProjects.value = projects as any[]
+    
+    // Set default selected owners (primary owners) for projects with multiple owners
+    const defaultOwners: ProjectOwners = {}
+    const typedProjects = projects as any[]
+    typedProjects.forEach((project: any) => {
+      if (project.owners && project.owners.length > 1) {
+        // Set primary owner as default (first in the list is primary)
+        defaultOwners[project.title] = project.owner || project.owners[0]
+      }
+    })
+    selectedOwners.value = defaultOwners
+    
   } catch (error) {
     console.error('Error loading budget data:', error)
+    // Provide fallback mock data if API fails
+    budgetOverview.value = {
+      totalBudget: 0,
+      totalSpent: 0,
+      spentPercentage: 0,
+      researchAmount: 0,
+      researchProjectCount: 0,
+      categories: []
+    }
+    budgetProjects.value = []
+    selectedOwners.value = {}
   } finally {
     loading.value = false
   }
 }
 
+// Watch for user authentication and load data
+watch(
+  () => user.value?.email,
+  (email) => {
+    if (email) {
+      loadBudgetData()
+    }
+  },
+  { immediate: true }
+)
+
 // Load data on component mount
 onMounted(() => {
-  loadBudgetData()
+  if (user.value?.email) {
+    loadBudgetData()
+  }
 })
 
 // Watch for year changes

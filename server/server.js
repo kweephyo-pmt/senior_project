@@ -208,17 +208,21 @@ app.get('/api/lecturer/publications/:staffCode', async (req, res) => {
 });
 
 // Budget API endpoints
-// Get budget overview for a lecturer
-app.get('/api/budget/overview/:lecturerId', async (req, res) => {
+// Get budget overview for a staff member by staff code
+app.get('/api/budget/overview/:staffCode', async (req, res) => {
   try {
-    const { lecturerId } = req.params;
+    const { staffCode } = req.params;
     const year = req.query.year || 2025;
 
     // Get budget categories with totals
     const [categories] = await pool.query(
-      'SELECT * FROM budget_categories WHERE lecturer_id = ? AND year = ?',
-      [lecturerId, year]
+      'SELECT * FROM budget_categories WHERE staff_code = ? AND year = ?',
+      [staffCode, year]
     );
+
+    if (categories.length === 0) {
+      return res.status(404).json({ error: 'No budget data found for this staff member' });
+    }
 
     // Calculate totals
     const totalBudget = categories.reduce((sum, cat) => sum + parseFloat(cat.total_budget), 0);
@@ -228,8 +232,8 @@ app.get('/api/budget/overview/:lecturerId', async (req, res) => {
 
     // Get project count for research
     const [projectCount] = await pool.query(
-      'SELECT COUNT(*) as count FROM budget_projects bp JOIN budget_categories bc ON bp.category_id = bc.id WHERE bc.name = "Research Project" AND bp.lecturer_id = ? AND bp.year = ?',
-      [lecturerId, year]
+      'SELECT COUNT(*) as count FROM budget_projects bp JOIN budget_categories bc ON bp.category_id = bc.id WHERE bc.name = "Research Project" AND bp.staff_code = ? AND bp.year = ?',
+      [staffCode, year]
     );
 
     res.json({
@@ -251,10 +255,10 @@ app.get('/api/budget/overview/:lecturerId', async (req, res) => {
   }
 });
 
-// Get budget projects/details for a lecturer
-app.get('/api/budget/projects/:lecturerId', async (req, res) => {
+// Get budget projects/details for a staff member by staff code
+app.get('/api/budget/projects/:staffCode', async (req, res) => {
   try {
-    const { lecturerId } = req.params;
+    const { staffCode } = req.params;
     const year = req.query.year || 2025;
 
     const [projects] = await pool.query(`
@@ -266,9 +270,9 @@ app.get('/api/budget/projects/:lecturerId', async (req, res) => {
         bc.name as category
       FROM budget_projects bp
       JOIN budget_categories bc ON bp.category_id = bc.id
-      WHERE bp.lecturer_id = ? AND bp.year = ?
+      WHERE bp.staff_code = ? AND bp.year = ?
       ORDER BY bp.created_at DESC
-    `, [lecturerId, year]);
+    `, [staffCode, year]);
 
     // Get owners for each project
     const projectsWithOwners = await Promise.all(
@@ -302,12 +306,12 @@ app.get('/api/budget/projects/:lecturerId', async (req, res) => {
 // Create new budget project
 app.post('/api/budget/projects', async (req, res) => {
   try {
-    const { title, categoryName, budgetAmount, duration, lecturerId, year = 2025, owners = [] } = req.body;
+    const { title, categoryName, budgetAmount, duration, staffCode, year = 2025, owners = [] } = req.body;
 
     // Get category ID
     const [category] = await pool.query(
-      'SELECT id FROM budget_categories WHERE name = ? AND lecturer_id = ? AND year = ?',
-      [categoryName, lecturerId, year]
+      'SELECT id FROM budget_categories WHERE name = ? AND staff_code = ? AND year = ?',
+      [categoryName, staffCode, year]
     );
 
     if (category.length === 0) {
@@ -316,8 +320,8 @@ app.post('/api/budget/projects', async (req, res) => {
 
     // Insert project
     const [result] = await pool.query(
-      'INSERT INTO budget_projects (title, category_id, budget_amount, duration, year, lecturer_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, category[0].id, budgetAmount, duration, year, lecturerId]
+      'INSERT INTO budget_projects (title, category_id, budget_amount, duration, year, staff_code) VALUES (?, ?, ?, ?, ?, ?)',
+      [title, category[0].id, budgetAmount, duration, year, staffCode]
     );
 
     const projectId = result.insertId;

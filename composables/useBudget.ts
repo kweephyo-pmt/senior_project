@@ -3,10 +3,17 @@ export const useBudget = () => {
   const config = useRuntimeConfig()
   const baseURL = 'http://localhost:4000/api'
 
-  // Get budget overview data
-  const getBudgetOverview = async (lecturerId: string, year: number = 2025) => {
+  // Extract staff code from email (e.g., 6531503172@lamduan.mfu.ac.th -> 6531503172)
+  const extractStaffCode = (email: string): string => {
+    if (!email) return ''
+    const match = email.match(/^(\d+)@/)
+    return match ? match[1] : ''
+  }
+
+  // Get budget overview data by staff code
+  const getBudgetOverview = async (staffCode: string, year: number = 2025) => {
     try {
-      const response = await $fetch(`${baseURL}/budget/overview/${lecturerId}?year=${year}`)
+      const response = await $fetch(`${baseURL}/budget/overview/${staffCode}?year=${year}`)
       return response
     } catch (error) {
       console.error('Error fetching budget overview:', error)
@@ -14,10 +21,10 @@ export const useBudget = () => {
     }
   }
 
-  // Get budget projects/details
-  const getBudgetProjects = async (lecturerId: string, year: number = 2025) => {
+  // Get budget projects/details by staff code
+  const getBudgetProjects = async (staffCode: string, year: number = 2025) => {
     try {
-      const response = await $fetch(`${baseURL}/budget/projects/${lecturerId}?year=${year}`)
+      const response = await $fetch(`${baseURL}/budget/projects/${staffCode}?year=${year}`)
       return response
     } catch (error) {
       console.error('Error fetching budget projects:', error)
@@ -31,7 +38,7 @@ export const useBudget = () => {
     categoryName: string
     budgetAmount: number
     duration: string
-    lecturerId: string
+    staffCode: string
     year?: number
     owners?: string[]
   }) => {
@@ -80,6 +87,7 @@ export const useBudget = () => {
   }
 
   return {
+    extractStaffCode,
     getBudgetOverview,
     getBudgetProjects,
     createBudgetProject,

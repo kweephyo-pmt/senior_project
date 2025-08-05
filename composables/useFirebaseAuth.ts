@@ -164,7 +164,23 @@ export function useFirebaseAuth() {
     }
 
     const userData = await getUserData(email)
-    console.log('Checking user data:', { email, userData })
+    // Only log on first check or when userData changes
+    if (!user.value || user.value.email !== email) {
+      console.log('Auth state changed:', { email, hasUserData: !!userData })
+    }
+    
+    // Ensure user object has the correct photo URL
+    if (userData?.photoURL && currentUser) {
+      // Create a new user object with the photo URL from Firestore
+      const updatedUser = {
+        ...currentUser,
+        photoURL: userData.photoURL,
+        displayName: userData.displayName || currentUser.displayName
+      } as User
+      user.value = updatedUser
+    } else {
+      user.value = currentUser
+    }
 
     // Check if user is deactivated
     if (userData?.isActive === false) {
@@ -236,14 +252,30 @@ export function useFirebaseAuth() {
            path.startsWith(roleRoutes[role].prefix)
   }
 
+  // Add debouncing to prevent excessive auth state checks
+  let authStateTimeout: NodeJS.Timeout | null = null
+  
   onMounted(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      user.value = currentUser
-      isLoading.value = false
-      await handleUserAuthState(currentUser)
+      // Clear any pending timeout
+      if (authStateTimeout) {
+        clearTimeout(authStateTimeout)
+      }
+      
+      // Debounce auth state changes
+      authStateTimeout = setTimeout(async () => {
+        user.value = currentUser
+        isLoading.value = false
+        await handleUserAuthState(currentUser)
+      }, 100) // 100ms debounce
     })
 
-    return () => unsubscribe()
+    return () => {
+      if (authStateTimeout) {
+        clearTimeout(authStateTimeout)
+      }
+      unsubscribe()
+    }
   })
 
   const logout = async () => {
@@ -319,12 +351,35 @@ export function useFirebaseAuth() {
         return
       }
       
-      // Ensure user data exists with a photo URL
-      if (userData && !userData.photoURL) {
-        // If no photo URL exists, set a default avatar
-        const defaultAvatar = getDefaultAvatarURL(userData.displayName || result.user.displayName || 'User')
-        await setDoc(doc(db, 'users', email), { photoURL: defaultAvatar }, { merge: true })
+      // Handle profile photo URL properly
+      let finalPhotoURL = userData?.photoURL
+      
+      // Priority 1: Use Google profile photo from sign-in result
+      if (result.user.photoURL) {
+        const standardizedGooglePhoto = standardizePhotoURL(result.user.photoURL)
+        finalPhotoURL = standardizedGooglePhoto
+        // Cache the Google photo URL
+        if (standardizedGooglePhoto) {
+          cachePhotoURL(email, standardizedGooglePhoto)
+        }
       }
+      // Priority 2: Use cached photo URL
+      else if (!finalPhotoURL) {
+        const cachedPhoto = getCachedPhotoURL(email)
+        if (cachedPhoto) {
+          finalPhotoURL = cachedPhoto
+        }
+      }
+      // Priority 3: Generate default avatar if no photo available
+      if (!finalPhotoURL) {
+        finalPhotoURL = getDefaultAvatarURL(userData?.displayName || result.user.displayName || 'User')
+      }
+      
+      // Update Firestore with the final photo URL
+      await setDoc(doc(db, 'users', email), { 
+        photoURL: finalPhotoURL,
+        displayName: userData?.displayName || result.user.displayName || 'User'
+      }, { merge: true })
 
       // Update last login timestamp
       await setDoc(doc(db, 'users', email), { 

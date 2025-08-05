@@ -260,7 +260,17 @@ const handleImageLoad = () => {
 
 // Compute photo URL
 const photoURL = computed(() => {
-  return user.value?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.value?.displayName || 'User')}`
+  // Priority 1: User's photoURL from Firebase Auth
+  if (user.value?.photoURL) {
+    return user.value.photoURL
+  }
+  // Priority 2: User data photoURL from Firestore
+  if (userData.value?.photoURL) {
+    return userData.value.photoURL
+  }
+  // Priority 3: Generate fallback avatar
+  const displayName = userData.value?.displayName || user.value?.displayName || 'User'
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4F46E5&color=ffffff&size=96`
 })
 
 async function fetchUserData() {

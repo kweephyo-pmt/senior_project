@@ -45,21 +45,26 @@
       </nav>
       <!-- User Profile at Bottom -->
       <div class="p-4 border-t border-[#035e80] flex items-center">
-        <div class="w-10 h-10 rounded-full bg-white overflow-hidden mr-3 relative">
+        <div v-if="initialLoading" class="w-10 h-10 rounded-full bg-gray-300 mr-3 animate-pulse"></div>
+        <div v-else class="w-10 h-10 rounded-full bg-white overflow-hidden mr-3 relative">
           <div class="w-full h-full flex items-center justify-center bg-gray-100" :class="{ 'hidden': showImage }">
-            <span class="text-xl font-semibold text-gray-500">{{ (userData?.displayName || 'U')?.[0]?.toUpperCase() }}</span>
+            <span class="text-xl font-semibold text-gray-500">{{ (userData?.displayName || user?.displayName || 'U')?.[0]?.toUpperCase() }}</span>
           </div>
           <img 
             v-show="showImage"
-            :src="userData?.photoURL || user?.photoURL" 
-            :alt="userData?.displayName || 'User'" 
+            :src="photoURL" 
+            :alt="userData?.displayName || user?.displayName || 'User'" 
             class="w-full h-full object-cover absolute inset-0" 
             @error="handleImageError"
             @load="handleImageLoad"
           />
         </div>
-        <div>
-          <p class="text-sm font-medium text-white">{{ userData?.displayName || 'User' }}</p>
+        <div v-if="initialLoading" class="animate-pulse">
+          <div class="h-4 bg-gray-300 rounded w-24 mb-1"></div>
+          <div class="h-3 bg-gray-300 rounded w-16"></div>
+        </div>
+        <div v-else>
+          <p class="text-sm font-medium text-white">{{ userData?.displayName || user?.displayName || 'User' }}</p>
           <p class="text-xs text-[#7fc6de]/80">Lecturer</p>
         </div>
         <button 
@@ -155,16 +160,31 @@
       <!-- User Profile at Bottom -->
       <div class="sticky bottom-0 bg-[#18345c]/90 backdrop-blur-sm border-t border-[#035e80]/30 pt-3 pb-4 px-4">
         <div class="flex items-center p-2 rounded-xl bg-white/5">
-          <div class="w-10 h-10 rounded-full ring-2 ring-white/10 overflow-hidden mr-3 shadow-lg">
+          <div v-if="initialLoading" class="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+          <div v-else class="w-10 h-10 rounded-full ring-2 ring-white/10 overflow-hidden">
             <img 
               :src="photoURL" 
-              :alt="userData?.displayName || 'User'" 
-              class="w-full h-full object-cover" 
+              :alt="userData?.displayName || user?.displayName || 'User'" 
+              class="w-10 h-10 rounded-full object-cover"
+              @error="handleImageError"
             />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-white truncate">{{ userData?.displayName || 'User' }}</p>
-            <p class="text-xs text-[#7fc6de]/80">Lecturer</p>
+            <div class="flex items-center justify-between">
+              <div v-if="initialLoading" class="flex items-center space-x-3 animate-pulse">
+                <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+                <div>
+                  <div class="h-4 bg-gray-200 rounded w-24 mb-1"></div>
+                  <div class="h-3 bg-gray-200 rounded w-32"></div>
+                </div>
+              </div>
+              <div v-else class="flex items-center space-x-3">
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ userData?.displayName || user?.displayName || 'User' }}</p>
+                  <p class="text-xs text-gray-500">{{ userData?.email || user?.email || 'user@example.com' }}</p>
+                </div>
+              </div>
+            </div>
           </div>
           <button 
             @click="logout" 
@@ -206,9 +226,22 @@ const showSidebar = ref(false)
 const userData = ref<any>(null)
 const showImage = ref(false)
 
-// Handle image load errors
-const handleImageError = () => {
-  showImage.value = false
+// Initial loading state to prevent flash of fallback content
+const initialLoading = ref(true)
+
+// Handle image load errors by falling back to generated avatar
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  const displayName = userData.value?.displayName || user.value?.displayName || 'User'
+  const fallbackURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4F46E5&color=ffffff&size=96`
+  
+  // Only change if it's not already the fallback URL to prevent infinite loops
+  if (img.src !== fallbackURL) {
+    img.src = fallbackURL
+    showImage.value = true // Show the fallback image
+  } else {
+    showImage.value = false // Hide if even fallback fails
+  }
 }
 
 // Handle successful image load
@@ -218,15 +251,35 @@ const handleImageLoad = () => {
 
 // Compute standardized photo URL
 const photoURL = computed(() => {
-  return user.value?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.value?.displayName || 'User')}`
+  // Priority 1: User's photoURL from Firebase Auth
+  if (user.value?.photoURL) {
+    return user.value.photoURL
+  }
+  // Priority 2: User data photoURL from Firestore
+  if (userData.value?.photoURL) {
+    return userData.value.photoURL
+  }
+  // Priority 3: Generate fallback avatar
+  const displayName = userData.value?.displayName || user.value?.displayName || 'User'
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4F46E5&color=ffffff&size=96`
 })
 
 async function fetchUserData() {
   if (user.value?.email) {
-    const userDoc = await getDoc(doc(getFirestore(), 'users', user.value.email))
-    if (userDoc.exists()) {
-      userData.value = userDoc.data()
+    try {
+      const userDoc = await getDoc(doc(getFirestore(), 'users', user.value.email))
+      if (userDoc.exists()) {
+        userData.value = userDoc.data()
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error)
+    } finally {
+      // Set initial loading to false after user data fetch completes (or fails)
+      initialLoading.value = false
     }
+  } else {
+    // If no user email, still set loading to false to show fallback content
+    initialLoading.value = false
   }
 }
 

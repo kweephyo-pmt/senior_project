@@ -19,9 +19,10 @@
             <div class="flex items-start space-x-4">
               <div class="relative flex-shrink-0">
                 <img 
-                  :src="auth.currentUser?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(auth.currentUser?.displayName || 'User')"
+                  :src="photoURL"
                   :alt="auth.currentUser?.displayName || 'User'"
                   class="w-12 h-12 rounded-full object-cover ring-4 ring-white shadow-lg transition-transform hover:scale-105 duration-300"
+                  @error="handleImageError"
                 />
                 <div class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white shadow-sm">
                   <span class="absolute inset-0 animate-ping bg-green-400 rounded-full opacity-75"></span>
@@ -226,6 +227,29 @@ const route = useRoute()
 const router = useRouter()
 const { showAlert } = useAlert()
 const auth = getAuth()
+
+// Compute standardized photo URL with fallback
+const photoURL = computed(() => {
+  // Priority 1: User's photoURL from Firebase Auth
+  if (auth.currentUser?.photoURL) {
+    return auth.currentUser.photoURL
+  }
+  // Priority 2: Generate fallback avatar
+  const displayName = auth.currentUser?.displayName || 'User'
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4F46E5&color=ffffff&size=96`
+})
+
+// Handle image loading errors by falling back to generated avatar
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  const displayName = auth.currentUser?.displayName || 'User'
+  const fallbackURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4F46E5&color=ffffff&size=96`
+  
+  // Only change if it's not already the fallback URL to prevent infinite loops
+  if (img.src !== fallbackURL) {
+    img.src = fallbackURL
+  }
+}
 
 // Route guard setup
 onMounted(async () => {
