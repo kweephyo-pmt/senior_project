@@ -1,6 +1,6 @@
 // KPI Data API composable
 export const useKpiData = () => {
-  const baseURL = 'http://localhost:4000/api'
+  const baseURL = 'https://senior-project-backend-51782680110.asia-southeast1.run.app/api'
 
   // Extract staff code from email
   const extractStaffCode = (email: string): string => {

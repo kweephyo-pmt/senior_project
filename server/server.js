@@ -6,7 +6,11 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000', // Your Nuxt frontend URL
+  origin: [
+    'http://localhost:3000', // Local development
+    'https://senior-project-51782680110.asia-southeast1.run.app', // Production frontend
+    'https://curriculum-statistics.web.app' // Firebase hosting if used
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -431,13 +435,130 @@ app.delete('/api/budget/projects/:projectId', async (req, res) => {
   }
 });
 
+// MFU API Proxy Endpoints
+let mfuAuthToken = null;
+let tokenExpiry = null;
+
+// MFU API Configuration
+const MFU_API_CONFIG = {
+  baseURL: 'https://eport.mfu.ac.th/api/master',
+  username: 'sombi',
+  password: 'kTzQmR7pWv9LbYD',
+  evaluateId: '9',
+  lang: 'en',
+  staffCodeUndergraduate: '67212038',
+  staffCodeGraduate: '46212058'
+};
+
+// Function to authenticate with MFU API
+const authenticateMFU = async () => {
+  try {
+    const response = await fetch(`${MFU_API_CONFIG.baseURL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: MFU_API_CONFIG.username,
+        password: MFU_API_CONFIG.password,
+        evaluate_id: MFU_API_CONFIG.evaluateId,
+        lang: MFU_API_CONFIG.lang
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`MFU API login failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    mfuAuthToken = data.token;
+    tokenExpiry = Date.now() + (55 * 60 * 1000); // Token expires in 55 minutes
+    
+    console.log('MFU API authentication successful');
+    return mfuAuthToken;
+  } catch (error) {
+    console.error('MFU API authentication error:', error);
+    throw error;
+  }
+};
+
+// Function to get valid MFU token
+const getMFUToken = async () => {
+  if (!mfuAuthToken || !tokenExpiry || Date.now() >= tokenExpiry) {
+    await authenticateMFU();
+  }
+  return mfuAuthToken;
+};
+
+// MFU API Proxy - Get Undergraduate Data
+app.get('/api/mfu/undergraduate/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const token = await getMFUToken();
+    
+    const response = await fetch(`${MFU_API_CONFIG.baseURL}/get_Undergraduate`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'staffcode': staffCode,
+        'evaluate_id': MFU_API_CONFIG.evaluateId,
+        'lang': MFU_API_CONFIG.lang
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`MFU API undergraduate request failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching undergraduate data:', error);
+    res.status(500).json({ error: 'Failed to fetch undergraduate data', details: error.message });
+  }
+});
+
+// MFU API Proxy - Get Graduate Data
+app.get('/api/mfu/graduate/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const token = await getMFUToken();
+    
+    const response = await fetch(`${MFU_API_CONFIG.baseURL}/get_Graduate`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'staffcode': staffCode,
+        'evaluate_id': MFU_API_CONFIG.evaluateId,
+        'lang': MFU_API_CONFIG.lang
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`MFU API graduate request failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching graduate data:', error);
+    res.status(500).json({ error: 'Failed to fetch graduate data', details: error.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,8 +1,8 @@
 <template>
-  <div class="max-w-5xl mx-auto py-6">
+  <div class="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
     <!-- Header Section with Controls -->
     <div class="mb-8">
-      <div class="flex justify-between items-center mb-1">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-0">
         <div class="flex items-center">
           <button @click="goBack" class="mr-4 text-gray-600 hover:text-blue-600 focus:outline-none" aria-label="Back">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,7 +11,7 @@
           </button>
           <h1 class="text-3xl font-bold text-gray-900">Recent Publications</h1>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4">
           <!-- Year Filter -->
           <div class="relative inline-block">
             <select
@@ -28,7 +28,7 @@
             </div>
           </div>
           <!-- Search -->
-          <div class="relative w-64">
+          <div class="relative w-full sm:w-64">
             <input type="text" v-model="searchQuery" 
                    placeholder="Search..." 
                    class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
@@ -47,9 +47,9 @@
     <div class="space-y-12">
       <div v-for="year in filteredPublications" :key="year.year">
         <h2 class="text-2xl font-bold mb-6">{{ year.year }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div v-for="pub in year.publications" :key="pub.title" 
-               class="bg-blue-50 rounded-lg p-4 flex flex-col justify-between shadow hover:shadow-lg transition">
+               class="bg-blue-50 rounded-lg sm:rounded-xl p-4 sm:p-6 flex flex-col justify-between shadow-md sm:shadow-xl hover:shadow-lg transition">
             <div>
               <p class="font-semibold text-blue-900 text-base mb-2">{{ pub.title }}</p>
               <p class="text-gray-600 text-sm mb-2">{{ pub.venue }}</p>

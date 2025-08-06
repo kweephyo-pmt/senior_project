@@ -1,22 +1,22 @@
 <template>
   <!-- Overview Banner with background image -->
-  <div class="relative h-56 overflow-hidden">
+  <div class="relative h-32 sm:h-40 md:h-48 lg:h-56 overflow-hidden">
     <div class="absolute inset-0">
       <img :src="bgImage" alt="Background" class="w-full h-full object-cover opacity-60" />
     </div>
     <div class="absolute inset-0 bg-black/30"></div>
-    <div class="relative container mx-auto px-20 pt-8 z-10">
-      <h1 class="text-[82px] font-bold text-[#1D3555] leading-tight">Overview</h1>
-      <h2 class="text-2xl text-[#1D3555] px-1.5 mt-1">Welcome back, {{ user?.displayName || 'User' }}</h2>
+    <div class="relative container mx-auto px-3 sm:px-4 md:px-6 lg:px-20 pt-4 sm:pt-6 lg:pt-8 z-10">
+      <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[82px] font-bold text-[#1D3555] leading-tight">Overview</h1>
+      <h2 class="text-sm sm:text-lg md:text-xl lg:text-2xl text-[#1D3555] px-0 sm:px-1.5 mt-1">Welcome back, {{ user?.displayName || 'User' }}</h2>
     </div>
   </div>
 
   <!-- Content Area -->
-  <div class="px-6 py-8 max-w-7xl mx-auto min-h-[calc(100vh-14rem)]">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-      <!-- Left Column: Education & Research Area -->
-      <div class="md:col-span-1">
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+  <div class="px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 max-w-7xl mx-auto min-h-[calc(100vh-14rem)]">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+      <!-- Education & Research Area -->
+      <div class="sm:col-span-2 md:col-span-2 lg:col-span-1">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-4 sm:p-6 mb-4 sm:mb-6">
           <h3 class="text-xl font-bold text-gray-800 mb-3 border-b pb-2">Education</h3>
           <div v-if="initialLoading || educationLoading" class="space-y-4">
             <div v-for="i in 3" :key="i" class="animate-pulse">
@@ -75,8 +75,8 @@
           </div>
         </div>
       </div>
-      <!-- Right Column: Contact & Publications -->
-      <div class="md:col-span-2 flex flex-col gap-4">
+      <!-- Contact & Publications -->
+      <div class="sm:col-span-2 md:col-span-2 lg:col-span-2 flex flex-col gap-4">
         <!-- Contact Card -->
         <div class="bg-white rounded-xl shadow p-4 mb-3">
           <div v-if="initialLoading || profileLoading" class="animate-pulse">

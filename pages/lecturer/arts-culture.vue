@@ -1,12 +1,12 @@
 <template>
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
       <!-- Header with Round Selector -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
           <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Domain 5: Arts and Culture Conservation Performance</h1>
           <p class="text-sm sm:text-base text-gray-600">Welcome back, {{ user?.displayName }}</p>
         </div>
-        <div class="relative w-full sm:w-auto">
+        <div class="relative w-full sm:w-48 lg:w-auto">
           <select
           class="w-full sm:w-auto appearance-none bg-white border-0  rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
         >
@@ -35,7 +35,7 @@
      </div>
 
      <!-- KPI Categories with NuxtLink, only when not loading -->
-     <div v-else class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -103,9 +103,9 @@
     </div>
   
       <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 sm:gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 sm:gap-6 lg:gap-8">
         <!-- Arts and Culture Performance Chart -->
-        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-4 sm:p-6 mb-6 sm:mb-8">
         <div class="flex flex-col items-center">
           <h2 class="text-md font-bold text-gray-900 mb-1 text-center">
             Arts and Culture Conservation Performance

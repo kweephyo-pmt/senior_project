@@ -1,8 +1,8 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
     <!-- Header -->
     <div class="mb-8">
-      <div class="flex items-center gap-12">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-12 mb-4 sm:mb-0">
         <h1 class="text-2xl font-bold text-gray-900">Budget Management</h1>
         <div class="relative">
           <select
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Budget Overview Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <!-- Loading State for Cards -->
       <template v-if="loading">
         <div v-for="i in 3" :key="i" class="bg-gray-50 rounded-lg shadow-md p-6 animate-pulse">
@@ -92,16 +92,18 @@
     </div>
 
     <!-- Budget Distribution and Details -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
       <!-- Budget Distribution Chart -->
-      <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-8 mb-8 h-full">
+      <div class="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-6 sm:p-8 mb-6 sm:mb-8 h-full">
         <h2 class="text-2xl font-semibold text-gray-900 mb-8">Budget Distribution</h2>
         
         <!-- Column Headers -->
         <div class="flex items-center mb-4">
-          <div class="w-64"></div>
-          <div class="w-32 text-right text-sm font-medium text-gray-600 ml-2">Spent/Received</div>
-          <div class="flex-1 mx-6"></div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium text-gray-600">Budget Item</div>
+          </div>
+          <div class="w-32 text-right text-sm font-medium text-gray-600">Spent/Received</div>
+          <div class="flex-1 mx-4"></div>
         </div>
 
         <!-- Budget Items -->
@@ -112,7 +114,7 @@
               <div class="w-4 h-4 rounded-full bg-gray-200"></div>
               <div class="h-4 bg-gray-200 rounded w-32"></div>
             </div>
-            <div class="w-32 ml-2">
+            <div class="w-32">
               <div class="h-4 bg-gray-200 rounded w-24"></div>
             </div>
             <div class="flex-1 mx-6">
@@ -126,9 +128,9 @@
           <div
             v-for="(item, index) in budgetItems"
             :key="index"
-            class="flex items-center"
+            class="flex items-center space-x-4"
           >
-            <div class="w-64 flex items-center gap-2 text-base text-gray-700">
+            <div class="flex-1 min-w-0 flex items-center gap-2 text-base text-gray-700">
               <!-- Colored Dot -->
               <span class="w-4 h-4 rounded-full inline-block mr-2" :style="{ background: item.color }"></span>
               <span>{{ item.name }}</span>
@@ -205,7 +207,7 @@
       </div>
 
       <!-- Budget Details -->
-      <div class="lg:col-span-1">
+      <div class="lg:col-span-1 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-6 sm:p-8 h-full">
         <div class="bg-white rounded-2xl shadow-lg p-5 h-full flex flex-col">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Budget Details</h2>
           <!-- Loading State for Budget Details -->

@@ -1,0 +1,35 @@
+steps:
+  # Build and deploy backend
+  - name: 'gcr.io/cloud-builders/gcloud'
+    dir: 'server'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'senior-project-backend'
+      - '--source=.'
+      - '--platform=managed'
+      - '--region=asia-southeast1'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+    env:
+      - 'NODE_ENV=production'
+
+  # Install frontend dependencies
+  - name: 'node:18'
+    entrypoint: 'npm'
+    args: ['install']
+
+  # Build frontend
+  - name: 'node:18'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+  # Deploy frontend to App Engine
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'app'
+      - 'deploy'
+      - 'app.yaml'
+      - '--quiet'
+
+timeout: '1200s'

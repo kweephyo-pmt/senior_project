@@ -30,7 +30,7 @@ export const useLecturerEducation = () => {
     error.value = null
 
     try {
-      const response = await fetch(`http://localhost:4000/api/lecturer/education/${staffCode.value}`)
+      const response = await fetch(`https://senior-project-backend-51782680110.asia-southeast1.run.app/api/lecturer/education/${staffCode.value}`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)

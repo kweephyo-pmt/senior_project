@@ -89,14 +89,14 @@
 
     <!-- Mobile Sidebar -->
     <aside 
-      class="fixed inset-y-0 left-0 bg-gradient-to-b from-[#18345c] via-[#17688f] to-[#1597bb] shadow-2xl w-[280px] z-50 flex flex-col md:hidden transform transition-transform duration-300 ease-in-out"
+      class="fixed inset-y-0 left-0 bg-gradient-to-b from-[#18345c]/95 via-[#17688f]/95 to-[#137b97]/95 shadow-2xl w-[280px] z-50 flex flex-col md:hidden transform transition-transform duration-300 ease-in-out"
       :class="showSidebar ? 'translate-x-0' : '-translate-x-full'"
       aria-label="Mobile sidebar"
     >
       <!-- Mobile Sidebar Header -->
       <div class="sticky top-0 z-20 flex flex-col bg-[#18466d] shadow-lg">
         <!-- Top Bar -->
-        <div class="flex items-center justify-between px-4 py-2">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <h2 class="text-lg font-semibold text-white">Menu</h2>
           <button 
             @click="showSidebar = false"
@@ -110,7 +110,7 @@
         </div>
         
         <!-- Logo Section -->
-        <div class="px-4 py-3 border-t border-white/10">
+        <div class="px-4 py-4 border-b border-white/10">
           <div class="flex items-center space-x-3">
             <div class="flex items-center">
               <mfulogo class="w-8 h-8"/>
@@ -125,43 +125,31 @@
         </div>
       </div>
       <nav class="flex-1 px-4 py-6">
-        <ul class="space-y-1">
-          <li>
+        <ul class="space-y-2">
+          <li v-for="(item, index) in menuItems" :key="index">
             <NuxtLink 
-              to="/lecturer/dashboard" 
+              :to="item.path" 
               @click="showSidebar = false" 
-              class="flex items-center px-3 py-2.5 text-white/90 hover:text-white hover:bg-[#035e80]/50 rounded-lg transition-all duration-200" 
-              :class="{ 'bg-[#035475]/60 text-white shadow-sm': $route.path === '/lecturer/dashboard' }"
+              class="flex items-center px-4 py-3 text-white/90 hover:text-white hover:bg-[#035e80]/50 rounded-lg transition-all duration-200"
+              :class="{ 'bg-[#035475]/60 text-white shadow-sm': $route.path === item.path }"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Profile
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/lecturer/kpi-overview" @click="showSidebar = false" class="flex items-center px-4 py-3 text-white hover:bg-[#035e80] rounded-md transition-colors" :class="{ 'bg-[#035475]': $route.path === '/lecturer/kpi-overview' }">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              KPI
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/lecturer/budget" @click="showSidebar = false" class="flex items-center px-4 py-3 text-white hover:bg-[#035e80] rounded-md transition-colors" :class="{ 'bg-[#035475]': $route.path === '/lecturer/budget' }">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Budget
+              <component 
+                :is="item.icon" 
+                class="h-5 w-5 mr-3" 
+                :fill="'none'" 
+                :viewBox="'0 0 24 24'" 
+                :stroke="'currentColor'"
+              />
+              {{ item.label }}
             </NuxtLink>
           </li>
         </ul>
       </nav>
       <!-- User Profile at Bottom -->
       <div class="sticky bottom-0 bg-[#18345c]/90 backdrop-blur-sm border-t border-[#035e80]/30 pt-3 pb-4 px-4">
-        <div class="flex items-center p-2 rounded-xl bg-white/5">
-          <div v-if="initialLoading" class="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-          <div v-else class="w-10 h-10 rounded-full ring-2 ring-white/10 overflow-hidden">
+        <div class="flex items-center p-3 rounded-xl bg-white/5">
+          <div v-if="initialLoading" class="w-10 h-10 rounded-full bg-gray-200 animate-pulse mr-3"></div>
+          <div v-else class="w-10 h-10 rounded-full ring-2 ring-white/10 overflow-hidden mr-3">
             <img 
               :src="photoURL" 
               :alt="userData?.displayName || user?.displayName || 'User'" 
@@ -178,17 +166,15 @@
                   <div class="h-3 bg-gray-200 rounded w-32"></div>
                 </div>
               </div>
-              <div v-else class="flex items-center space-x-3">
-                <div>
-                  <p class="text-sm font-medium text-gray-900">{{ userData?.displayName || user?.displayName || 'User' }}</p>
-                  <p class="text-xs text-gray-500">{{ userData?.email || user?.email || 'user@example.com' }}</p>
-                </div>
+              <div v-else class="flex flex-col">
+                <p class="text-sm font-medium text-white">{{ userData?.displayName || user?.displayName || 'User' }}</p>
+                <p class="text-xs text-white/90">Lecturer</p>
               </div>
             </div>
           </div>
           <button 
             @click="logout" 
-            class="ml-2 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors" 
+            class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
             aria-label="Logout"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,10 +186,10 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 bg-gray-50">
+    <div class="flex-1 bg-gray-50 min-h-screen flex flex-col">
       <!-- Mobile menu button -->
-      <div class="md:hidden sticky top-0 z-50 bg-white p-4 shadow-sm">
-        <button @click="showSidebar = !showSidebar" class="text-blue-700 focus:outline-none" aria-label="Toggle sidebar">
+      <div class="md:hidden sticky top-0 z-50 bg-white p-3 sm:p-4 shadow-sm">
+        <button @click="showSidebar = !showSidebar" class="text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label="Toggle sidebar">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -218,6 +204,54 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
+
+// Menu items for mobile navigation
+const menuItems = [
+  {
+    path: '/lecturer/dashboard',
+    label: 'Profile',
+    icon: 'svg-user'
+  },
+  {
+    path: '/lecturer/kpi-overview',
+    label: 'KPI',
+    icon: 'svg-kpi'
+  },
+  {
+    path: '/lecturer/budget',
+    label: 'Budget',
+    icon: 'svg-budget'
+  }
+]
+
+// Define SVG components for icons
+type IconType = 'svg-user' | 'svg-kpi' | 'svg-budget'
+
+const icons: Record<IconType, () => string> = {
+  'svg-user': () => `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  </svg>`,
+  'svg-kpi': () => `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+  </svg>`,
+  'svg-budget': () => `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>`
+}
+
+// Register SVG components
+Object.entries(icons).forEach(([key, icon]) => {
+  const component = {
+    name: key as IconType,
+    template: icon(),
+    props: {
+      fill: { type: String, default: 'none' },
+      viewBox: { type: String, default: '0 0 24 24' },
+      stroke: { type: String, default: 'currentColor' }
+    }
+  }
+  defineComponent(component)
+})
 import { doc, getDoc, getFirestore } from 'firebase/firestore'
 import mfulogo from '@/components/mfulogo.vue'
 

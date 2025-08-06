@@ -1,24 +1,24 @@
 <template>
-  <div class="container mx-auto px-4 py-4 sm:py-8">
+  <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
     <!-- Header with Round Selector -->
-    <div class="md:flex md:justify-between md:items-center mb-6 sm:mb-8">
-      <!-- Title Section - Always Full Width on Mobile -->
-      <div class="mb-4 md:mb-0">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center sm:space-y-0 mb-4 sm:mb-6 lg:mb-8">
+      <!-- Title Section -->
+      <div class="flex-1">
+        <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight">
           Domain 1: Teaching Performance
         </h1>
-        <p class="text-sm sm:text-base text-inherit mt-1">Welcome back, {{ user?.displayName }}</p>
+        <p class="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">Welcome back, {{ user?.displayName }}</p>
       </div>
-      <!-- Round Selector - Full Width on Mobile -->
-      <div class="relative w-full md:w-auto">
+      <!-- Round Selector -->
+      <div class="relative w-full sm:w-48 lg:w-auto">
         <select
-          class="w-full sm:w-auto appearance-none bg-white border-0 rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
+          class="w-full appearance-none bg-white border-0 rounded-lg py-2.5 pl-3 pr-8 shadow-sm ring-2 ring-[#4697b9] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#4697b9]"
         >
           <option>Round 2/2025</option>
           <option>Round 1/2025</option>
           <option>Round 2/2024</option>
         </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-inherit">
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
@@ -39,7 +39,7 @@
     </div>
 
       <!-- KPI Categories with NuxtLink, only when not loading -->
-      <div v-else class="grid grid-cols-2 sm:grid-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -107,7 +107,7 @@
     </div>
 
     <!-- Main Content Grid - Always rendered -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
       <!-- Teaching Performance Card - Always rendered, chart always visible -->
       <div class="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-3 sm:p-6 lg:p-8">
         <h2 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 text-center">
@@ -123,7 +123,7 @@
       </div>
 
       <!-- Tables Column - Loading states only affect tables -->
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col sm:gap-6">
         <!-- Loading State for Tables Only -->
         <div v-if="isLoadingData" class="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-6 text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
@@ -277,23 +277,34 @@ const graduateData = ref<any[]>([])
 const isLoadingData = ref(false)
 const apiError = ref<string | null>(null)
 
-// API Configuration - UPDATE THESE WITH YOUR REAL CREDENTIALS!
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+// API Configuration using Nuxt runtime config
+const runtimeConfig = useRuntimeConfig()
+console.log('Runtime config values:', {
+  apiBaseUrl: runtimeConfig.public.apiBaseUrl,
+  apiUsername: runtimeConfig.public.apiUsername,
+  hasPassword: !!runtimeConfig.public.apiPassword
+})
+
+// Add fallback values in case runtime config fails
+const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'https://eport.mfu.ac.th/api/master'
 const API_CREDENTIALS = {
-  username: import.meta.env.VITE_API_USERNAME,
-  password: import.meta.env.VITE_API_PASSWORD
+  username: runtimeConfig.public.apiUsername || 'sombi',
+  password: runtimeConfig.public.apiPassword || 'kTzQmR7pWv9LbYD'
 }
+
+console.log('Final API_BASE_URL:', API_BASE_URL)
+console.log('Final API_CREDENTIALS:', { username: API_CREDENTIALS.username, hasPassword: !!API_CREDENTIALS.password })
 
 // Required headers for GET requests (based on Postman collection)
 const REQUIRED_GET_HEADERS_COMMON = {
-  evaluateid: import.meta.env.VITE_EVALUATE_ID,
-  lang: import.meta.env.VITE_API_LANG
+  evaluateid: runtimeConfig.public.evaluateId || '9',
+  lang: runtimeConfig.public.apiLang || 'en'
 }
 
 // Specific staffcodes based on Postman collection
 const STAFF_CODES = {
-  undergraduate: import.meta.env.VITE_STAFF_CODE_UNDERGRADUATE,
-  graduate: import.meta.env.VITE_STAFF_CODE_GRADUATE
+  undergraduate: runtimeConfig.public.staffCodeUndergraduate || '67212038',
+  graduate: runtimeConfig.public.staffCodeGraduate || '46212058'
 }
 
 // Format value helper

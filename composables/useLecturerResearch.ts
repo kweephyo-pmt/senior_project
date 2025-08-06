@@ -24,7 +24,7 @@ export const useLecturerResearch = () => {
     error.value = null
 
     try {
-      const response = await fetch(`http://localhost:4000/api/lecturer/research/${staffCode.value}`)
+      const response = await fetch(`https://senior-project-backend-51782680110.asia-southeast1.run.app/api/lecturer/research/${staffCode.value}`)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)

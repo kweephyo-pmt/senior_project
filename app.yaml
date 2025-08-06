@@ -1,0 +1,15 @@
+runtime: nodejs18
+
+env_variables:
+  NODE_ENV: production
+  VITE_API_BASE_URL: "https://eport.mfu.ac.th/api/master"
+  VITE_API_USERNAME: "sombi"
+  VITE_API_PASSWORD: "kTzQmR7pWv9LbYD"
+  VITE_EVALUATE_ID: "9"
+  VITE_API_LANG: "en"
+  VITE_STAFF_CODE_UNDERGRADUATE: "67212038"
+  VITE_STAFF_CODE_GRADUATE: "46212058"
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
