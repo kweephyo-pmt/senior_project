@@ -13,6 +13,12 @@ steps:
       - '--port=8080'
     env:
       - 'NODE_ENV=production'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyAm7B_bdMezQ-rqFjScE593hGGCVBa7VZ0'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=curriculum-statistics.firebaseapp.com'
+      - 'VITE_FIREBASE_PROJECT_ID=curriculum-statistics'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=curriculum-statistics.firebasestorage.app'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=51782680110'
+      - 'VITE_FIREBASE_APP_ID=1:51782680110:web:6bc2a46eb9f791892a29bf'
 
   # Install frontend dependencies
   - name: 'node:18'

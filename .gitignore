@@ -25,6 +25,3 @@ logs
 .fleet
 .idea
 
-
-# Firebase config
-plugins/firebase.ts

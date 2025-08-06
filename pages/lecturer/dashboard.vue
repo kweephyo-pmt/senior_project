@@ -145,29 +145,34 @@
             <h3 class="text-xl font-bold text-gray-800">Recent Publications</h3>
             <NuxtLink to="/lecturer/publications" class="text-blue-600 text-base hover:underline">View All</NuxtLink>
           </div>
-          <div v-if="initialLoading || publicationsLoading" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div v-for="i in 3" :key="i" class="bg-gray-50 rounded-lg p-3 animate-pulse">
-              <div class="space-y-3">
-                <div class="h-4 bg-gray-200 rounded w-full"></div>
-                <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+          <div v-if="initialLoading || publicationsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div v-for="i in 3" :key="i" class="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 animate-pulse">
+              <div class="space-y-4">
+                <div class="h-5 bg-gray-200 rounded w-full"></div>
+                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
                 <div class="h-6 bg-gray-200 rounded w-16"></div>
               </div>
-              <div class="flex items-center gap-2 mt-4">
-                <div class="w-7 h-7 rounded-full bg-gray-200"></div>
-                <div class="h-3 bg-gray-200 rounded w-20"></div>
+              <div class="flex items-center gap-3 mt-4">
+                <div class="w-8 h-8 rounded-full bg-gray-200"></div>
+                <div class="h-4 bg-gray-200 rounded w-24"></div>
               </div>
             </div>
           </div>
-          <div v-else-if="!initialLoading && publications && publications.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div v-for="(pub, idx) in publications" :key="idx" class="bg-blue-50 rounded-lg p-3 flex flex-col justify-between shadow hover:shadow-lg transition">
+          <div v-else-if="!initialLoading && publications && publications.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div v-for="(pub, idx) in publications" :key="idx" class="bg-blue-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow hover:shadow-lg transition">
               <div>
-                <p class="font-semibold text-blue-900 text-base mb-1">{{ pub.title }}</p>
-                <p class="text-gray-600 text-sm mb-2">{{ pub.venue }} &bull; {{ pub.year }}</p>
-                <a :href="pub.link" v-if="pub.link" class="inline-block px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-xs font-semibold mb-2">Link</a>
+                <p class="font-semibold text-blue-900 text-base sm:text-lg mb-2">{{ pub.title }}</p>
+                <p class="text-gray-600 text-sm sm:text-base mb-2">{{ pub.venue }} &bull; {{ pub.year }}</p>
+                <a v-if="pub.link" :href="pub.link" class="inline-flex items-center px-3 py-1 bg-blue-200 text-blue-800 rounded text-xs sm:text-sm font-semibold mb-2">
+                  <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Link
+                </a>
               </div>
-              <div class="flex items-center gap-2 mt-4">
-                <img :src="photoURL" class="w-7 h-7 rounded-full border border-blue-300" @error="handleImageError" />
-                <span class="text-sm text-gray-700 font-medium">{{ user?.displayName || 'User' }}</span>
+              <div class="flex items-center gap-3 mt-4">
+                <img :src="photoURL" class="w-8 h-8 rounded-full border border-blue-300" @error="handleImageError" />
+                <span class="text-sm sm:text-base text-gray-700 font-medium">{{ user?.displayName || 'User' }}</span>
               </div>
             </div>
           </div>
