@@ -89,18 +89,18 @@
 
     <!-- Mobile Sidebar -->
     <aside 
-      class="fixed inset-y-0 left-0 bg-gradient-to-b from-[#18345c]/95 via-[#17688f]/95 to-[#137b97]/95 shadow-2xl w-[280px] z-50 flex flex-col md:hidden transform transition-transform duration-300 ease-in-out"
+      class="fixed inset-y-0 left-0 bg-gradient-to-br from-[#212936]/95 via-[#22334d]/95 to-[#1a2636]/95 backdrop-blur-md shadow-2xl w-[280px] z-50 flex flex-col md:hidden transform transition-transform duration-300 ease-in-out"
       :class="showSidebar ? 'translate-x-0' : '-translate-x-full'"
       aria-label="Mobile sidebar"
     >
       <!-- Mobile Sidebar Header -->
-      <div class="sticky top-0 z-20 flex flex-col bg-[#18466d] shadow-lg">
+      <div class="sticky top-0 z-20 flex flex-col bg-[#23272f]/90">
         <!-- Top Bar -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-          <h2 class="text-lg font-semibold text-white">Menu</h2>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700/40">
+          <h2 class="text-base font-semibold text-white tracking-wide">Menu</h2>
           <button 
             @click="showSidebar = false"
-            class="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+            class="p-2 text-gray-200 hover:bg-gray-700/30 rounded-md transition-colors"
             aria-label="Close sidebar"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

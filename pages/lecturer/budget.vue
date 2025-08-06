@@ -207,8 +207,8 @@
       </div>
 
       <!-- Budget Details -->
-      <div class="lg:col-span-1 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-6 sm:p-8 h-full">
-        <div class="bg-white rounded-2xl shadow-lg p-5 h-full flex flex-col">
+      <div class="lg:col-span-1 h-full">
+        <div class="bg-white rounded-xl shadow-xl p-6 h-full flex flex-col">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Budget Details</h2>
           <!-- Loading State for Budget Details -->
           <div v-if="loading" class="space-y-3 h-[400px]">
@@ -222,7 +222,7 @@
           <!-- Actual Budget Details -->
           <div v-else-if="budgetDetails.length > 0" class="space-y-3 overflow-y-scroll pr-2 h-[400px] custom-scrollbar">
             <div v-for="detail in budgetDetails" :key="detail.title"
-                 class="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-100">
+                 class="p-4">
               <h3 class="text-base font-medium text-gray-900 mb-2">{{ detail.title }}</h3>
 
               <!-- Multiple owners with selector -->
