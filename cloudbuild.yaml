@@ -1,41 +1,55 @@
 steps:
-  # Build and deploy backend
-  - name: 'gcr.io/cloud-builders/gcloud'
+  # Build frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/senior-project-frontend', '.']
+  
+  # Build backend container image
+  - name: 'gcr.io/cloud-builders/docker'
     dir: 'server'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/senior-project-backend', '.']
+  
+  # Push frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/senior-project-frontend']
+  
+  # Push backend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/senior-project-backend']
+  
+  # Deploy frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'senior-project-frontend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/senior-project-frontend'
+      - '--region'
+      - 'asia-southeast1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '3000'
+  
+  # Deploy backend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
       - 'senior-project-backend'
-      - '--source=.'
-      - '--platform=managed'
-      - '--region=asia-southeast1'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/senior-project-backend'
+      - '--region'
+      - 'asia-southeast1'
+      - '--platform'
+      - 'managed'
       - '--allow-unauthenticated'
-      - '--port=8080'
-    env:
+      - '--port'
+      - '8080'
+      - '--set-env-vars'
       - 'NODE_ENV=production'
-      - 'VITE_FIREBASE_API_KEY=AIzaSyAm7B_bdMezQ-rqFjScE593hGGCVBa7VZ0'
-      - 'VITE_FIREBASE_AUTH_DOMAIN=curriculum-statistics.firebaseapp.com'
-      - 'VITE_FIREBASE_PROJECT_ID=curriculum-statistics'
-      - 'VITE_FIREBASE_STORAGE_BUCKET=curriculum-statistics.firebasestorage.app'
-      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=51782680110'
-      - 'VITE_FIREBASE_APP_ID=1:51782680110:web:6bc2a46eb9f791892a29bf'
-
-  # Install frontend dependencies
-  - name: 'node:18'
-    entrypoint: 'npm'
-    args: ['install']
-
-  # Build frontend
-  - name: 'node:18'
-    entrypoint: 'npm'
-    args: ['run', 'build']
-
-  # Deploy frontend to App Engine
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'app'
-      - 'deploy'
-      - 'app.yaml'
-      - '--quiet'
 
 timeout: '1200s'

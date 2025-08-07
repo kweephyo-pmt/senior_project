@@ -1,7 +1,7 @@
 // Budget API composable
 export const useBudget = () => {
   const config = useRuntimeConfig()
-  const baseURL = 'https://senior-project-backend-51782680110.asia-southeast1.run.app/api'
+  const baseURL = config.public.backendApiUrl || 'https://senior-project-backend-51782680110.asia-southeast1.run.app/api'
 
   // Extract staff code from email (e.g., 6531503172@lamduan.mfu.ac.th -> 6531503172)
   const extractStaffCode = (email: string): string => {

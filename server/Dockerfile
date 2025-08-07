@@ -1,5 +1,5 @@
-# Use Node.js 18 LTS with specific version for security
-FROM node:18.19.0-alpine3.18
+# Use Node.js 18 LTS with latest patch version for security
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app

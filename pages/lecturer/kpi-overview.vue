@@ -133,8 +133,8 @@
       </div>
 
       <!-- Performance Metrics -->
-      <div class="lg:col-span-1 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-4 sm:p-6">
-        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+      <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white rounded-xl shadow-md p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">
             Overall Performance
           </h2>
