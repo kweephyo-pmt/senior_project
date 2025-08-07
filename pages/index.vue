@@ -20,7 +20,7 @@
             </div>
           </div>
           <div class="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
-            <a href="#features" class="hidden sm:block text-gray-600 hover:text-[#046e93] transition-colors duration-300">Features</a>
+            <a href="#features" class="hidden sm:block text-gray-600 hover:text-[#046e93] transition-colors duration-300">Functions</a>
             <a href="#stats" class="hidden sm:block text-gray-600 hover:text-[#046e93] transition-colors duration-300">Statistics</a>
             <a href="#testimonials" class="hidden sm:block text-gray-600 hover:text-[#046e93] transition-colors duration-300">Testimonials</a>
             <button
