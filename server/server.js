@@ -9,7 +9,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000', // Local development
     'https://senior-project-51782680110.asia-southeast1.run.app', // Production frontend
-    'https://curriculum-statistics.web.app' // Firebase hosting if used
+    'https://curriculum-statistics.web.app', // Firebase hosting if used
+    'https://app.som-bi.work.gd', // Your custom domain
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
