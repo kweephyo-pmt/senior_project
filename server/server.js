@@ -145,6 +145,49 @@ app.get('/api/research-performance/:staffCode', async (req, res) => {
   }
 });
 
+// Academic Service Performance Chart endpoint with evaluation period filter
+app.get('/api/academic-service-performance/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    let query = 'SELECT category, internal_score, external_score, non_revenue_score, display_order FROM academic_service_performance WHERE staff_code = ?';
+    let params = [staffCode];
+    
+    // Add evaluation period filter if provided
+    if (evaluateid) {
+      query += ' AND evaluateid = ?';
+      params.push(evaluateid);
+    } else {
+      // Default to most recent active period (evaluateid 9 = 1/2025)
+      query += ' AND evaluateid = 9';
+    }
+    
+    query += ' ORDER BY display_order';
+    
+    const [rows] = await pool.query(query, params);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No academic service performance data found for this staff code and evaluation period'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error('Error fetching academic service performance data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
 // KPI endpoint - Get KPI percentages by staff code
 app.get('/api/kpi/:staffCode', async (req, res) => {
   try {
