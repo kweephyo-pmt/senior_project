@@ -394,7 +394,10 @@ const onEvaluationPeriodChange = async () => {
 
 // Initialize chart with data
 const initializeChart = () => {
-  if (!acChart.value) return
+  if (!acChart.value) {
+    console.warn('Chart canvas element not available')
+    return
+  }
   
   // Destroy existing chart
   if (chartInstance) {
@@ -402,6 +405,12 @@ const initializeChart = () => {
   }
   
   const chartData = getChartData()
+  
+  // Validate chart data before creating chart
+  if (!chartData || !chartData.labels || chartData.labels.length === 0) {
+    console.warn('Chart data not available yet')
+    return
+  }
   
   chartInstance = new Chart(acChart.value, {
     type: 'bar',
@@ -479,17 +488,40 @@ onMounted(async () => {
     await fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value?.toString())
   }
   
-  // Initialize the chart with database data
+  // Wait for DOM to be ready before initializing chart
+  await nextTick()
   initializeChart()
 })
 
 watch(
   () => user.value?.email,
-  (email) => {
+  async (email) => {
     if (email) {
-      loadKpiData();
+      loadKpiData()
+      // Fetch evaluation periods and set default
+      await fetchEvaluationPeriods()
+      if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
+        selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+      }
+      await fetchArtsCulturePerformance(email, selectedEvaluationPeriod.value?.toString())
+      // Re-initialize chart with new data
+      await nextTick()
+      initializeChart()
     }
   },
   { immediate: true }
+);
+
+// Watch for arts culture data changes and re-initialize chart
+watch(
+  () => artsCultureData.value,
+  () => {
+    if (artsCultureData.value && artsCultureData.value.length > 0) {
+      nextTick(() => {
+        initializeChart()
+      })
+    }
+  },
+  { deep: true }
 );
 </script>
