@@ -59,6 +59,7 @@ export const useAcademicServicePerformance = () => {
     const internalData = academicServiceData.value.map(item => Number(item.internal_score) || 0)
     const externalData = academicServiceData.value.map(item => Number(item.external_score) || 0)
     const nonRevenueData = academicServiceData.value.map(item => Number(item.non_revenue_score) || 0)
+    const revenueData = academicServiceData.value.map(item => Number(item.revenue_score) || 0)
 
     return {
       labels,
@@ -81,6 +82,13 @@ export const useAcademicServicePerformance = () => {
           label: "Non-Revenue (Score)",
           data: nonRevenueData,
           backgroundColor: "#1D3555",
+          borderWidth: 0,
+          borderRadius: 4,
+        },
+        {
+          label: "Revenue (Score)",
+          data: revenueData,
+          backgroundColor: "#AC0078",
           borderWidth: 0,
           borderRadius: 4,
         },

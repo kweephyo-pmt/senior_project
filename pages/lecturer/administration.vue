@@ -8,15 +8,24 @@
         </h1>
         <p class="text-sm sm:text-base text-gray-600">Welcome back, {{ user?.displayName }}</p>
       </div>
+      <!-- Evaluation Period Selector -->
       <div class="relative w-full sm:w-48 lg:w-auto">
         <select
-          class="w-full sm:w-auto appearance-none bg-white border-0 rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
+          v-model="selectedEvaluationPeriod"
+          @change="onEvaluationPeriodChange"
+          class="w-full appearance-none bg-white border-0 rounded-lg py-2.5 pl-3 pr-8 shadow-sm ring-2 ring-[#4697b9] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#4697b9]"
+          :disabled="isLoadingPeriods"
         >
-          <option>Round 2/2025</option>
-          <option>Round 1/2025</option>
-          <option>Round 2/2024</option>
+          <option v-if="isLoadingPeriods" disabled>Loading periods...</option>
+          <option 
+            v-for="period in evaluationPeriods" 
+            :key="period.evaluateid" 
+            :value="period.evaluateid"
+          >
+            Round {{ period.evaluatename }}
+          </option>
         </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
@@ -27,7 +36,10 @@
     <!-- Administration Track -->
     <div class="mb-6">
       <h2 class="text-center text-lg font-medium text-gray-700 mb-1">Administration Track</h2>
-      <p class="text-center text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
+      <p class="text-center text-sm text-gray-500 mb-4">
+        <span v-if="isLoadingPeriods">Loading...</span>
+        <span v-else>{{ formatDateRange() }}</span>
+      </p>
     </div>
 
      <!-- Loading spinner -->
@@ -114,8 +126,13 @@
         <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
           Threshold (30) - Earned score (115)
         </p>
-        <div class="h-[300px] sm:h-[360px] w-full">
-          <canvas ref="administrationChart"></canvas>
+        <!-- Performance Chart -->
+        <div class="h-[300px] sm:h-[400px] mb-4 sm:mb-6">
+          <div v-if="isLoadingChart" class="flex justify-center items-center h-full">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
+            <p class="ml-3 text-sm text-gray-600">Loading chart data...</p>
+          </div>
+          <canvas v-else ref="administrationChart"></canvas>
         </div>
       </div>
 
@@ -187,8 +204,10 @@
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed, watch, nextTick } from 'vue'
 import { useKpiData } from '@/composables/useKpiData'
+import { useAdministrationPerformance } from '@/composables/useAdministrationPerformance'
+import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 
 definePageMeta({
   layout: 'lecturer'
@@ -197,7 +216,15 @@ definePageMeta({
 const administrationChart = ref<HTMLCanvasElement | null>(null)
 const showMobileMenu = ref(false)
 const { getKpiData } = useKpiData()
-const { user,logout } = useFirebaseAuth()
+const { user, logout } = useFirebaseAuth()
+const { administrationData, loading: isLoadingChart, error: chartError, fetchAdministrationPerformance, getChartData } = useAdministrationPerformance()
+const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
+
+// Reactive data
+const selectedEvaluationPeriod = ref<number | null>(null)
+const kpiData = ref<any>(null)
+const loading = ref(true)
+let chartInstance: Chart | null = null
 
 // Format value helper
 const formatValue = (value: any) => {
@@ -209,10 +236,6 @@ const formatValue = (value: any) => {
   }
   return '0';
 }
-
-// Reactive data
-const kpiData = ref<any>(null)
-const loading = ref(true)
 
 // Dynamic KPI categories from database
 const kpiCategories = computed(() => {
@@ -245,98 +268,144 @@ const loadKpiData = async () => {
     loading.value = false
   }
 }
+
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
 
-onMounted(() => {
-  // Create horizontal bar chart for administration performance
-  if (administrationChart.value) {
-    new Chart(administrationChart.value, {
-      type: 'bar',
-      data: {
-        labels: [
-          ['Academic Administration assigned', 'by the School or University'],
-          'Coordination with Guest Lecturer',
-          'Course Coordination',
-          ['University\'s Committee or ', 'Committee-Appointed Working Group'],
-          ['School\'s Committee or ', 'Committee-Appointed Working Group'],
-          'School Committee',
-          'Curricular Committee',
-          ['Administrative duty assigned', 'by the school']
-        ],
-        datasets: [{
-          data: [0, 0, 10, 25, 20, 0, 0, 60],
-          backgroundColor: '#1D3555',
-          borderWidth: 0,
-          borderRadius: 4
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          },
-          datalabels: {               
-            anchor: 'end',              
-            align: 'end',               
-            color: '#6B7280',           
-            font: {
-              size: 12,
-              weight: 'bold'
-            },
-            offset: 4                  
-          }
+// Format date range for evaluation period
+const formatDateRange = () => {
+  const currentPeriod = evaluationPeriods.value.find(p => p.evaluateid === selectedEvaluationPeriod.value)
+  if (!currentPeriod) return 'Loading...'
+  
+  const startDate = new Date(currentPeriod.evaluatestartdate)
+  const endDate = new Date(currentPeriod.evaluateenddate)
+  
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+  
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`
+}
+
+// Handle evaluation period change
+const onEvaluationPeriodChange = async () => {
+  if (user.value?.email && selectedEvaluationPeriod.value) {
+    await fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value.toString())
+    initializeChart()
+  }
+}
+
+// Initialize chart with data
+const initializeChart = () => {
+  if (!administrationChart.value) return
+  
+  // Destroy existing chart
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+  
+  const chartData = getChartData()
+  
+  chartInstance = new Chart(administrationChart.value, {
+    type: 'bar',
+    data: chartData,
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
         },
-        scales: {
-          x: {
-            beginAtZero: true,
-            max: 180,
-            grid: {
-              color: '#f0f0f0'
-            },
-            ticks: {
-              font: {
-                size: 12
-              }
-            },
-            title: {
-              display: true,
-              text: 'Raw Score',
-              font: {
-                size: 14,
-                weight: 'bold'
-              }
+        datalabels: {               
+          anchor: 'end',              
+          align: 'end',               
+          color: '#6B7280',           
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          offset: 4                  
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 180,
+          grid: {
+            color: '#f0f0f0'
+          },
+          ticks: {
+            font: {
+              size: 12
             }
           },
-          y: {
-            grid: {
-              display: false
-            },
-            ticks: {
-              font: {
-                size: 12
-              }
+          title: {
+            display: true,
+            text: 'Raw Score',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
+          }
+        },
+        y: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            font: {
+              size: 12
             }
           }
         }
-      },
-      plugins: [ChartDataLabels]        // Register datalabels plugin here
-    })
+      }
+    },
+    plugins: [ChartDataLabels]
+  })
+}
+
+onMounted(async () => {
+  // Load KPI data first
+  if (user.value?.email) {
+    await loadKpiData()
   }
+  
+  // Fetch evaluation periods and set default
+  await fetchEvaluationPeriods()
+  if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
+    selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+  }
+  
+  // Load administration performance data
+  if (user.value?.email) {
+    await fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value?.toString())
+  }
+  
+  // Initialize the chart with database data
+  initializeChart()
 })
-import { watch } from "vue";
 
 watch(
   () => user.value?.email,
-  (email) => {
+  async (email) => {
     if (email) {
-      loadKpiData();
+      loadKpiData()
+      // Fetch evaluation periods and set default
+      await fetchEvaluationPeriods()
+      if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
+        selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+      }
+      await fetchAdministrationPerformance(email, selectedEvaluationPeriod.value?.toString())
+      // Re-initialize chart with new data
+      initializeChart()
     }
   },
   { immediate: true }
-);
+)
 </script>

@@ -326,10 +326,11 @@ const initializeChart = () => {
             const internal = datasets[0]?.data?.[index] ?? 0
             const external = datasets[1]?.data?.[index] ?? 0
             const nonRevenue = datasets[2]?.data?.[index] ?? 0
+            const revenue = datasets[3]?.data?.[index] ?? 0
 
-            const total = Number(internal) + Number(external) + Number(nonRevenue)
+            const total = Number(internal) + Number(external) + Number(nonRevenue) + Number(revenue)
 
-            if (context.datasetIndex === 2) {
+            if (context.datasetIndex === 3) {
               return total > 0 ? total : ''
             }
             return ''
