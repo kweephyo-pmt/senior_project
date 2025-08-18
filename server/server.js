@@ -38,6 +38,70 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Evaluation Periods endpoint
+app.get('/api/evaluation-periods', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT evaluateid, evaluatename, evaluatestartdate, evaluateenddate, is_active FROM evaluation_periods ORDER BY evaluateid DESC'
+    );
+    
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error('Error fetching evaluation periods:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
+// Teaching Performance Chart endpoint with evaluation period filter
+app.get('/api/teaching-performance/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    let query = 'SELECT category, lecture_score, lab_score, display_order FROM teaching_performance WHERE staff_code = ?';
+    let params = [staffCode];
+    
+    // Add evaluation period filter if provided
+    if (evaluateid) {
+      query += ' AND evaluateid = ?';
+      params.push(evaluateid);
+    } else {
+      // Default to most recent active period (evaluateid 9 = 1/2025)
+      query += ' AND evaluateid = 9';
+    }
+    
+    query += ' ORDER BY display_order';
+    
+    const [rows] = await pool.query(query, params);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No teaching performance data found for this staff code and evaluation period'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error('Error fetching teaching performance data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
 // KPI endpoint - Get KPI percentages by staff code
 app.get('/api/kpi/:staffCode', async (req, res) => {
   try {
@@ -436,122 +500,6 @@ app.delete('/api/budget/projects/:projectId', async (req, res) => {
   }
 });
 
-// MFU API Proxy Endpoints
-let mfuAuthToken = null;
-let tokenExpiry = null;
-
-// MFU API Configuration
-const MFU_API_CONFIG = {
-  baseURL: 'https://eport.mfu.ac.th/api/master',
-  username: 'sombi',
-  password: 'kTzQmR7pWv9LbYD',
-  evaluateId: '9',
-  lang: 'en',
-  staffCodeUndergraduate: '67212038',
-  staffCodeGraduate: '46212058'
-};
-
-// Function to authenticate with MFU API
-const authenticateMFU = async () => {
-  try {
-    const response = await fetch(`${MFU_API_CONFIG.baseURL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: MFU_API_CONFIG.username,
-        password: MFU_API_CONFIG.password,
-        evaluate_id: MFU_API_CONFIG.evaluateId,
-        lang: MFU_API_CONFIG.lang
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`MFU API login failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    mfuAuthToken = data.token;
-    tokenExpiry = Date.now() + (55 * 60 * 1000); // Token expires in 55 minutes
-    
-    console.log('MFU API authentication successful');
-    return mfuAuthToken;
-  } catch (error) {
-    console.error('MFU API authentication error:', error);
-    throw error;
-  }
-};
-
-// Function to get valid MFU token
-const getMFUToken = async () => {
-  if (!mfuAuthToken || !tokenExpiry || Date.now() >= tokenExpiry) {
-    await authenticateMFU();
-  }
-  return mfuAuthToken;
-};
-
-// MFU API Proxy - Get Undergraduate Data
-app.get('/api/mfu/undergraduate/:staffCode', async (req, res) => {
-  try {
-    const { staffCode } = req.params;
-    const token = await getMFUToken();
-    
-    const response = await fetch(`${MFU_API_CONFIG.baseURL}/get_Undergraduate`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'staffcode': staffCode,
-        'evaluate_id': MFU_API_CONFIG.evaluateId,
-        'lang': MFU_API_CONFIG.lang
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`MFU API undergraduate request failed: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching undergraduate data:', error);
-    res.status(500).json({ error: 'Failed to fetch undergraduate data', details: error.message });
-  }
-});
-
-// MFU API Proxy - Get Graduate Data
-app.get('/api/mfu/graduate/:staffCode', async (req, res) => {
-  try {
-    const { staffCode } = req.params;
-    const token = await getMFUToken();
-    
-    const response = await fetch(`${MFU_API_CONFIG.baseURL}/get_Graduate`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'staffcode': staffCode,
-        'evaluate_id': MFU_API_CONFIG.evaluateId,
-        'lang': MFU_API_CONFIG.lang
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`MFU API graduate request failed: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching graduate data:', error);
-    res.status(500).json({ error: 'Failed to fetch graduate data', details: error.message });
-  }
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

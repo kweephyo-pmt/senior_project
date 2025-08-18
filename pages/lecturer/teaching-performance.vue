@@ -9,14 +9,22 @@
         </h1>
         <p class="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">Welcome back, {{ user?.displayName }}</p>
       </div>
-      <!-- Round Selector -->
+      <!-- Evaluation Period Selector -->
       <div class="relative w-full sm:w-48 lg:w-auto">
         <select
+          v-model="selectedEvaluationPeriod"
+          @change="onEvaluationPeriodChange"
           class="w-full appearance-none bg-white border-0 rounded-lg py-2.5 pl-3 pr-8 shadow-sm ring-2 ring-[#4697b9] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#4697b9]"
+          :disabled="isLoadingPeriods"
         >
-          <option>Round 2/2025</option>
-          <option>Round 1/2025</option>
-          <option>Round 2/2024</option>
+          <option v-if="isLoadingPeriods" disabled>Loading periods...</option>
+          <option 
+            v-for="period in evaluationPeriods" 
+            :key="period.evaluateid" 
+            :value="period.evaluateid"
+          >
+            {{ period.evaluatename }}
+          </option>
         </select>
         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -220,6 +228,8 @@ import Chart from "chart.js/auto";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { onMounted, ref } from "vue";
 import { useKpiData } from '@/composables/useKpiData'
+import { useTeachingPerformance } from '@/composables/useTeachingPerformance'
+import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 
 definePageMeta({
   layout: "lecturer",
@@ -228,12 +238,22 @@ definePageMeta({
 const teachingChart = ref<HTMLCanvasElement | null>(null);
 const { getKpiData } = useKpiData()
 const { user,logout } = useFirebaseAuth()
-
+const { teachingData, loading: isLoadingChart, error: chartError, fetchTeachingPerformance, getChartData } = useTeachingPerformance()
+const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 
 // Reactive data
 const selectedRound = ref('round2-2025')
+const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
 const loading = ref(true)
+
+// Handle evaluation period change
+const onEvaluationPeriodChange = async () => {
+  if (selectedEvaluationPeriod.value && user.value?.email) {
+    await fetchTeachingPerformance(selectedEvaluationPeriod.value)
+    initializeChart()
+  }
+}
 
 // Dynamic KPI categories from database
 const kpiCategories = computed(() => {
@@ -557,40 +577,25 @@ const fetchAllData = async () => {
   }
 }
 
-// Initialize chart with hardcoded data
+// Store chart instance for proper cleanup
+let chartInstance: Chart | null = null;
+
+// Initialize chart with database data
 const initializeChart = () => {
-  if (teachingChart.value) {
-    addLog('Initializing chart...');
-    new Chart(teachingChart.value, {
+  if (teachingChart.value && teachingData.value.length > 0) {
+    addLog('Initializing chart with database data...');
+    
+    // Destroy existing chart if it exists
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+    
+    const chartData = getChartData()
+    
+    chartInstance = new Chart(teachingChart.value, {
       type: "bar",
-      data: {
-        labels: [
-          ["Other Teaching Tasks Assigned", "by the Academic Office"],
-          "Thesis Oversight Duties",
-          ["Student Projects or", "Special Issues"],
-          "Student Internships",
-          "Graduate Teaching",
-          "Undergraduate Teaching"
-        ],
-        datasets: [
-          {
-            label: "Lecture (Score)",
-            data: [0, 0, 0, 3, 30, 90], // Hardcoded data
-            backgroundColor: ["#172554", "#172554", "#172554", "#172554", "#172554", "#172554"],
-            borderWidth: 0,
-            borderRadius: 0,
-            stack: 'Stack 0',
-          },
-          {
-            label: "Lab (Score)",
-            data: [0, 0, 0, 0, 19.46, 61.5], // Hardcoded data
-            backgroundColor: ["#a21a5b", "#a21a5b", "#a21a5b", "#a21a5b", "#a21a5b", "#a21a5b"],
-            borderWidth: 0,
-            borderRadius: 0,
-            stack: 'Stack 0',
-          },
-        ],
-      },
+      data: chartData,
       options: {
         indexAxis: "y" as const,
         responsive: true,
@@ -697,25 +702,42 @@ onMounted(async () => {
   componentMounted.value = true
   addLog('Component mounted successfully')
   
-  // Initialize the chart with hardcoded data. This should make the chart visible.
-  // This is called once on mount.
+  // Fetch evaluation periods first
+  await fetchEvaluationPeriods()
+  
+  // Set default to active evaluation period
+  if (activeEvaluationPeriod.value) {
+    selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+  }
+  
+  // Load teaching performance data
+  if (user.value?.email) {
+    await fetchTeachingPerformance(selectedEvaluationPeriod.value || undefined)
+  }
+  
+  // Initialize the chart with database data
   initializeChart(); 
   
   addLog('API connection ready. Fetching data...')
   
   // Fetch the data for the tables automatically
   await fetchAllData() 
-  
-  // The chart remains hardcoded and is NOT updated with fetched data.
-  // No further chart update logic is needed here.
 })
 import { watch } from "vue";
 
 watch(
   () => user.value?.email,
-  (email) => {
+  async (email) => {
     if (email) {
       loadKpiData();
+      // Fetch evaluation periods and set default
+      await fetchEvaluationPeriods()
+      if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
+        selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+      }
+      await fetchTeachingPerformance(selectedEvaluationPeriod.value || undefined);
+      // Re-initialize chart with new data
+      initializeChart();
     }
   },
   { immediate: true }
