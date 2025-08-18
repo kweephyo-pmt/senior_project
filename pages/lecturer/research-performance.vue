@@ -8,14 +8,24 @@
         </h1>
         <p class="text-sm sm:text-base text-gray-600">Welcome back, {{ user?.displayName }}</p>
       </div>
+      <!-- Evaluation Period Selector -->
       <div class="relative w-full sm:w-48 lg:w-auto">
         <select
-          class="w-full sm:w-auto appearance-none bg-white border-0  rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
-        > <option>Round 2/2025</option>
-          <option>Round 1/2025</option>
-          <option>Round 2/2024</option>
+          v-model="selectedEvaluationPeriod"
+          @change="onEvaluationPeriodChange"
+          class="w-full appearance-none bg-white border-0 rounded-lg py-2.5 pl-3 pr-8 shadow-sm ring-2 ring-[#4697b9] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#4697b9]"
+          :disabled="isLoadingPeriods"
+        >
+          <option v-if="isLoadingPeriods" disabled>Loading periods...</option>
+          <option 
+            v-for="period in evaluationPeriods" 
+            :key="period.evaluateid" 
+            :value="period.evaluateid"
+          >
+            Round {{ period.evaluatename }}
+          </option>
         </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
@@ -224,9 +234,11 @@
 <script setup lang="ts">
 import Chart from "chart.js/auto";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { onMounted, ref } from "vue";
+import { onMounted, ref, nextTick } from "vue";
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import { useKpiData } from '@/composables/useKpiData'
+import { useResearchPerformance } from '@/composables/useResearchPerformance'
+import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 
 
 definePageMeta({
@@ -235,12 +247,24 @@ definePageMeta({
 const researchChart = ref<HTMLCanvasElement | null>(null);
 const { getKpiData } = useKpiData()
 const { user,logout } = useFirebaseAuth()
-
+const { researchData, loading: researchLoading, error: researchError, fetchResearchPerformance, getChartData } = useResearchPerformance()
+const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 
 // Reactive data
 const selectedRound = ref('round2-2025')
+const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
 const loading = ref(true)
+
+// Handle evaluation period change
+const onEvaluationPeriodChange = async () => {
+  if (selectedEvaluationPeriod.value && user.value?.email) {
+    await fetchResearchPerformance(user.value.email, selectedEvaluationPeriod.value.toString())
+    nextTick(() => {
+      createChart()
+    })
+  }
+}
 
 // Format value helper
 const formatValue = (value: any) => {
@@ -286,48 +310,20 @@ const loadKpiData = async () => {
 // Register the plugin
 Chart.register(ChartDataLabels);
 
-onMounted(() => {
-  // Create bar chart
-  if (researchChart.value) {
-    new Chart(researchChart.value, {
+let chartInstance: Chart | null = null;
+
+const createChart = () => {
+  if (researchChart.value && researchData.value.length > 0) {
+    // Destroy existing chart if it exists
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    const chartData = getChartData();
+    
+    chartInstance = new Chart(researchChart.value, {
       type: "bar",
-      data: {
-        labels: [
-          ["Other Academic Work", "assigned by the School"],
-          "Other Academic Work",
-          "Patented Inventions",
-          ["Composition of textbooks, Books,", "and interactive/e-Learning Materials"],
-          "Academic Articles",
-          "Research Publication",
-          "Research Studies"
-        ],
-        datasets: [
-          {
-            label: "Level 4 (Score)",
-            data: [10, 0, 0, 50, 0, 25, 7],
-            backgroundColor: "#172554",
-            borderWidth: 0,
-            borderRadius: 4,
-            stack: 'Stack 0'
-          },
-          {
-            label: "Level 6 (Score)",
-            data: [0, 0, 0, 0, 0, 30, 8],
-            backgroundColor: "#a21a5b",
-            borderWidth: 0,
-            borderRadius: 4,
-            stack: 'Stack 0'
-          },
-          {
-            label: "Level 7 (Score)",
-            data: [0, 0, 0, 0, 0, 30, 0],
-            backgroundColor: "#dc2626",
-            borderWidth: 0,
-            borderRadius: 4,
-            stack: 'Stack 0'
-          }
-        ],
-      },
+      data: chartData,
       options: {
         indexAxis: "y" as const,
         responsive: true,
@@ -425,15 +421,51 @@ onMounted(() => {
       },
     });
   }
+};
+
+onMounted(async () => {
+  // Load evaluation periods first
+  await fetchEvaluationPeriods()
+  
+  // Set default to active evaluation period
+  if (activeEvaluationPeriod.value) {
+    selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+  }
+  
+  // Load research data when component mounts
+  if (user.value?.email) {
+    await fetchResearchPerformance(user.value.email);
+  }
 });
 
 import { watch } from "vue";
 
+// Watch for research data changes and create chart
+watch(
+  () => researchData.value,
+  (data) => {
+    if (data && data.length > 0) {
+      nextTick(() => {
+        createChart();
+      });
+    }
+  },
+  { deep: true }
+);
+
 watch(
   () => user.value?.email,
-  (email) => {
+  async (email) => {
     if (email) {
       loadKpiData();
+      await fetchEvaluationPeriods();
+      
+      // Set default to active evaluation period
+      if (activeEvaluationPeriod.value) {
+        selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid;
+      }
+      
+      await fetchResearchPerformance(email);
     }
   },
   { immediate: true }
