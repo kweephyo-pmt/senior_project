@@ -257,13 +257,17 @@ const onEvaluationPeriodChange = async () => {
 
 // Format date range for selected evaluation period
 const formatDateRange = () => {
+  if (isLoadingPeriods.value) {
+    return 'Loading...'
+  }
+  
   if (!selectedEvaluationPeriod.value || !evaluationPeriods.value) {
-    return '11 Feb 2025-31 July 2025' // fallback
+    return 'No period selected'
   }
   
   const selectedPeriod = evaluationPeriods.value.find(p => p.evaluateid === selectedEvaluationPeriod.value)
   if (!selectedPeriod) {
-    return '11 Feb 2025-31 July 2025' // fallback
+    return 'Period not found'
   }
   
   const startDate = new Date(selectedPeriod.evaluatestartdate).toLocaleDateString('en-GB', { 
