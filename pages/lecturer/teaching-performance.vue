@@ -37,7 +37,7 @@
     <!-- Teaching Track -->
     <div class="mb-4 sm:mb-6">
       <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Teaching Track</h2>
-      <p class="text-center text-xs sm:text-sm text-gray-500 mb-4">11 Feb 2025-31 July 2025</p>
+      <p class="text-center text-xs sm:text-sm text-gray-500 mb-4">{{ formatDateRange() }}</p>
     </div>
 
     <!-- Loading spinner -->
@@ -253,6 +253,31 @@ const onEvaluationPeriodChange = async () => {
     await fetchTeachingPerformance(selectedEvaluationPeriod.value)
     initializeChart()
   }
+}
+
+// Format date range for selected evaluation period
+const formatDateRange = () => {
+  if (!selectedEvaluationPeriod.value || !evaluationPeriods.value) {
+    return '11 Feb 2025-31 July 2025' // fallback
+  }
+  
+  const selectedPeriod = evaluationPeriods.value.find(p => p.evaluateid === selectedEvaluationPeriod.value)
+  if (!selectedPeriod) {
+    return '11 Feb 2025-31 July 2025' // fallback
+  }
+  
+  const startDate = new Date(selectedPeriod.evaluatestartdate).toLocaleDateString('en-GB', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  })
+  const endDate = new Date(selectedPeriod.evaluateenddate).toLocaleDateString('en-GB', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  })
+  
+  return `${startDate}-${endDate}`
 }
 
 // Dynamic KPI categories from database
