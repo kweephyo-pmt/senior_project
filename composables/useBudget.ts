@@ -11,9 +11,9 @@ export const useBudget = () => {
   }
 
   // Get budget overview data by staff code
-  const getBudgetOverview = async (staffCode: string, year: number = 2025) => {
+  const getBudgetOverview = async (staffCode: string, evaluateid: number = 9) => {
     try {
-      const response = await $fetch(`${baseURL}/budget/overview/${staffCode}?year=${year}`)
+      const response = await $fetch(`${baseURL}/budget/overview/${staffCode}?evaluateid=${evaluateid}`)
       return response
     } catch (error) {
       console.error('Error fetching budget overview:', error)
@@ -22,9 +22,9 @@ export const useBudget = () => {
   }
 
   // Get budget projects/details by staff code
-  const getBudgetProjects = async (staffCode: string, year: number = 2025) => {
+  const getBudgetProjects = async (staffCode: string, evaluateid: number = 9) => {
     try {
-      const response = await $fetch(`${baseURL}/budget/projects/${staffCode}?year=${year}`)
+      const response = await $fetch(`${baseURL}/budget/projects/${staffCode}?evaluateid=${evaluateid}`)
       return response
     } catch (error) {
       console.error('Error fetching budget projects:', error)
@@ -39,7 +39,7 @@ export const useBudget = () => {
     budgetAmount: number
     duration: string
     staffCode: string
-    year?: number
+    evaluateid?: number
     owners?: string[]
   }) => {
     try {

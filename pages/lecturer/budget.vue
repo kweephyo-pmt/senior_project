@@ -4,21 +4,29 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-12 mb-4 sm:mb-0">
         <h1 class="text-2xl font-bold text-gray-900">Budget Management</h1>
-        <div class="relative">
-          <select
-            @change="onYearChange"
-            v-model="selectedYear"
-            class="appearance-none bg-white border-0 rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm w-44">
-            <option value="2025">Year/ 2025</option>
-            <option value="2024">Year/ 2024</option>
-            <option value="2023">Year/ 2023</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+        <!-- Evaluation Period Selector -->
+      <div class="relative w-full sm:w-48 lg:w-auto">
+        <select
+          v-model="selectedEvaluationPeriod"
+          @change="onEvaluationPeriodChange"
+          class="w-full appearance-none bg-white border-0 rounded-lg py-2.5 pl-3 pr-8 shadow-sm ring-2 ring-[#4697b9] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#4697b9]"
+          :disabled="isLoadingPeriods"
+        >
+          <option v-if="isLoadingPeriods" disabled>Loading periods...</option>
+          <option 
+            v-for="period in evaluationPeriods" 
+            :key="period.evaluateid" 
+            :value="period.evaluateid"
+          >
+            Round {{ period.evaluatename }}
+          </option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
         </div>
+      </div>
       </div>
       <p class="text-gray-600 text-sm mt-2">Welcome back, {{ user?.displayName }}</p>
     </div>
@@ -303,9 +311,11 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import { useBudget } from '@/composables/useBudget'
+import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 
 const { user } = useFirebaseAuth()
 const { extractStaffCode, getBudgetOverview, getBudgetProjects } = useBudget()
+const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 
 interface ProjectOwners {
   [key: string]: string;
@@ -318,6 +328,7 @@ const budgetOverview = ref<any>(null)
 const budgetProjects = ref<any[]>([])
 const loading = ref(true)
 const selectedYear = ref(2025)
+const selectedEvaluationPeriod = ref<number | null>(null)
 const openDropdown = ref('')
 
 // Extract staff code from user email
@@ -381,6 +392,13 @@ const researchProjectCount = computed(() => {
   return budgetOverview.value?.researchProjectCount || 0
 })
 
+// Handle evaluation period change
+const onEvaluationPeriodChange = async () => {
+  if (selectedEvaluationPeriod.value && user.value?.email) {
+    await loadBudgetData()
+  }
+}
+
 // Load data from database
 const loadBudgetData = async () => {
   const currentStaffCode = staffCode.value
@@ -391,9 +409,10 @@ const loadBudgetData = async () => {
   
   try {
     loading.value = true
+    const evaluateId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
     const [overview, projects] = await Promise.all([
-      getBudgetOverview(currentStaffCode, selectedYear.value),
-      getBudgetProjects(currentStaffCode, selectedYear.value)
+      getBudgetOverview(currentStaffCode, evaluateId),
+      getBudgetProjects(currentStaffCode, evaluateId)
     ])
     budgetOverview.value = overview
     budgetProjects.value = projects as any[]
@@ -430,27 +449,28 @@ const loadBudgetData = async () => {
 // Watch for user authentication and load data
 watch(
   () => user.value?.email,
-  (email) => {
+  async (email) => {
     if (email) {
-      loadBudgetData()
+      await fetchEvaluationPeriods()
+      if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
+        selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+      }
+      await loadBudgetData()
     }
   },
   { immediate: true }
 )
 
 // Load data on component mount
-onMounted(() => {
+onMounted(async () => {
   if (user.value?.email) {
-    loadBudgetData()
+    await fetchEvaluationPeriods()
+    if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
+      selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+    }
+    await loadBudgetData()
   }
 })
-
-// Watch for year changes
-const onYearChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  selectedYear.value = parseInt(target.value)
-  loadBudgetData()
-}
 </script>
 
 <style scoped>

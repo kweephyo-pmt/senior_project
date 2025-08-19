@@ -453,12 +453,12 @@ app.get('/api/arts-culture-performance/:staffCode', async (req, res) => {
 app.get('/api/budget/overview/:staffCode', async (req, res) => {
   try {
     const { staffCode } = req.params;
-    const year = req.query.year || 2025;
+    const evaluateid = req.query.evaluateid || 9;
 
     // Get budget categories with totals
     const [categories] = await pool.query(
-      'SELECT * FROM budget_categories WHERE staff_code = ? AND year = ?',
-      [staffCode, year]
+      'SELECT * FROM budget_categories WHERE staff_code = ? AND evaluateid = ?',
+      [staffCode, evaluateid]
     );
 
     if (categories.length === 0) {
@@ -473,8 +473,8 @@ app.get('/api/budget/overview/:staffCode', async (req, res) => {
 
     // Get project count for research
     const [projectCount] = await pool.query(
-      'SELECT COUNT(*) as count FROM budget_projects bp JOIN budget_categories bc ON bp.category_id = bc.id WHERE bc.name = "Research Project" AND bp.staff_code = ? AND bp.year = ?',
-      [staffCode, year]
+      'SELECT COUNT(*) as count FROM budget_projects bp JOIN budget_categories bc ON bp.category_id = bc.id WHERE bc.name = "Research Project" AND bp.staff_code = ? AND bp.evaluateid = ?',
+      [staffCode, evaluateid]
     );
 
     res.json({
@@ -500,7 +500,7 @@ app.get('/api/budget/overview/:staffCode', async (req, res) => {
 app.get('/api/budget/projects/:staffCode', async (req, res) => {
   try {
     const { staffCode } = req.params;
-    const year = req.query.year || 2025;
+    const evaluateid = req.query.evaluateid || 9;
 
     const [projects] = await pool.query(`
       SELECT 
@@ -511,9 +511,9 @@ app.get('/api/budget/projects/:staffCode', async (req, res) => {
         bc.name as category
       FROM budget_projects bp
       JOIN budget_categories bc ON bp.category_id = bc.id
-      WHERE bp.staff_code = ? AND bp.year = ?
+      WHERE bp.staff_code = ? AND bp.evaluateid = ?
       ORDER BY bp.created_at DESC
-    `, [staffCode, year]);
+    `, [staffCode, evaluateid]);
 
     // Get owners for each project
     const projectsWithOwners = await Promise.all(
@@ -547,22 +547,22 @@ app.get('/api/budget/projects/:staffCode', async (req, res) => {
 // Create new budget project
 app.post('/api/budget/projects', async (req, res) => {
   try {
-    const { title, categoryName, budgetAmount, duration, staffCode, year = 2025, owners = [] } = req.body;
+    const { title, categoryName, budgetAmount, duration, staffCode, evaluateid = 9, owners = [] } = req.body;
 
     // Get category ID
     const [category] = await pool.query(
-      'SELECT id FROM budget_categories WHERE name = ? AND staff_code = ? AND year = ?',
-      [categoryName, staffCode, year]
+      'SELECT id FROM budget_categories WHERE name = ? AND staff_code = ? AND evaluateid = ?',
+      [categoryName, staffCode, evaluateid]
     );
 
     if (category.length === 0) {
-      return res.status(400).json({ error: 'Category not found' });
+      return res.status(404).json({ error: 'Category not found' });
     }
 
     // Insert project
     const [result] = await pool.query(
-      'INSERT INTO budget_projects (title, category_id, budget_amount, duration, year, staff_code) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, category[0].id, budgetAmount, duration, year, staffCode]
+      'INSERT INTO budget_projects (title, category_id, budget_amount, duration, year, staff_code, evaluateid) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [title, category[0].id, budgetAmount, duration, 2025, staffCode, evaluateid]
     );
 
     const projectId = result.insertId;
