@@ -331,7 +331,7 @@ const initializeChart = () => {
             const total = Number(internal) + Number(external) + Number(nonRevenue) + Number(revenue)
 
             if (context.datasetIndex === 3) {
-              return total > 0 ? total : ''
+              return total > 0 ? total : '0'
             }
             return ''
           }

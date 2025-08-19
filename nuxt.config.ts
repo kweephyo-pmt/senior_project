@@ -73,6 +73,14 @@ export default defineNuxtConfig({
       }
     }
   },
+  vite: {
+    server: {
+      cors: {
+        origin: true,
+        credentials: true
+      }
+    }
+  },
   ssr: true,
   router: {
     options: {
