@@ -145,98 +145,28 @@
           <div class="max-h-[150px] overflow-y-auto pr-2"> 
             <table class="min-w-full text-xs">
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
-                    <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">Thailand Cloud Immersion Day</p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : 27 June 2024
-                      </p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : Seminar
-                      </p>
-                      <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>Room E4A0514, Mae Fah Luang University
-                      </p>
-                    </div>
+                <tr v-if="loadingSelfDevelopment">
+                  <td class="px-6 py-4 text-center text-gray-500">
+                    Loading self-development activities...
                   </td>
                 </tr>
-                <tr>
-                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
-                    <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">Digital Innovation Workshop</p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : 15 May 2024
-                      </p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : Workshop
-                      </p>
-                      <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>Online Platform
-                      </p>
-                    </div>
+                <tr v-else-if="selfDevelopmentData.length === 0">
+                  <td class="px-6 py-4 text-center text-gray-500">
+                    No self-development activities found for this evaluation period.
                   </td>
                 </tr>
-                <tr>
-                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
+                <tr v-else v-for="activity in selfDevelopmentData" :key="activity.title + activity.date">
+                  <td class="px-6 py-4 flex items-center gap-2">
                     <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">Advanced AI Concepts</p>
+                      <p class="text-sm font-bold mb-1">{{ activity.title }}</p>
                       <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : 10 April 2024
+                        <acDateLogo class="w-4 h-4"/>Date : {{ formatDate(activity.date) }}
                       </p>
                       <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : Seminar
+                        <acTypeLogo class="w-4 h-4"/>Type : {{ activity.type }}
                       </p>
                       <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>Room B3A101, Mae Fah Luang University
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
-                    <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">UX/UI Design Principles</p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : 20 March 2024
-                      </p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : Training
-                      </p>
-                      <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>Online Training Platform
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-                 <tr>
-                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
-                    <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">Data Visualization Techniques</p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : 05 February 2024
-                      </p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : Workshop
-                      </p>
-                      <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>Conference Hall, Mae Fah Luang University
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="px-6 py-4 flex items-center gap-2"> <!-- Increased horizontal padding -->
-                    <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">Machine Learning for Education</p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : 15 January 2024
-                      </p>
-                      <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : Seminar
-                      </p>
-                      <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>Online Webinar
+                        <acLocationLogo class="w-4 h-4"/>{{ activity.location }}
                       </p>
                     </div>
                   </td>
@@ -301,6 +231,7 @@ import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import { useKpiData } from '@/composables/useKpiData'
 import { useArtsCulturePerformance } from '@/composables/useArtsCulturePerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
+import { useSelfDevelopment } from '@/composables/useSelfDevelopment'
 
 definePageMeta({
   layout: 'lecturer'
@@ -312,11 +243,14 @@ const { getKpiData } = useKpiData()
 const { user, logout } = useFirebaseAuth()
 const { artsCultureData, loading: isLoadingChart, error: chartError, fetchArtsCulturePerformance, getChartData } = useArtsCulturePerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
+const { getSelfDevelopmentData } = useSelfDevelopment()
 
 // Reactive data
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
 const loading = ref(true)
+const selfDevelopmentData = ref<any[]>([])
+const loadingSelfDevelopment = ref(false)
 let chartInstance: Chart | null = null
 
 // Format value helper
@@ -366,6 +300,35 @@ const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
 
+// Load self-development data
+const loadSelfDevelopmentData = async () => {
+  try {
+    loadingSelfDevelopment.value = true
+    if (user.value?.email) {
+      const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 8
+      console.log('Loading self-development data for:', user.value.email, 'evaluation period:', evalId)
+      const response = await getSelfDevelopmentData(user.value.email, evalId) as any
+      selfDevelopmentData.value = response.data || []
+      console.log('Self-development data loaded:', selfDevelopmentData.value)
+    }
+  } catch (err) {
+    console.error('Failed to load self-development data:', err)
+    selfDevelopmentData.value = []
+  } finally {
+    loadingSelfDevelopment.value = false
+  }
+}
+
+// Format date helper
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
 // Format date range for evaluation period
 const formatDateRange = () => {
   const currentPeriod = evaluationPeriods.value.find(p => p.evaluateid === selectedEvaluationPeriod.value)
@@ -390,7 +353,8 @@ const onEvaluationPeriodChange = async () => {
   if (user.value?.email && selectedEvaluationPeriod.value) {
     await Promise.all([
       fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
-      loadKpiData()
+      loadKpiData(),
+      loadSelfDevelopmentData()
     ])
     initializeChart()
   }
@@ -487,9 +451,12 @@ onMounted(async () => {
     selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
   }
   
-  // Load arts culture performance data
+  // Load arts culture performance data and self-development data
   if (user.value?.email) {
-    await fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value?.toString())
+    await Promise.all([
+      fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value?.toString()),
+      loadSelfDevelopmentData()
+    ])
   }
   
   // Wait for DOM to be ready before initializing chart
@@ -507,7 +474,10 @@ watch(
       if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
         selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
       }
-      await fetchArtsCulturePerformance(email, selectedEvaluationPeriod.value?.toString())
+      await Promise.all([
+        fetchArtsCulturePerformance(email, selectedEvaluationPeriod.value?.toString()),
+        loadSelfDevelopmentData()
+      ])
       // Re-initialize chart with new data
       await nextTick()
       initializeChart()

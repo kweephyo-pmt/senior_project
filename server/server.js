@@ -38,6 +38,38 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Self-development endpoint
+app.get('/api/self-development/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    let query = 'SELECT staffcode, title, date, type, location, evaluateid FROM self_development WHERE staffcode = ?';
+    let params = [staffCode];
+    
+    if (evaluateid) {
+      query += ' AND evaluateid = ?';
+      params.push(evaluateid);
+    }
+    
+    query += ' ORDER BY date DESC';
+    
+    const [rows] = await pool.query(query, params);
+    
+    res.json({
+      success: true,
+      data: rows,
+      count: rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching self-development data:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Evaluation Periods endpoint
 app.get('/api/evaluation-periods', async (req, res) => {
   try {
