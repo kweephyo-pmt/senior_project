@@ -410,6 +410,9 @@ const loadBudgetData = async () => {
   try {
     loading.value = true
     const evaluateId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+    console.log('Budget loadBudgetData - selectedEvaluationPeriod:', selectedEvaluationPeriod.value)
+    console.log('Budget loadBudgetData - activeEvaluationPeriod:', activeEvaluationPeriod.value?.evaluateid)
+    console.log('Budget loadBudgetData - final evaluateId:', evaluateId)
     const [overview, projects] = await Promise.all([
       getBudgetOverview(currentStaffCode, evaluateId),
       getBudgetProjects(currentStaffCode, evaluateId)

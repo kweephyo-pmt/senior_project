@@ -555,8 +555,8 @@ app.get('/api/budget/projects/:staffCode', async (req, res) => {
     const projectsWithOwners = await Promise.all(
       projects.map(async (project) => {
         const [owners] = await pool.query(
-          'SELECT owner_name, is_primary FROM project_owners WHERE project_id = ? ORDER BY is_primary DESC',
-          [project.id]
+          'SELECT owner_name, is_primary FROM project_owners WHERE project_id = ? AND evaluateid = ? ORDER BY is_primary DESC',
+          [project.id, evaluateid]
         );
 
         const ownersList = owners.map(o => o.owner_name);
