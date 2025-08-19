@@ -27,19 +27,19 @@ export const useKpiData = () => {
     } catch (error) {
       console.error('Error fetching KPI data:', error)
       
-      // Return fallback mock data if API fails
+      // Return empty data if API fails
       return {
         staffCode: extractStaffCode(email),
-        staffName: 'Dr. Supansa',
+        staffName: 'Unknown',
         categories: [
-          { name: 'Teaching', weight: 60, value: 60, color: '#1e40af', bgColor: '#dbeafe', textColor: '#1e40af' },
-          { name: 'Research', weight: 15, value: 15, color: '#0891b2', bgColor: '#cffafe', textColor: '#0891b2' },
-          { name: 'Academic Service', weight: 10, value: 10, color: '#059669', bgColor: '#d1fae5', textColor: '#059669' },
-          { name: 'Administration', weight: 5, value: 5, color: '#7c3aed', bgColor: '#ede9fe', textColor: '#7c3aed' },
-          { name: 'Arts and Culture', weight: 10, value: 3.75, color: '#dc2626', bgColor: '#fecaca', textColor: '#dc2626' }
+          { name: 'Teaching', weight: 0, value: 0, color: '#1e40af', bgColor: '#dbeafe', textColor: '#1e40af' },
+          { name: 'Research', weight: 0, value: 0, color: '#0891b2', bgColor: '#cffafe', textColor: '#0891b2' },
+          { name: 'Academic Service', weight: 0, value: 0, color: '#059669', bgColor: '#d1fae5', textColor: '#059669' },
+          { name: 'Administration', weight: 0, value: 0, color: '#7c3aed', bgColor: '#ede9fe', textColor: '#7c3aed' },
+          { name: 'Arts and Culture', weight: 0, value: 0, color: '#dc2626', bgColor: '#fecaca', textColor: '#dc2626' }
         ],
-        totalScore: '93.75',
-        performanceLevel: 'Excellent'
+        totalScore: '0',
+        performanceLevel: 'No Data'
       }
     }
   }
