@@ -8,15 +8,24 @@
         </h1>
         <p class="text-sm sm:text-base text-gray-600">Welcome back, {{ user?.displayName }}</p>
       </div>
-      <div class="relative w-full sm:w-48 lg:w-auto">
+     <!-- Evaluation Period Selector -->
+     <div class="relative w-full sm:w-48 lg:w-auto">
         <select
-          class="w-full sm:w-auto appearance-none bg-white border-0  rounded-lg py-2 pl-4 pr-10 shadow-sm ring-2 ring-[#4697b9] text-sm"
+          v-model="selectedEvaluationPeriod"
+          @change="onEvaluationPeriodChange"
+          class="w-full appearance-none bg-white border-0 rounded-lg py-2.5 pl-3 pr-8 shadow-sm ring-2 ring-[#4697b9] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#4697b9]"
+          :disabled="isLoadingPeriods"
         >
-          <option>Round 2/2025</option>
-          <option>Round 1/2025</option>
-          <option>Round 2/2024</option>
+          <option v-if="isLoadingPeriods" disabled>Loading periods...</option>
+          <option 
+            v-for="period in evaluationPeriods" 
+            :key="period.evaluateid" 
+            :value="period.evaluateid"
+          >
+            Round {{ period.evaluatename }}
+          </option>
         </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
@@ -250,19 +259,19 @@
 
 <script setup lang="ts">
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth';
+import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods';
 import Chart from "chart.js/auto";
 import { computed, onMounted, ref, watch, onActivated, onUnmounted } from "vue";
 
-// Try to import the composable
-let getKpiData: any = null;
-try {
-  const kpiComposable = await import('@/composables/useKpiData');
-  getKpiData = kpiComposable.useKpiData?.().getKpiData;
-} catch (error) {
-  console.warn('KPI composable not available. Data fetching will be skipped.', error);
-}
+// Import KPI composable
+import { useKpiData } from '@/composables/useKpiData'
 
 const { user, logout } = useFirebaseAuth()
+const { evaluationPeriods, loading: isLoadingPeriods, fetchEvaluationPeriods, activeEvaluationPeriod } = useEvaluationPeriods()
+const { getKpiData } = useKpiData()
+
+// Selected evaluation period state
+const selectedEvaluationPeriod = ref<number | null>(null)
 
 // State management
 const loading = ref(true)
@@ -325,21 +334,18 @@ const loadKpiData = async () => {
     
     addLog('Starting KPI data fetch...')
     
-    if (!getKpiData) {
-      throw new Error('KPI composable not available')
-    }
-    
     if (!user.value?.email) {
       throw new Error('User email not available')
     }
     
-    addLog('Loading KPI data for: ' + user.value.email)
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 8
+    addLog(`Loading KPI data for: ${user.value.email}, evaluation period: ${evalId}`)
     
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Request timeout')), 10000)
     )
     
-    const dataPromise = getKpiData(user.value.email)
+    const dataPromise = getKpiData(user.value.email, evalId)
     const data = await Promise.race([dataPromise, timeoutPromise])
     
     addLog('Raw KPI data received:')
@@ -618,21 +624,53 @@ const stopDataWatcher = watch([kpiData, dataSource], () => {
 // Fetch data on initial mount and also when the component is activated
 let chartInitialized = false; // Flag to ensure chart is initialized only once after data is ready
 
+// Handle evaluation period change
+const onEvaluationPeriodChange = async () => {
+  addLog(`🔄 Evaluation period changed to: ${selectedEvaluationPeriod.value}`)
+  await loadKpiData()
+}
+
 const initializeComponentData = async () => {
   addLog('🚀 Initializing component data...')
-  await loadKpiData();
   
-  if (Chart.registry) {
-    const datalabelsPlugin = Chart.registry.plugins.get('datalabels');
-    if (datalabelsPlugin) {
-      Chart.unregister(datalabelsPlugin);
+  try {
+    // Load evaluation periods first
+    await fetchEvaluationPeriods()
+    
+    // Set default selected period to active period
+    if (!selectedEvaluationPeriod.value && activeEvaluationPeriod.value) {
+      selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
+    }
+    
+    // Load KPI data
+    await loadKpiData();
+    
+    if (Chart.registry) {
+      const datalabelsPlugin = Chart.registry.plugins.get('datalabels');
+      if (datalabelsPlugin) {
+        Chart.unregister(datalabelsPlugin);
+      }
+    }
+    
+    addLog('📊 Initializing chart with ' + dataSource.value + ' data...');
+    renderChart();
+    addLog('✅ Chart initialized successfully');
+  } catch (error) {
+    addLog('❌ Error initializing component: ' + (error instanceof Error ? error.message : String(error)), 'error')
+    loading.value = false
+  }
+};
+
+// Watch for evaluation period changes
+watch(
+  () => selectedEvaluationPeriod.value,
+  (newEvalId, oldEvalId) => {
+    if (newEvalId && newEvalId !== oldEvalId && user.value?.email && !loading.value) {
+      addLog(`Evaluation period changed from ${oldEvalId} to ${newEvalId}`)
+      onEvaluationPeriodChange()
     }
   }
-  
-  addLog('📊 Initializing chart with ' + dataSource.value + ' data...');
-  renderChart();
-  addLog('✅ Chart initialized successfully');
-};
+)
 
 // Watch for user email and fetch data when available
 watch(

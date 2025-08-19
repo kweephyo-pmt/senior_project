@@ -188,15 +188,19 @@ app.get('/api/academic-service-performance/:staffCode', async (req, res) => {
   }
 });
 
-// KPI endpoint - Get KPI percentages by staff code
+// KPI endpoint - Get KPI percentages by staff code and evaluation period
 app.get('/api/kpi/:staffCode', async (req, res) => {
   try {
     const { staffCode } = req.params;
+    const { evaluateid } = req.query;
     
-    // Fetch KPI data from percentage table
+    // Default to evaluation period 8 if not specified
+    const evalId = evaluateid || 8;
+    
+    // Fetch KPI data from percentage table filtered by evaluateid
     const [rows] = await pool.query(
-      'SELECT staff_code, staff_name, domain1_weight, domain2_weight, domain3_weight, domain4_weight, domain5_weight FROM percentage WHERE staff_code = ?',
-      [staffCode]
+      'SELECT staff_code, staff_name, domain1_weight, domain2_weight, domain3_weight, domain4_weight, domain5_weight FROM percentage WHERE staff_code = ? AND evaluateid = ?',
+      [staffCode, evalId]
     );
 
     if (rows.length === 0) {

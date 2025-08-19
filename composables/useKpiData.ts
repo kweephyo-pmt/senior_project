@@ -10,15 +10,19 @@ export const useKpiData = () => {
     return match ? match[1] : ''
   }
 
-  // Get KPI data by staff code
-  const getKpiData = async (email: string) => {
+  // Get KPI data by staff code and evaluation period
+  const getKpiData = async (email: string, evaluateid?: number) => {
     try {
       const staffCode = extractStaffCode(email)
       if (!staffCode) {
         throw new Error('Invalid email format - cannot extract staff code')
       }
 
-      const response = await $fetch(`${baseURL}/kpi/${staffCode}`)
+      const url = evaluateid 
+        ? `${baseURL}/kpi/${staffCode}?evaluateid=${evaluateid}`
+        : `${baseURL}/kpi/${staffCode}`
+      
+      const response = await $fetch(url)
       return response
     } catch (error) {
       console.error('Error fetching KPI data:', error)
