@@ -42,6 +42,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      apiBase: process.env.NUXT_PUBLIC_BACKEND_API_URL || process.env.BACKEND_API_URL,
       apiBaseUrl: process.env.VITE_API_BASE_URL,
       apiUsername: process.env.VITE_API_USERNAME,
       apiPassword: process.env.VITE_API_PASSWORD,
@@ -49,13 +50,13 @@ export default defineNuxtConfig({
       apiLang: process.env.VITE_API_LANG,
       staffCodeUndergraduate: process.env.VITE_STAFF_CODE_UNDERGRADUATE,
       staffCodeGraduate: process.env.VITE_STAFF_CODE_GRADUATE,
-      // Firebase configuration
-      firebaseApiKey: process.env.FIREBASE_API_KEY,
-      firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
-      firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-      firebaseAppId: process.env.FIREBASE_APP_ID
+      // Firebase configuration - using NUXT_PUBLIC_ prefix for client-side access
+      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY,
+      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || process.env.FIREBASE_AUTH_DOMAIN,
+      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID,
+      firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET,
+      firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID,
+      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || process.env.FIREBASE_APP_ID
     }
   },
   modules: ['@nuxtjs/tailwindcss'],

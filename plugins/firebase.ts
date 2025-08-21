@@ -7,12 +7,12 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   
   // Firebase configuration from runtime config with fallbacks
   const config = {
-    apiKey: runtimeConfig.public.firebaseApiKey || "AIzaSyAm7B_bdMezQ-rqFjScE593hGGCVBa7VZ0",
-    authDomain: runtimeConfig.public.firebaseAuthDomain || "curriculum-statistics.firebaseapp.com",
-    projectId: runtimeConfig.public.firebaseProjectId || "curriculum-statistics",
-    storageBucket: runtimeConfig.public.firebaseStorageBucket || "curriculum-statistics.firebasestorage.app",
-    messagingSenderId: runtimeConfig.public.firebaseMessagingSenderId || "51782680110",
-    appId: runtimeConfig.public.firebaseAppId || "1:51782680110:web:6bc2a46eb9f791892a29bf"
+    apiKey: runtimeConfig.public.firebaseApiKey,
+    authDomain: runtimeConfig.public.firebaseAuthDomain,
+    projectId: runtimeConfig.public.firebaseProjectId,
+    storageBucket: runtimeConfig.public.firebaseStorageBucket,
+    messagingSenderId: runtimeConfig.public.firebaseMessagingSenderId,
+    appId: runtimeConfig.public.firebaseAppId
   }
 
   try {
