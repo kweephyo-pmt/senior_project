@@ -379,24 +379,7 @@ app.get('/api/lecturer/research/:staffCode', async (req, res) => {
   }
 });
 
-// Get lecturer publications by staff code
-app.get('/api/lecturer/publications/:staffCode', async (req, res) => {
-  try {
-    const { staffCode } = req.params;
-    const limit = req.query.limit || 10;
-    
-    const [rows] = await pool.query(
-      'SELECT title, venue, year, link FROM lecturer_publications WHERE staff_code = ? ORDER BY year DESC, id DESC LIMIT ?',
-      [staffCode, parseInt(limit)]
-    );
 
-    res.json(rows);
-
-  } catch (error) {
-    console.error('Error fetching lecturer publications:', error);
-    res.status(500).json({ error: 'Failed to fetch lecturer publications' });
-  }
-});
 
 // Administration Performance Chart endpoint with evaluation period filter
 app.get('/api/administration-performance/:staffCode', async (req, res) => {
@@ -750,6 +733,53 @@ app.delete('/api/budget/projects/:projectId', async (req, res) => {
   } catch (error) {
     console.error('Error deleting budget project:', error);
     res.status(500).json({ error: 'Failed to delete budget project' });
+  }
+});
+
+// Lecturer Publications endpoint with evaluation period filter
+app.get('/api/lecturer/publications/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid, limit } = req.query;
+    
+    let query = 'SELECT id, title, authors, venue, year, link, evaluateid FROM lecturer_publications WHERE staff_code = ?';
+    let params = [staffCode];
+    
+    // Add evaluation period filter if provided
+    if (evaluateid) {
+      query += ' AND evaluateid = ?';
+      params.push(evaluateid);
+    }
+    // If no evaluateid specified, show all publications
+    
+    query += ' ORDER BY year DESC, title ASC';
+    
+    // Add limit if provided
+    if (limit) {
+      query += ' LIMIT ?';
+      params.push(parseInt(limit));
+    }
+    
+    const [rows] = await pool.query(query, params);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No publications found for this staff member'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('Error fetching lecturer publications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch publications data'
+    });
   }
 });
 
