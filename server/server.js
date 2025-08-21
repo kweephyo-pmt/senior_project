@@ -484,6 +484,51 @@ app.get('/api/arts-culture-performance/:staffCode', async (req, res) => {
   }
 });
 
+// MFU Arranged Activities endpoint for Domain 5: Arts and Culture
+app.get('/api/mfu-arranged-activities/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    let query = `
+      SELECT 
+        id,
+        staff_code,
+        project_name,
+        activity_level,
+        evaluateid,
+        created_at
+      FROM mfu_arranged_activities 
+      WHERE staff_code = ?
+    `;
+    
+    const params = [staffCode];
+    
+    if (evaluateid) {
+      query += ' AND evaluateid = ?';
+      params.push(evaluateid);
+    }
+    
+    query += ' ORDER BY activity_level ASC, created_at DESC';
+    
+    const [rows] = await pool.query(query, params);
+    
+    res.json({
+      success: true,
+      data: rows,
+      count: rows.length,
+      message: rows.length > 0 ? 'MFU arranged activities retrieved successfully' : 'No MFU arranged activities found for this staff member'
+    });
+  } catch (error) {
+    console.error('Error fetching MFU arranged activities:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch MFU arranged activities',
+      error: error.message
+    });
+  }
+});
+
 // Budget API endpoints
 // Get budget overview for a staff member by staff code
 app.get('/api/budget/overview/:staffCode', async (req, res) => {

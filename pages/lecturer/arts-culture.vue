@@ -190,29 +190,26 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1</td>
-                  <td class="px-3 py-1">Cultural Heritage Workshop</td>
+                <tr v-if="mfuLoading">
+                  <td colspan="2" class="px-3 py-4 text-center text-gray-500">
+                    <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#4697b9] mr-2"></div>
+                    Loading MFU arranged activities...
+                  </td>
                 </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2</td>
-                  <td class="px-3 py-1">Traditional Arts Festival</td>
+                <tr v-else-if="mfuError">
+                  <td colspan="2" class="px-3 py-4 text-center text-red-600">
+                    {{ mfuError }}
+                  </td>
                 </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3</td>
-                  <td class="px-3 py-1">Community Engagement Program</td>
+                <tr v-else-if="mfuArrangedActivities.length === 0">
+                  <td colspan="2" class="px-3 py-4 text-center text-gray-500">
+                    No MFU arranged activities found for this evaluation period.
+                  </td>
                 </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">4</td>
-                  <td class="px-3 py-1">Local Culture Documentation</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">5</td>
-                  <td class="px-3 py-1">Arts Conservation Training</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">6</td>
-                  <td class="px-3 py-1">Cultural Exchange Initiative</td>
+                <tr v-else v-for="(activity, index) in mfuArrangedActivities" :key="activity.id" 
+                    :class="{ 'bg-[#E8F4FC]': index % 2 === 1 }">
+                  <td class="px-3 py-1 text-center">{{ activity.activity_level }}</td>
+                  <td class="px-3 py-1">{{ activity.project_name }}</td>
                 </tr>
               </tbody>
             </table>
@@ -232,6 +229,7 @@ import { useKpiData } from '@/composables/useKpiData'
 import { useArtsCulturePerformance } from '@/composables/useArtsCulturePerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 import { useSelfDevelopment } from '@/composables/useSelfDevelopment'
+import { useMfuArrangedActivities } from '@/composables/useMfuArrangedActivities'
 
 definePageMeta({
   layout: 'lecturer'
@@ -244,6 +242,7 @@ const { user, logout } = useFirebaseAuth()
 const { artsCultureData, loading: isLoadingChart, error: chartError, fetchArtsCulturePerformance, getChartData } = useArtsCulturePerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 const { getSelfDevelopmentData } = useSelfDevelopment()
+const { mfuArrangedActivities, loading: mfuLoading, error: mfuError, fetchMfuArrangedActivities } = useMfuArrangedActivities()
 
 // Reactive data
 const selectedEvaluationPeriod = ref<number | null>(null)
@@ -319,6 +318,15 @@ const loadSelfDevelopmentData = async () => {
   }
 }
 
+// Load MFU arranged activities
+const loadMfuArrangedActivities = async () => {
+  if (user.value?.email) {
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+    console.log('Loading MFU arranged activities for:', user.value.email, 'evaluation period:', evalId)
+    await fetchMfuArrangedActivities(user.value.email, evalId.toString())
+  }
+}
+
 // Format date helper
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -354,7 +362,8 @@ const onEvaluationPeriodChange = async () => {
     await Promise.all([
       fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData(),
-      loadSelfDevelopmentData()
+      loadSelfDevelopmentData(),
+      loadMfuArrangedActivities()
     ])
     initializeChart()
   }
@@ -455,7 +464,8 @@ onMounted(async () => {
   if (user.value?.email) {
     await Promise.all([
       fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value?.toString()),
-      loadSelfDevelopmentData()
+      loadSelfDevelopmentData(),
+      loadMfuArrangedActivities()
     ])
   }
   
@@ -476,7 +486,8 @@ watch(
       }
       await Promise.all([
         fetchArtsCulturePerformance(email, selectedEvaluationPeriod.value?.toString()),
-        loadSelfDevelopmentData()
+        loadSelfDevelopmentData(),
+        loadMfuArrangedActivities()
       ])
       // Re-initialize chart with new data
       await nextTick()
