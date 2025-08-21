@@ -25,6 +25,7 @@ export const useResearchPerformance = () => {
 
     loading.value = true
     error.value = null
+    researchData.value = [] // Clear existing data before fetching new data
 
     try {
       const baseUrl = 'https://senior-project-backend-51782680110.asia-southeast1.run.app'
@@ -36,17 +37,16 @@ export const useResearchPerformance = () => {
 
       const response = await $fetch(url) as any
       
-      if (response.success && response.data) {
-        researchData.value = response.data
+      if (response.success) {
+        researchData.value = response.data || []
       } else {
-        error.value = response.message || 'Failed to fetch research performance data'
+        researchData.value = [] // Clear data on error
         throw new Error(response.message || 'Failed to fetch research performance data');
       }
     } catch (err: any) {
       console.error('Error fetching research performance data:', err);
       error.value = err.message || 'Failed to fetch research performance data';
-      
-
+      researchData.value = [] // Clear data on error
     } finally {
       loading.value = false;
     }

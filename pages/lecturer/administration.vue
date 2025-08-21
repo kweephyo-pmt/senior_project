@@ -313,7 +313,34 @@ const initializeChart = () => {
     chartInstance.destroy()
   }
   
-  const chartData = getChartData()
+  let chartData;
+  
+  if (administrationData.value.length > 0) {
+    chartData = getChartData();
+  } else {
+    // Show empty chart with zero values using same template structure
+    chartData = {
+      labels: [
+        ['Academic Administration assigned', 'by the School or University'],
+        ['Coordination with Guest Lecturer'],
+        'Course Coordination',
+        ['University\'s Committee or', 'Committee-Appointed Working Group'],
+        ['School\'s Committee or', 'Committee-Appointed Working Group'],
+        'School Committee',
+        'Curricular Committee',
+        ['Administrative duty assigned', 'by the school']
+      ],
+      datasets: [
+        {
+          label: "Score",
+          data: [0, 0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: "#172554",
+          borderWidth: 0,
+          borderRadius: 0,
+        },
+      ],
+    };
+  }
   
   chartInstance = new Chart(administrationChart.value, {
     type: 'bar',

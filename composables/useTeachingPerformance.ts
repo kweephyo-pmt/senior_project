@@ -29,6 +29,7 @@ export const useTeachingPerformance = () => {
 
     loading.value = true;
     error.value = null;
+    teachingData.value = []; // Clear existing data before fetching new data
     
     try {
       const staffCode = extractStaffCode(user.value.email);
@@ -45,15 +46,15 @@ export const useTeachingPerformance = () => {
       const response = await $fetch(url);
       
       if (response.success) {
-        teachingData.value = response.data;
+        teachingData.value = response.data || [];
       } else {
+        teachingData.value = []; // Clear data on error
         throw new Error(response.message || 'Failed to fetch teaching performance data');
       }
     } catch (err: any) {
       console.error('Error fetching teaching performance data:', err);
       error.value = err.message || 'Failed to fetch teaching performance data';
-      
-
+      teachingData.value = []; // Clear data on error
     } finally {
       loading.value = false;
     }

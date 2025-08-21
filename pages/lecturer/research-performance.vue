@@ -346,13 +346,39 @@ Chart.register(ChartDataLabels);
 let chartInstance: Chart | null = null;
 
 const createChart = () => {
-  if (researchChart.value && researchData.value.length > 0) {
+  if (researchChart.value) {
     // Destroy existing chart if it exists
     if (chartInstance) {
       chartInstance.destroy();
     }
 
-    const chartData = getChartData();
+    let chartData;
+    
+    if (researchData.value.length > 0) {
+      chartData = getChartData();
+    } else {
+      // Show empty chart with zero values using same template structure
+      chartData = {
+        labels: [
+          ['Other Academic Work assigned', 'by the School'],
+          'Other Academic Work',
+          'Patented Inventions',
+          ['Composition of textbooks, Books,', 'and interactive/e-Learning Materials'],
+          'Academic Articles',
+          'Research Publication',
+          'Research Studies'
+        ],
+        datasets: [
+          {
+            label: "Score",
+            data: [0, 0, 0, 0, 0, 0, 0],
+            backgroundColor: "#172554",
+            borderWidth: 0,
+            borderRadius: 0,
+          },
+        ],
+      };
+    }
     
     chartInstance = new Chart(researchChart.value, {
       type: "bar",

@@ -265,10 +265,18 @@ import { computed, onMounted, ref, watch, onActivated, onUnmounted } from "vue";
 
 // Import KPI composable
 import { useKpiData } from '@/composables/useKpiData'
+import { useOverallPerformance } from '@/composables/useOverallPerformance'
 
 const { user, logout } = useFirebaseAuth()
 const { evaluationPeriods, loading: isLoadingPeriods, fetchEvaluationPeriods, activeEvaluationPeriod } = useEvaluationPeriods()
 const { getKpiData } = useKpiData()
+const { 
+  performanceData, 
+  loading: performanceLoading, 
+  error: performanceError, 
+  fetchOverallPerformance,
+  getPerformanceLevelColor 
+} = useOverallPerformance()
 
 // Selected evaluation period state
 const selectedEvaluationPeriod = ref<number | null>(null)
@@ -297,12 +305,7 @@ const fallbackKpiData = {
   artsCulture: 7.3
 }
 
-const fallbackPerformanceData = {
-  academicPerformance: 96.25,
-  behavior: 36,
-  totalScore: 92.25,
-  performanceLevel: 'Excellent'
-}
+// Remove hardcoded fallback data - will use database data instead
 
 // Format value helper
 const formatValue = (value: any) => {
@@ -326,42 +329,53 @@ const addLog = (message: string, type: 'info' | 'error' = 'info') => {
   }
 }
 
-// Load KPI data from database
+// Load KPI data and overall performance data from database
 const loadKpiData = async () => {
   try {
     loading.value = true
     fetchError.value = null
     
-    addLog('Starting KPI data fetch...')
+    addLog('Starting KPI and performance data fetch...')
     
     if (!user.value?.email) {
       throw new Error('User email not available')
     }
     
-    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 8
-    addLog(`Loading KPI data for: ${user.value.email}, evaluation period: ${evalId}`)
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+    addLog(`Loading data for: ${user.value.email}, evaluation period: ${evalId}`)
     
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Request timeout')), 10000)
     )
     
-    const dataPromise = getKpiData(user.value.email, evalId)
-    const data = await Promise.race([dataPromise, timeoutPromise])
+    // Fetch both KPI data and overall performance data
+    const kpiDataPromise = getKpiData(user.value.email, evalId)
+    const performanceDataPromise = fetchOverallPerformance(user.value.email, evalId)
+    
+    const results = await Promise.race([
+      Promise.all([kpiDataPromise, performanceDataPromise]), 
+      timeoutPromise
+    ]) as [any, any]
+    
+    const [kpiResult, performanceResult] = results
     
     addLog('Raw KPI data received:')
-    console.log('Raw Data:', data)
+    console.log('KPI Data:', kpiResult)
+    console.log('Performance Data:', performanceResult)
     
-    if (data && typeof data === 'object') {
-      kpiData.value = data as any
+    if (kpiResult && typeof kpiResult === 'object') {
+      kpiData.value = kpiResult as any
       dataSource.value = 'database'
-      addLog('✅ Successfully loaded data from database')
+      addLog('✅ Successfully loaded KPI data from database')
     } else {
-      throw new Error('Invalid data format received')
+      throw new Error('Invalid KPI data format received')
     }
+    
+    addLog('✅ Successfully loaded performance data from database')
     
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err)
-    addLog('❌ Failed to load KPI data: ' + errorMessage, 'error')
+    addLog('❌ Failed to load data: ' + errorMessage, 'error')
     fetchError.value = errorMessage
     dataSource.value = 'fallback'
     kpiData.value = null
@@ -500,22 +514,24 @@ const kpiCategories = computed(() => {
   return categories
 })
 
-// Overall performance data
+// Overall performance data from database
 const overallPerformance = computed(() => {
-  if (dataSource.value === 'database' && kpiData.value?.performance) {
-    return kpiData.value.performance
-  }
-  
-  if (dataSource.value === 'database' && kpiData.value?.academicPerformance !== undefined) {
+  if (performanceData.value) {
     return {
-      academicPerformance: kpiData.value.academicPerformance || 0,
-      behavior: kpiData.value.behavior || 0,
-      totalScore: kpiData.value.totalScore || 0,
-      performanceLevel: kpiData.value.performanceLevel || 'No Data'
+      academicPerformance: performanceData.value.academicPerformance || 0,
+      behavior: performanceData.value.behavior || 0,
+      totalScore: performanceData.value.totalScore || 0,
+      performanceLevel: performanceData.value.performanceLevel || 'No Data'
     }
   }
   
-  return fallbackPerformanceData
+  // Fallback if no data available
+  return {
+    academicPerformance: 0,
+    behavior: 0,
+    totalScore: 0,
+    performanceLevel: 'No Data'
+  }
 })
 
 definePageMeta({ layout: 'lecturer' })

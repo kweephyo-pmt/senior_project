@@ -783,6 +783,68 @@ app.get('/api/lecturer/publications/:staffCode', async (req, res) => {
   }
 });
 
+// Overall Performance endpoint - Get overall performance by staff code and evaluation period
+app.get('/api/overall-performance/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    // Default to evaluation period 9 if not specified
+    const evalId = evaluateid || 9;
+    
+    // Fetch overall performance data
+    const [rows] = await pool.query(
+      `SELECT 
+        staff_code,
+        staff_name,
+        academic_performance,
+        behavior_score,
+        total_score,
+        performance_level,
+        evaluateid,
+        created_at,
+        updated_at
+      FROM overall_performance 
+      WHERE staff_code = ? AND evaluateid = ?
+      ORDER BY created_at DESC
+      LIMIT 1`,
+      [staffCode, evalId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No overall performance data found for this staff code and evaluation period'
+      });
+    }
+
+    const performanceData = rows[0];
+    
+    res.json({
+      success: true,
+      data: {
+        staffCode: performanceData.staff_code,
+        staffName: performanceData.staff_name,
+        academicPerformance: parseFloat(performanceData.academic_performance),
+        behavior: parseFloat(performanceData.behavior_score),
+        totalScore: parseFloat(performanceData.total_score),
+        performanceLevel: performanceData.performance_level,
+        evaluateid: performanceData.evaluateid,
+        createdAt: performanceData.created_at,
+        updatedAt: performanceData.updated_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching overall performance data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch overall performance data',
+      error: error.message
+    });
+  }
+});
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

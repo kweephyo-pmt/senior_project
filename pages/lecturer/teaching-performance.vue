@@ -615,16 +615,50 @@ let chartInstance: Chart | null = null;
 
 // Initialize chart with database data
 const initializeChart = () => {
-  if (teachingChart.value && teachingData.value.length > 0) {
-    addLog('Initializing chart with database data...');
-    
+  if (teachingChart.value) {
     // Destroy existing chart if it exists
     if (chartInstance) {
       chartInstance.destroy();
       chartInstance = null;
     }
     
-    const chartData = getChartData()
+    let chartData;
+    
+    if (teachingData.value.length > 0) {
+      addLog('Initializing chart with database data...');
+      chartData = getChartData();
+    } else {
+      addLog('No teaching data available, showing empty chart with zeros...');
+      // Show empty chart with zero values using same template structure
+      chartData = {
+        labels: [
+          ['Other Teaching Tasks', 'Assigned by the Academic Office'],
+          ['Thesis Oversight', 'Duties'],
+          ['Student Projects or', 'Special Issues'],
+          ['Student', 'Internships'],
+          ['Graduate', 'Teaching'],
+          ['Undergraduate', 'Teaching']
+        ],
+        datasets: [
+          {
+            label: "Lecture (Score)",
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: "#172554",
+            borderWidth: 0,
+            borderRadius: 0,
+            stack: 'Stack 0',
+          },
+          {
+            label: "Lab (Score)",
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: "#a21a5b",
+            borderWidth: 0,
+            borderRadius: 0,
+            stack: 'Stack 0',
+          },
+        ],
+      };
+    }
     
     chartInstance = new Chart(teachingChart.value, {
       type: "bar",
@@ -725,7 +759,12 @@ const initializeChart = () => {
         },
       },
     });
-    addLog('Chart initialized with hardcoded data');
+    
+    if (teachingData.value.length > 0) {
+      addLog('Chart initialized with database data');
+    } else {
+      addLog('Chart initialized with empty data (showing zeros)');
+    }
   } else {
     addLog('Cannot initialize chart: teachingChart ref is null', 'error');
   }

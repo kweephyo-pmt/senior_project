@@ -25,6 +25,7 @@ export const useArtsCulturePerformance = () => {
 
     loading.value = true
     error.value = null
+    artsCultureData.value = [] // Clear existing data before fetching new data
 
     try {
       const baseUrl = 'https://senior-project-backend-51782680110.asia-southeast1.run.app'
@@ -36,15 +37,16 @@ export const useArtsCulturePerformance = () => {
 
       const response = await $fetch(url) as any
       
-      if (response.success && response.data) {
-        artsCultureData.value = response.data
+      if (response.success) {
+        artsCultureData.value = response.data || []
       } else {
-        error.value = response.message || 'Failed to fetch arts culture performance data'
+        artsCultureData.value = [] // Clear data on error
         throw new Error(response.message || 'Failed to fetch arts culture performance data');
       }
     } catch (err: any) {
       console.error('Error fetching arts culture performance data:', err);
       error.value = err.message || 'Failed to fetch arts culture performance data';
+      artsCultureData.value = [] // Clear data on error
     } finally {
       loading.value = false;
     }

@@ -299,7 +299,54 @@ const initializeChart = () => {
     chartInstance.destroy()
   }
   
-  const chartData = getChartData()
+  let chartData;
+  
+  if (academicServiceData.value.length > 0) {
+    chartData = getChartData();
+  } else {
+    // Show empty chart with zero values using same template structure
+    chartData = {
+      labels: [
+        'Other Services',
+        'Visiting Professor',
+        'Additional Assigned Tasks',
+        'Reviewer',
+        'Committee/Advisor',
+        'Guest Lecturer',
+        'Academic Service Activities'
+      ],
+      datasets: [
+        {
+          label: "Internal (Score)",
+          data: [0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: "#1D3555",
+          borderWidth: 0,
+          borderRadius: 4,
+        },
+        {
+          label: "External (Score)",
+          data: [0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: "#a21a5b",
+          borderWidth: 0,
+          borderRadius: 4,
+        },
+        {
+          label: "Non-Revenue (Score)",
+          data: [0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: "#059669",
+          borderWidth: 0,
+          borderRadius: 4,
+        },
+        {
+          label: "Revenue (Score)",
+          data: [0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: "#dc2626",
+          borderWidth: 0,
+          borderRadius: 4,
+        },
+      ],
+    };
+  }
   
   chartInstance = new Chart(academicChart.value, {
     type: 'bar',

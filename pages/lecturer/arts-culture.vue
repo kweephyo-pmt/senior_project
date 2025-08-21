@@ -381,7 +381,31 @@ const initializeChart = () => {
     chartInstance.destroy()
   }
   
-  const chartData = getChartData()
+  let chartData;
+  
+  if (artsCultureData.value.length > 0) {
+    chartData = getChartData();
+  } else {
+    // Show empty chart with zero values using same template structure
+    chartData = {
+      labels: [
+        ['Arts & Culture Conservation Performance'],
+        ['Organization development or participation'],
+        'Self-development',
+        'Student Development activities',
+        ['MFU-arranged arts & culture', 'conservation activities']
+      ],
+      datasets: [
+        {
+          label: "Score",
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: "#172554",
+          borderWidth: 0,
+          borderRadius: 0,
+        },
+      ],
+    };
+  }
   
   // Validate chart data before creating chart
   if (!chartData || !chartData.labels || chartData.labels.length === 0) {

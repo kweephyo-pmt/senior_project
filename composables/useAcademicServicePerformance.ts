@@ -25,6 +25,7 @@ export const useAcademicServicePerformance = () => {
 
     loading.value = true
     error.value = null
+    academicServiceData.value = [] // Clear existing data before fetching new data
 
     try {
       const baseUrl = 'https://senior-project-backend-51782680110.asia-southeast1.run.app'
@@ -36,16 +37,16 @@ export const useAcademicServicePerformance = () => {
 
       const response = await $fetch(url) as any
       
-      if (response.success && response.data) {
-        academicServiceData.value = response.data
+      if (response.success) {
+        academicServiceData.value = response.data || []
       } else {
-        error.value = response.message || 'Failed to fetch academic service performance data'
-        throw new Error(response.message || 'Failed to fetch academic service performance data');
+        academicServiceData.value = [] // Clear data on error
+        throw new Error(response.message || 'Failed to fetch academic service performance data')
       }
     } catch (err: any) {
-      console.error('Error fetching academic service performance data:', err);
-      error.value = err.message || 'Failed to fetch academic service performance data';
-      
+      console.error('Error fetching academic service performance data:', err)
+      error.value = err.message || 'Failed to fetch academic service performance data'
+      academicServiceData.value = [] // Clear data on error
 
     } finally {
       loading.value = false;

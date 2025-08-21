@@ -25,6 +25,7 @@ export const useAdministrationPerformance = () => {
 
     loading.value = true
     error.value = null
+    administrationData.value = [] // Clear existing data before fetching new data
 
     try {
       const baseUrl = 'https://senior-project-backend-51782680110.asia-southeast1.run.app'
@@ -36,15 +37,16 @@ export const useAdministrationPerformance = () => {
 
       const response = await $fetch(url) as any
       
-      if (response.success && response.data) {
-        administrationData.value = response.data
+      if (response.success) {
+        administrationData.value = response.data || []
       } else {
-        error.value = response.message || 'Failed to fetch administration performance data'
+        administrationData.value = [] // Clear data on error
         throw new Error(response.message || 'Failed to fetch administration performance data');
       }
     } catch (err: any) {
       console.error('Error fetching administration performance data:', err);
       error.value = err.message || 'Failed to fetch administration performance data';
+      administrationData.value = [] // Clear data on error
     } finally {
       loading.value = false;
     }
