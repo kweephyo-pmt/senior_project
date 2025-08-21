@@ -134,7 +134,17 @@
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Research Studies</h2>
           <div class="max-h-[200px] overflow-y-auto">
-            <table class="min-w-full text-xs">
+            <!-- Loading state -->
+            <div v-if="studiesLoading" class="flex justify-center items-center py-8">
+              <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#4697b9]"></div>
+              <p class="ml-2 text-xs text-gray-600">Loading studies...</p>
+            </div>
+            <!-- No data state -->
+            <div v-else-if="researchStudiesData.length === 0" class="text-center py-8">
+              <p class="text-xs text-gray-500">No research studies found</p>
+            </div>
+            <!-- Data table -->
+            <table v-else class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
                   <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">Level</th>
@@ -142,37 +152,9 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1</td>
-                  <td class="px-3 py-1">Self Project</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2</td>
-                  <td class="px-3 py-1">RECAI (Research Centre Reform)</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3</td>
-                  <td class="px-3 py-1">AI-Enhanced Learning Analytics</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">4</td>
-                  <td class="px-3 py-1">Smart Campus Initiative</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">5</td>
-                  <td class="px-3 py-1">Educational Data Mining Project</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">6</td>
-                  <td class="px-3 py-1">Student Success Prediction Model</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">7.1</td>
-                  <td class="px-3 py-1">Blockchain in Education</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">7.2</td>
-                  <td class="px-3 py-1">Virtual Reality Learning Environments</td>
+                <tr v-for="(study, index) in researchStudiesData" :key="study.id" :class="index % 2 === 1 ? 'bg-[#E8F4FC]' : ''">
+                  <td class="px-3 py-1 text-center">{{ study.level }}</td>
+                  <td class="px-3 py-1">{{ study.projectName }}</td>
                 </tr>
               </tbody>
             </table>
@@ -182,7 +164,17 @@
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Research Publication</h2>
           <div class="max-h-[200px] overflow-y-auto">
-            <table class="min-w-full text-xs">
+            <!-- Loading state -->
+            <div v-if="publicationsLoading" class="flex justify-center items-center py-8">
+              <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#4697b9]"></div>
+              <p class="ml-2 text-xs text-gray-600">Loading publications...</p>
+            </div>
+            <!-- No data state -->
+            <div v-else-if="researchPublicationsData.length === 0" class="text-center py-8">
+              <p class="text-xs text-gray-500">No research publications found</p>
+            </div>
+            <!-- Data table -->
+            <table v-else class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
                   <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">Level</th>
@@ -190,37 +182,9 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1</td>
-                  <td class="px-3 py-1">Self Research Highlights</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2</td>
-                  <td class="px-3 py-1">Gold Chain of Knowledge</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3</td>
-                  <td class="px-3 py-1">Machine Learning in Education</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">4</td>
-                  <td class="px-3 py-1">Adaptive Learning Systems</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">5</td>
-                  <td class="px-3 py-1">Educational Technology Integration</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">6</td>
-                  <td class="px-3 py-1">Digital Assessment Methods</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">7.1</td>
-                  <td class="px-3 py-1">Learning Analytics Dashboard</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">8.1</td>
-                  <td class="px-3 py-1">InsightlyHub</td>
+                <tr v-for="(publication, index) in researchPublicationsData" :key="publication.id" :class="index % 2 === 1 ? 'bg-[#E8F4FC]' : ''">
+                  <td class="px-3 py-1 text-center">{{ publication.level }}</td>
+                  <td class="px-3 py-1">{{ publication.projectName }}</td>
                 </tr>
               </tbody>
             </table>
@@ -239,6 +203,8 @@ import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import { useKpiData } from '@/composables/useKpiData'
 import { useResearchPerformance } from '@/composables/useResearchPerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
+import { useResearchStudies } from '@/composables/useResearchStudies'
+import { useResearchPublications } from '@/composables/useResearchPublications'
 
 
 definePageMeta({
@@ -249,19 +215,27 @@ const { getKpiData } = useKpiData()
 const { user,logout } = useFirebaseAuth()
 const { researchData, loading: researchLoading, error: researchError, fetchResearchPerformance, getChartData } = useResearchPerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
+const { getResearchStudies, formatResearchStudiesData } = useResearchStudies()
+const { getResearchPublications, formatResearchPublicationsData } = useResearchPublications()
 
 // Reactive data
 const selectedRound = ref('round2-2025')
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
 const loading = ref(true)
+const researchStudiesData = ref<any[]>([])
+const researchPublicationsData = ref<any[]>([])
+const studiesLoading = ref(false)
+const publicationsLoading = ref(false)
 
 // Handle evaluation period change
 const onEvaluationPeriodChange = async () => {
   if (selectedEvaluationPeriod.value && user.value?.email) {
     await Promise.all([
       fetchResearchPerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
-      loadKpiData()
+      loadKpiData(),
+      loadResearchStudies(),
+      loadResearchPublications()
     ])
     nextTick(() => {
       createChart()
@@ -338,6 +312,48 @@ const loadKpiData = async () => {
     console.error('Failed to load KPI data:', err)
   } finally {
     loading.value = false
+  }
+}
+
+// Load research studies data
+const loadResearchStudies = async () => {
+  try {
+    studiesLoading.value = true
+    if (user.value?.email) {
+      const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+      const response = await getResearchStudies(user.value.email, evalId)
+      if (response.success) {
+        researchStudiesData.value = formatResearchStudiesData(response.data)
+      } else {
+        researchStudiesData.value = []
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load research studies:', err)
+    researchStudiesData.value = []
+  } finally {
+    studiesLoading.value = false
+  }
+}
+
+// Load research publications data
+const loadResearchPublications = async () => {
+  try {
+    publicationsLoading.value = true
+    if (user.value?.email) {
+      const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+      const response = await getResearchPublications(user.value.email, evalId)
+      if (response.success) {
+        researchPublicationsData.value = formatResearchPublicationsData(response.data)
+      } else {
+        researchPublicationsData.value = []
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load research publications:', err)
+    researchPublicationsData.value = []
+  } finally {
+    publicationsLoading.value = false
   }
 }
 // Register the plugin
@@ -495,7 +511,9 @@ onMounted(async () => {
   if (user.value?.email) {
     await Promise.all([
       loadKpiData(),
-      fetchResearchPerformance(user.value.email)
+      fetchResearchPerformance(user.value.email),
+      loadResearchStudies(),
+      loadResearchPublications()
     ]);
   }
 });
@@ -527,7 +545,11 @@ watch(
         selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid;
       }
       
-      await fetchResearchPerformance(email);
+      await Promise.all([
+        fetchResearchPerformance(email),
+        loadResearchStudies(),
+        loadResearchPublications()
+      ]);
     }
   },
   { immediate: true }

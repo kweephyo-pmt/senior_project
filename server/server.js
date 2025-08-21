@@ -783,6 +783,98 @@ app.get('/api/lecturer/publications/:staffCode', async (req, res) => {
   }
 });
 
+// Research Studies endpoint - Get research studies for a staff member
+app.get('/api/research-studies/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    // Default to evaluation period 9 if not specified
+    const evalId = evaluateid || 9;
+    
+    const [rows] = await pool.query(
+      `SELECT 
+        id,
+        staff_code,
+        evaluateid,
+        level,
+        project_name,
+        created_at,
+        updated_at
+      FROM research_studies 
+      WHERE staff_code = ? AND evaluateid = ?
+      ORDER BY level ASC`,
+      [staffCode, evalId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No research studies found for this staff member'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('Error fetching research studies:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch research studies data',
+      error: error.message
+    });
+  }
+});
+
+// Research Publications endpoint - Get research publications for a staff member
+app.get('/api/research-publications/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    // Default to evaluation period 9 if not specified
+    const evalId = evaluateid || 9;
+    
+    const [rows] = await pool.query(
+      `SELECT 
+        id,
+        staff_code,
+        evaluateid,
+        level,
+        project_name,
+        created_at,
+        updated_at
+      FROM research_publications 
+      WHERE staff_code = ? AND evaluateid = ?
+      ORDER BY level ASC`,
+      [staffCode, evalId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No research publications found for this staff member'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('Error fetching research publications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch research publications data',
+      error: error.message
+    });
+  }
+});
+
 // Overall Performance endpoint - Get overall performance by staff code and evaluation period
 app.get('/api/overall-performance/:staffCode', async (req, res) => {
   try {
