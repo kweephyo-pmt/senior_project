@@ -110,7 +110,7 @@
                 <span class="text-gray-400">•</span>
                 <span class="text-xs sm:text-sm text-gray-500">{{ pub.authors }}</span>
               </div>
-              <a v-if="pub.link && pub.link !== '#'" :href="pub.link" 
+              <a v-if="pub.link && pub.link !== '#'" :href="pub.link.startsWith('http') ? pub.link : `https://${pub.link}`" target="_blank" rel="noopener noreferrer"
                  class="inline-flex items-center px-3 py-1.5 sm:py-2 bg-blue-200 text-blue-800 rounded text-xs sm:text-sm font-semibold mt-2 sm:mt-3">
                 <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

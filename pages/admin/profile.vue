@@ -177,13 +177,6 @@
     <div class="bg-white shadow rounded-xl p-6 mb-8">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold">Recent Publications</h2>
-        <button
-          @click="addPublication"
-          class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#036E94] transition-colors"
-          style="background-color: #036E94;"
-        >
-          + Add Publication
-        </button>
       </div>
       <div v-if="profile.publications.length">
         <div v-for="(pub, index) in profile.publications" :key="index" class="border p-4 rounded-md mb-2">
@@ -220,7 +213,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="text-gray-400 text-center py-4">No publications. Click "+ Add Publication" to add one.</div>
+      <div v-else class="text-gray-400 text-center py-4">No publications found.</div>
     </div>
 
     <!-- Action Buttons -->
