@@ -159,7 +159,7 @@
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   class="bg-blue-600 h-2 rounded-full"
-                  :style="{ width: overallPerformance.academicPerformance + '%' }"
+                  :style="{ width: (overallPerformance.academicPerformance / 60 * 100) + '%' }"
                 ></div>
               </div>
             </div>
@@ -174,7 +174,7 @@
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   class="bg-green-600 h-2 rounded-full"
-                  :style="{ width: overallPerformance.behavior + '%' }"
+                  :style="{ width: (overallPerformance.behavior / 40 * 100) + '%' }"
                 ></div>
               </div>
             </div>
