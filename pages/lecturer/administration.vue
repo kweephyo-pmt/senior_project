@@ -142,7 +142,17 @@
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Curricular Committee</h2>
           <div class="max-h-[200px] overflow-y-auto">
-            <table class="min-w-full text-xs">
+            <div v-if="curricularLoading" class="flex justify-center items-center py-4">
+              <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#4697b9]"></div>
+              <p class="ml-2 text-xs text-gray-600">Loading...</p>
+            </div>
+            <div v-else-if="curricularError" class="text-center py-4 text-xs text-red-600">
+              Error loading data
+            </div>
+            <div v-else-if="curricularData.length === 0" class="text-center py-4 text-xs text-gray-500">
+              No committee data available
+            </div>
+            <table v-else class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
                   <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">ID</th>
@@ -150,17 +160,9 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1</td>
-                  <td class="px-3 py-1 text-center">Dr. John Smith</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2</td>
-                  <td class="px-3 py-1 text-center">Prof. Jane Doe</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3</td>
-                  <td class="px-3 py-1 text-center">Dr. Michael Johnson</td>
+                <tr v-for="(item, index) in curricularData" :key="item.id" :class="index % 2 === 1 ? 'bg-[#E8F4FC]' : ''">
+                  <td class="px-3 py-1 text-center">{{ item.id }}</td>
+                  <td class="px-3 py-1 text-center">{{ item.staff_name }}</td>
                 </tr>
               </tbody>
             </table>
@@ -171,7 +173,17 @@
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">School Committee</h2>
           <div class="max-h-[200px] overflow-y-auto">
-            <table class="min-w-full text-xs">
+            <div v-if="schoolLoading" class="flex justify-center items-center py-4">
+              <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#4697b9]"></div>
+              <p class="ml-2 text-xs text-gray-600">Loading...</p>
+            </div>
+            <div v-else-if="schoolError" class="text-center py-4 text-xs text-red-600">
+              Error loading data
+            </div>
+            <div v-else-if="schoolData.length === 0" class="text-center py-4 text-xs text-gray-500">
+              No committee data available
+            </div>
+            <table v-else class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
                   <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">ID</th>
@@ -179,17 +191,9 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td class="px-3 py-1 text-center">1</td>
-                  <td class="px-3 py-1 text-center">Dr. Sarah Wilson</td>
-                </tr>
-                <tr class="bg-[#E8F4FC]">
-                  <td class="px-3 py-1 text-center">2</td>
-                  <td class="px-3 py-1 text-center">Prof. Robert Brown</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-1 text-center">3</td>
-                  <td class="px-3 py-1 text-center">Dr. Emily Davis</td>
+                <tr v-for="(item, index) in schoolData" :key="item.id" :class="index % 2 === 1 ? 'bg-[#E8F4FC]' : ''">
+                  <td class="px-3 py-1 text-center">{{ item.id }}</td>
+                  <td class="px-3 py-1 text-center">{{ item.staff_name }}</td>
                 </tr>
               </tbody>
             </table>
@@ -207,6 +211,8 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { onMounted, ref, computed, watch, nextTick } from 'vue'
 import { useKpiData } from '@/composables/useKpiData'
 import { useAdministrationPerformance } from '@/composables/useAdministrationPerformance'
+import { useCurricularCommittee } from '@/composables/useCurricularCommittee'
+import { useSchoolCommittee } from '@/composables/useSchoolCommittee'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 
 definePageMeta({
@@ -218,6 +224,8 @@ const showMobileMenu = ref(false)
 const { getKpiData } = useKpiData()
 const { user, logout } = useFirebaseAuth()
 const { administrationData, loading: isLoadingChart, error: chartError, fetchAdministrationPerformance, getChartData } = useAdministrationPerformance()
+const { curricularData, loading: curricularLoading, error: curricularError, fetchCurricularCommittee } = useCurricularCommittee()
+const { schoolData, loading: schoolLoading, error: schoolError, fetchSchoolCommittee } = useSchoolCommittee()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 
 // Reactive data
@@ -298,6 +306,8 @@ const onEvaluationPeriodChange = async () => {
   if (user.value?.email && selectedEvaluationPeriod.value) {
     await Promise.all([
       fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
+      fetchCurricularCommittee(user.value.email, selectedEvaluationPeriod.value.toString()),
+      fetchSchoolCommittee(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData()
     ])
     initializeChart()
@@ -415,7 +425,11 @@ onMounted(async () => {
   
   // Load administration performance data
   if (user.value?.email) {
-    await fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value?.toString())
+    await Promise.all([
+      fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value?.toString()),
+      fetchCurricularCommittee(user.value.email, selectedEvaluationPeriod.value?.toString()),
+      fetchSchoolCommittee(user.value.email, selectedEvaluationPeriod.value?.toString())
+    ])
   }
   
   // Initialize the chart with database data
@@ -432,7 +446,11 @@ watch(
       if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
         selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
       }
-      await fetchAdministrationPerformance(email, selectedEvaluationPeriod.value?.toString())
+      await Promise.all([
+        fetchAdministrationPerformance(email, selectedEvaluationPeriod.value?.toString()),
+        fetchCurricularCommittee(email, selectedEvaluationPeriod.value?.toString()),
+        fetchSchoolCommittee(email, selectedEvaluationPeriod.value?.toString())
+      ])
       // Re-initialize chart with new data
       initializeChart()
     }

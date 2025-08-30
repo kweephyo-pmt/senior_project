@@ -938,6 +938,146 @@ app.get('/api/overall-performance/:staffCode', async (req, res) => {
 });
 
 
+// Curricular Committee endpoint - Get curricular committee data only
+app.get('/api/curricular-committee/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    // Default to evaluation period 9 if not specified
+    const evalId = evaluateid || 9;
+    
+    // Fetch all curricular committee members for the evaluation period
+    const [rows] = await pool.query(
+      `SELECT 
+        id,
+        staff_code,
+        staff_name,
+        evaluateid
+      FROM curricular_committee 
+      WHERE evaluateid = ?
+      ORDER BY id ASC`,
+      [evalId]
+    );
+    
+    res.json({
+      success: true,
+      data: rows,
+      staffCode,
+      evaluateid: evalId
+    });
+    
+  } catch (error) {
+    console.error('Error fetching curricular committee data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch curricular committee data',
+      error: error.message
+    });
+  }
+});
+
+// School Committee endpoint - Get school committee data only
+app.get('/api/school-committee/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    // Default to evaluation period 9 if not specified
+    const evalId = evaluateid || 9;
+    
+    // Fetch all school committee members for the evaluation period
+    const [rows] = await pool.query(
+      `SELECT 
+        id,
+        staff_code,
+        staff_name,
+        evaluateid
+      FROM school_committee 
+      WHERE evaluateid = ?
+      ORDER BY id ASC`,
+      [evalId]
+    );
+    
+    res.json({
+      success: true,
+      data: rows,
+      staffCode,
+      evaluateid: evalId
+    });
+    
+  } catch (error) {
+    console.error('Error fetching school committee data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch school committee data',
+      error: error.message
+    });
+  }
+});
+
+// Administration Performance endpoint - Get combined curricular and school committee data for table display
+app.get('/api/administration-performance/:staffCode', async (req, res) => {
+  try {
+    const { staffCode } = req.params;
+    const { evaluateid } = req.query;
+    
+    // Default to evaluation period 9 if not specified
+    const evalId = evaluateid || 9;
+    
+    // Fetch both curricular and school committee data
+    const [curricularRows] = await pool.query(
+      `SELECT 
+        id,
+        staff_code,
+        staff_name,
+        evaluateid,
+        'Curricular Committee' as category
+      FROM curricular_committee 
+      WHERE staff_code = ? AND evaluateid = ?
+      ORDER BY id DESC`,
+      [staffCode, evalId]
+    );
+    
+    const [schoolRows] = await pool.query(
+      `SELECT 
+        id,
+        staff_code,
+        staff_name,
+        evaluateid,
+        'School Committee' as category
+      FROM school_committee 
+      WHERE staff_code = ? AND evaluateid = ?
+      ORDER BY id DESC`,
+      [staffCode, evalId]
+    );
+    
+    // Combine and format data for table display
+    const combinedData = [...curricularRows, ...schoolRows].map(row => ({
+      id: row.id,
+      staff_code: row.staff_code,
+      staff_name: row.staff_name,
+      category: row.category,
+      evaluateid: row.evaluateid
+    }));
+    
+    res.json({
+      success: true,
+      data: combinedData,
+      staffCode,
+      evaluateid: evalId
+    });
+    
+  } catch (error) {
+    console.error('Error fetching administration performance data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch administration performance data',
+      error: error.message
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
