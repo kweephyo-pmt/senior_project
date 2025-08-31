@@ -284,18 +284,6 @@ const selectedEvaluationPeriod = ref<number | null>(null)
 // State management
 const loading = ref(true)
 const fetchError = ref<string | null>(null)
-const dataSource = ref<'api' | 'fallback'>('fallback')
-
-// Fallback data when API fails
-const fallbackKpiData = {
-  teaching: { weight: 60, value: 60 },
-  research: { weight: 15, value: 15 },
-  academicService: { weight: 10, value: 10 },
-  administration: { weight: 5, value: 5 },
-  artsCulture: { weight: 10, value: 10 }
-}
-
-// Remove hardcoded fallback data - will use database data instead
 
 // Format value helper
 const formatValue = (value: any) => {
@@ -345,7 +333,6 @@ const loadKpiData = async () => {
     console.log('Performance Data:', performanceResult)
     
     if (kpiResult && kpiResult.categories) {
-      dataSource.value = 'api'
       addLog('✅ Successfully loaded KPI data from MFU API')
     } else {
       throw new Error('Invalid KPI data format received from MFU API')
@@ -357,8 +344,7 @@ const loadKpiData = async () => {
     const errorMessage = err instanceof Error ? err.message : String(err)
     addLog('❌ Failed to load data: ' + errorMessage, 'error')
     fetchError.value = errorMessage
-    dataSource.value = 'fallback'
-    addLog('📝 Using fallback data instead')
+    // No fallback data - will show zeros if API fails
   } finally {
     loading.value = false
   }
@@ -370,26 +356,29 @@ const retryFetch = async () => {
   await loadKpiData()
 }
 
-// Current KPI data computed from MFU API or fallback
+// Current KPI data computed from MFU API only
 const currentKpiData = computed(() => {
-  if (dataSource.value === 'api' && mfuKpiData.value) {
+  if (mfuKpiData.value && mfuKpiData.value.categories && Array.isArray(mfuKpiData.value.categories)) {
     addLog('Using MFU API KPI data...')
     
-    // Extract data from MFU API response
-    if (mfuKpiData.value.categories && Array.isArray(mfuKpiData.value.categories)) {
-      const categories = mfuKpiData.value.categories
-      return {
-        teaching: { weight: categories[0]?.weight || 60, value: categories[0]?.value || 60 },
-        research: { weight: categories[1]?.weight || 15, value: categories[1]?.value || 15 },
-        academicService: { weight: categories[2]?.weight || 10, value: categories[2]?.value || 10 },
-        administration: { weight: categories[3]?.weight || 5, value: categories[3]?.value || 5 },
-        artsCulture: { weight: categories[4]?.weight || 10, value: categories[4]?.value || 10 }
-      }
+    const categories = mfuKpiData.value.categories
+    return {
+      teaching: { weight: categories[0]?.weight || 0, value: categories[0]?.value || 0 },
+      research: { weight: categories[1]?.weight || 0, value: categories[1]?.value || 0 },
+      academicService: { weight: categories[2]?.weight || 0, value: categories[2]?.value || 0 },
+      administration: { weight: categories[3]?.weight || 0, value: categories[3]?.value || 0 },
+      artsCulture: { weight: categories[4]?.weight || 0, value: categories[4]?.value || 0 }
     }
   }
   
-  addLog('Using fallback KPI data')
-  return fallbackKpiData
+  // Return zeros when no API data available
+  return {
+    teaching: { weight: 0, value: 0 },
+    research: { weight: 0, value: 0 },
+    academicService: { weight: 0, value: 0 },
+    administration: { weight: 0, value: 0 },
+    artsCulture: { weight: 0, value: 0 }
+  }
 })
 
 // KPI categories computed from current data
@@ -484,7 +473,7 @@ function renderChart() {
   const ringThickness = 60;
   const ringSpacing = -60;
 
-  addLog('Rendering chart with data from: ' + dataSource.value)
+  addLog('Rendering chart with API data')
 
   const datasets = categories.map((cat, index) => {
     const outerRadius = 100 - (index * (ringThickness + ringSpacing));
@@ -561,9 +550,9 @@ function renderChart() {
 }
 
 // Watch for changes in data and update chart
-const stopDataWatcher = watch([mfuKpiData, dataSource, kpiCategories], () => {
+const stopDataWatcher = watch([mfuKpiData, kpiCategories], () => {
   // Only re-render if not currently loading AND data is available
-  if (!loading.value && (mfuKpiData.value || dataSource.value === 'fallback')) {
+  if (!loading.value && mfuKpiData.value) {
     addLog('Data source or data changed, re-rendering chart')
     renderChart();
   }
@@ -606,7 +595,7 @@ const initializeComponentData = async () => {
       }
     }
     
-    addLog('📊 Initializing chart with ' + dataSource.value + ' data...');
+    addLog('📊 Initializing chart with API data...');
     renderChart();
     addLog('✅ Chart initialized successfully');
   } catch (error) {

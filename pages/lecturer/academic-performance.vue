@@ -46,25 +46,8 @@
       <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
     </div>
 
-    <!-- No KPI data available message -->
-    <div v-if="!loading && !kpiLoading && mfuKpiData === null" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 sm:mb-8">
-      <div class="flex items-start">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-yellow-800">No KPI Data Available</h3>
-          <div class="mt-2 text-sm text-yellow-700">
-            <p>No KPI weights found for the selected evaluation period. Please try a different period or contact support.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPI Categories with NuxtLink, only when not loading -->
-    <div v-if="!loading && !kpiLoading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+    <!-- KPI Categories with NuxtLink, only when data is loaded -->
+    <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -75,7 +58,7 @@
         "
       >
         <p class="text-sm text-inherit">Teaching (60%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights.teaching }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.teaching || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -88,7 +71,7 @@
         "
       >
         <p class="text-sm text-inherit">Research (40%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights.research }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.research || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -101,7 +84,7 @@
         "
       >
         <p class="text-sm text-inherit">Academic Service (35%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights.academicService }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.academicService || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -114,7 +97,7 @@
         "
       >
         <p class="text-sm text-inherit">Administration (30%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights.administration }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.administration || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -127,7 +110,7 @@
         "
       >
         <p class="text-sm text-inherit">Arts and Culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights.artsCulture }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.artsCulture || 0 }}%</p>
       </NuxtLink>
     </div>
 

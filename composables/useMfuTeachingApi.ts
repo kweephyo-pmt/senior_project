@@ -19,11 +19,6 @@ export const useMfuTeachingApi = () => {
   const extractStaffCode = async (email: string): Promise<string> => {
     if (!email) return ''
     
-    // For development, use fallback mapping for known test email
-    if (email === '6531503172@lamduan.mfu.ac.th') {
-      return '65212167' // Known mapping from database
-    }
-    
     try {
       // Use production API URL for staff code lookup
       const response = await fetch('https://senior-project-backend-51782680110.asia-southeast1.run.app/api/lecturer/lookup-staffcode', {
