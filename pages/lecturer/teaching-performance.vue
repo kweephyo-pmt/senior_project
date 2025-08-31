@@ -141,10 +141,10 @@
         <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
           Threshold (75) - Earned score (93.50)
         </p>
-        <!-- Quality at Work positioned beside title/threshold -->
+        <!-- Qualitative Work positioned beside title/threshold -->
         <div class="absolute top-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-10 min-w-[140px]">
           <div class="bg-[#2C5282] text-white px-6 py-1.5 text-center">
-            <h3 class="text-sm font-bold">Quality at work</h3>
+            <h3 class="text-sm font-bold">Qualitative work</h3>
           </div>
           <div class="bg-white px-6 py-2 text-center">
             <div class="text-2xl font-bold text-gray-800">43/50</div>
