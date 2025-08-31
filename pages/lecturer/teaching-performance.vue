@@ -142,12 +142,12 @@
           Threshold (75) - Earned score (93.50)
         </p>
         <!-- Qualitative Work positioned beside title/threshold -->
-        <div class="absolute top-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-10 min-w-[140px]">
-          <div class="bg-[#2C5282] text-white px-6 py-1.5 text-center">
-            <h3 class="text-sm font-bold">Qualitative work</h3>
+        <div class="absolute top-4 right-4 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden z-10 min-w-[120px]">
+          <div class="bg-[#2C5282] text-white px-4 py-1 text-center">
+            <h3 class="text-xs font-bold">Qualitative work</h3>
           </div>
-          <div class="bg-white px-6 py-2 text-center">
-            <div class="text-2xl font-bold text-gray-800">43/50</div>
+          <div class="bg-white px-4 py-1.5 text-center">
+            <div class="text-xl font-bold text-gray-800">43/50</div>
           </div>
         </div>
         
