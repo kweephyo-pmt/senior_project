@@ -91,48 +91,6 @@ app.get('/api/evaluation-periods', async (req, res) => {
   }
 });
 
-// Teaching Performance Chart endpoint with evaluation period filter
-app.get('/api/teaching-performance/:staffCode', async (req, res) => {
-  try {
-    const { staffCode } = req.params;
-    const { evaluateid } = req.query;
-    
-    let query = 'SELECT category, lecture_score, lab_score, display_order FROM teaching_performance WHERE staff_code = ?';
-    let params = [staffCode];
-    
-    // Add evaluation period filter if provided
-    if (evaluateid) {
-      query += ' AND evaluateid = ?';
-      params.push(evaluateid);
-    } else {
-      // Default to most recent active period (evaluateid 9 = 1/2025)
-      query += ' AND evaluateid = 9';
-    }
-    
-    query += ' ORDER BY display_order';
-    
-    const [rows] = await pool.query(query, params);
-    
-    if (rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No teaching performance data found for this staff code and evaluation period'
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: rows
-    });
-  } catch (error) {
-    console.error('Error fetching teaching performance data:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
-});
 
 // Research Performance Chart endpoint with evaluation period filter
 app.get('/api/research-performance/:staffCode', async (req, res) => {
@@ -1073,6 +1031,51 @@ app.get('/api/administration-performance/:staffCode', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch administration performance data',
+      error: error.message
+    });
+  }
+});
+
+// Staff Code Lookup endpoint - Get staff code from lecturer_profiles by email
+app.post('/api/lecturer/lookup-staffcode', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+    
+    // Query lecturer_profiles table for staff code
+    const [rows] = await pool.execute(
+      `SELECT staff_code, staff_name 
+       FROM lecturer_profiles 
+       WHERE email = ? 
+       LIMIT 1`,
+      [email]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Staff member not found for this email'
+      });
+    }
+    
+    const staff = rows[0];
+    res.json({
+      success: true,
+      staffCode: staff.staff_code,
+      staffName: staff.staff_name
+    });
+    
+  } catch (error) {
+    console.error('Error looking up staff code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to lookup staff code',
       error: error.message
     });
   }

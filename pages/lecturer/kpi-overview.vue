@@ -64,7 +64,7 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research (15%)</p>
+        <p class="text-sm text-inherit">Research (40%)</p>
         <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[1]?.value) }}%</p>
       </NuxtLink>
 
@@ -77,7 +77,7 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service (10%)</p>
+        <p class="text-sm text-inherit">Academic Service (35%)</p>
         <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[2]?.value) }}%</p>
       </NuxtLink>
 
@@ -90,7 +90,7 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration (5%)</p>
+        <p class="text-sm text-inherit">Administration (30%)</p>
         <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[3]?.value) }}%</p>
       </NuxtLink>
 
@@ -264,12 +264,12 @@ import Chart from "chart.js/auto";
 import { computed, onMounted, ref, watch, onActivated, onUnmounted } from "vue";
 
 // Import KPI composable
-import { useKpiData } from '@/composables/useKpiData'
+import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
 import { useOverallPerformance } from '@/composables/useOverallPerformance'
 
 const { user, logout } = useFirebaseAuth()
 const { evaluationPeriods, loading: isLoadingPeriods, fetchEvaluationPeriods, activeEvaluationPeriod } = useEvaluationPeriods()
-const { getKpiData } = useKpiData()
+const { kpiData: mfuKpiData, isLoading: mfuKpiLoading, error: mfuKpiError, fetchKpiPercentages } = useMfuKpiApi()
 const { 
   performanceData, 
   loading: performanceLoading, 
@@ -283,26 +283,16 @@ const selectedEvaluationPeriod = ref<number | null>(null)
 
 // State management
 const loading = ref(true)
-const kpiData = ref<any>(null)
 const fetchError = ref<string | null>(null)
-const dataSource = ref<'database' | 'fallback'>('fallback')
+const dataSource = ref<'api' | 'fallback'>('fallback')
 
-// Fixed KPI weights
-const FIXED_KPI_WEIGHTS = {
-  teaching: 60,
-  research: 15,
-  academicService: 10,
-  administration: 5,
-  artsCulture: 10
-}
-
-// Fallback data
+// Fallback data when API fails
 const fallbackKpiData = {
-  teaching: 45.5,
-  research: 8.2,
-  academicService: 6.1,
-  administration: 2.8,
-  artsCulture: 7.3
+  teaching: { weight: 60, value: 60 },
+  research: { weight: 15, value: 15 },
+  academicService: { weight: 10, value: 10 },
+  administration: { weight: 5, value: 5 },
+  artsCulture: { weight: 10, value: 10 }
 }
 
 // Remove hardcoded fallback data - will use database data instead
@@ -329,13 +319,13 @@ const addLog = (message: string, type: 'info' | 'error' = 'info') => {
   }
 }
 
-// Load KPI data and overall performance data from database
+// Load KPI data from MFU API and overall performance data
 const loadKpiData = async () => {
   try {
     loading.value = true
     fetchError.value = null
     
-    addLog('Starting KPI and performance data fetch...')
+    addLog('Starting KPI and performance data fetch from MFU API...')
     
     if (!user.value?.email) {
       throw new Error('User email not available')
@@ -344,41 +334,30 @@ const loadKpiData = async () => {
     const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
     addLog(`Loading data for: ${user.value.email}, evaluation period: ${evalId}`)
     
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Request timeout')), 10000)
-    )
+    // Fetch both KPI data from MFU API and overall performance data
+    const [kpiResult, performanceResult] = await Promise.all([
+      fetchKpiPercentages(user.value.email, evalId),
+      fetchOverallPerformance(user.value.email, evalId)
+    ])
     
-    // Fetch both KPI data and overall performance data
-    const kpiDataPromise = getKpiData(user.value.email, evalId)
-    const performanceDataPromise = fetchOverallPerformance(user.value.email, evalId)
-    
-    const results = await Promise.race([
-      Promise.all([kpiDataPromise, performanceDataPromise]), 
-      timeoutPromise
-    ]) as [any, any]
-    
-    const [kpiResult, performanceResult] = results
-    
-    addLog('Raw KPI data received:')
+    addLog('Raw KPI data received from MFU API:')
     console.log('KPI Data:', kpiResult)
     console.log('Performance Data:', performanceResult)
     
-    if (kpiResult && typeof kpiResult === 'object') {
-      kpiData.value = kpiResult as any
-      dataSource.value = 'database'
-      addLog('✅ Successfully loaded KPI data from database')
+    if (kpiResult && kpiResult.categories) {
+      dataSource.value = 'api'
+      addLog('✅ Successfully loaded KPI data from MFU API')
     } else {
-      throw new Error('Invalid KPI data format received')
+      throw new Error('Invalid KPI data format received from MFU API')
     }
     
-    addLog('✅ Successfully loaded performance data from database')
+    addLog('✅ Successfully loaded performance data')
     
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err)
     addLog('❌ Failed to load data: ' + errorMessage, 'error')
     fetchError.value = errorMessage
     dataSource.value = 'fallback'
-    kpiData.value = null
     addLog('📝 Using fallback data instead')
   } finally {
     loading.value = false
@@ -391,126 +370,80 @@ const retryFetch = async () => {
   await loadKpiData()
 }
 
-// Enhanced data parsing
-interface KpiCategoryValues {
-  teaching: number;
-  research: number;
-  academicService: number;
-  administration: number;
-  artsCulture: number;
-}
-
-const currentKpiData = computed<KpiCategoryValues>(() => {
-  if (dataSource.value === 'database' && kpiData.value) {
-    addLog('Parsing database KPI data...')
+// Current KPI data computed from MFU API or fallback
+const currentKpiData = computed(() => {
+  if (dataSource.value === 'api' && mfuKpiData.value) {
+    addLog('Using MFU API KPI data...')
     
-    // Strategy 1: Look for categories array
-    if (kpiData.value.categories && Array.isArray(kpiData.value.categories)) {
-      const mapped: any = {}
-      kpiData.value.categories.forEach((cat: any) => {
-        if (cat.key && typeof cat.value !== 'undefined') {
-          mapped[cat.key] = parseFloat(cat.value) || 0
-        } else if (cat.name) { // Map by name if key is not available
-          const name = cat.name.toLowerCase().replace(/\s+/g, '')
-          if (name.includes('teaching')) mapped.teaching = parseFloat(cat.value) || 0
-          else if (name.includes('research')) mapped.research = parseFloat(cat.value) || 0
-          else if (name.includes('academic') || name.includes('service')) mapped.academicService = parseFloat(cat.value) || 0
-          else if (name.includes('administration')) mapped.administration = parseFloat(cat.value) || 0
-          else if (name.includes('arts') || name.includes('culture')) mapped.artsCulture = parseFloat(cat.value) || 0
-        }
-      })
-      return mapped
-    }
-    
-    // Strategy 2: Look for direct properties
-    if (typeof kpiData.value.teaching !== 'undefined' || 
-        typeof kpiData.value.research !== 'undefined') {
+    // Extract data from MFU API response
+    if (mfuKpiData.value.categories && Array.isArray(mfuKpiData.value.categories)) {
+      const categories = mfuKpiData.value.categories
       return {
-        teaching: parseFloat(kpiData.value.teaching) || 0,
-        research: parseFloat(kpiData.value.research) || 0,
-        academicService: parseFloat(kpiData.value.academicService || kpiData.value.academic_service) || 0,
-        administration: parseFloat(kpiData.value.administration) || 0,
-        artsCulture: parseFloat(kpiData.value.artsCulture || kpiData.value.arts_culture) || 0
+        teaching: { weight: categories[0]?.weight || 60, value: categories[0]?.value || 60 },
+        research: { weight: categories[1]?.weight || 15, value: categories[1]?.value || 15 },
+        academicService: { weight: categories[2]?.weight || 10, value: categories[2]?.value || 10 },
+        administration: { weight: categories[3]?.weight || 5, value: categories[3]?.value || 5 },
+        artsCulture: { weight: categories[4]?.weight || 10, value: categories[4]?.value || 10 }
       }
     }
-    
-    // Strategy 3: Look for nested data
-    if (kpiData.value.data && typeof kpiData.value.data === 'object') {
-      const nestedData = kpiData.value.data
-      return {
-        teaching: parseFloat(nestedData.teaching) || 0,
-        research: parseFloat(nestedData.research) || 0,
-        academicService: parseFloat(nestedData.academicService || nestedData.academic_service) || 0,
-        administration: parseFloat(nestedData.administration) || 0,
-        artsCulture: parseFloat(nestedData.artsCulture || nestedData.arts_culture) || 0
-      }
-    }
-    
-    // Strategy 4: Look for any numeric values
-    const numericFields = Object.keys(kpiData.value).filter(key => 
-      typeof kpiData.value[key] === 'number' && kpiData.value[key] >= 0
-    )
-    
-    if (numericFields.length >= 5) {
-      return {
-        teaching: parseFloat(kpiData.value[numericFields[0]]) || 0,
-        research: parseFloat(kpiData.value[numericFields[1]]) || 0,
-        academicService: parseFloat(kpiData.value[numericFields[2]]) || 0,
-        administration: parseFloat(kpiData.value[numericFields[3]]) || 0,
-        artsCulture: parseFloat(kpiData.value[numericFields[4]]) || 0
-      }
-    }
-    
-    addLog('Could not parse database structure, using fallback')
   }
   
   addLog('Using fallback KPI data')
   return fallbackKpiData
 })
 
-// KPI categories with enhanced data mapping
+// KPI categories computed from current data
 const kpiCategories = computed(() => {
   const currentValues = currentKpiData.value
+  
+  // Define maximum weights for each category
+  const maxWeights = {
+    teaching: 60,
+    research: 40,
+    academicService: 35,
+    administration: 30,
+    artsCulture: 10
+  }
   
   const categories = [
     { 
       name: 'Teaching', 
-      weight: FIXED_KPI_WEIGHTS.teaching,
-      value: currentValues.teaching || 0,
+      weight: maxWeights.teaching,
+      value: currentValues.teaching.weight || 0, // API value
       color: '#005F99', 
       key: 'teaching' 
     },
     { 
       name: 'Research', 
-      weight: FIXED_KPI_WEIGHTS.research,
-      value: currentValues.research || 0,
+      weight: maxWeights.research,
+      value: currentValues.research.weight || 0, // API value
       color: '#00BFFF', 
       key: 'research' 
     },
     { 
       name: 'Academic Service', 
-      weight: FIXED_KPI_WEIGHTS.academicService,
-      value: currentValues.academicService || 0,
+      weight: maxWeights.academicService,
+      value: currentValues.academicService.weight || 0, // API value
       color: '#7FD6D6', 
       key: 'academicService' 
     },
     { 
       name: 'Administration', 
-      weight: FIXED_KPI_WEIGHTS.administration,
-      value: currentValues.administration || 0,
+      weight: maxWeights.administration,
+      value: currentValues.administration.weight || 0, // API value
       color: '#7c3aed', 
       key: 'administration' 
     },
     { 
       name: 'Arts and Culture', 
-      weight: FIXED_KPI_WEIGHTS.artsCulture,
-      value: currentValues.artsCulture || 0,
+      weight: maxWeights.artsCulture,
+      value: currentValues.artsCulture.weight || 0, // API value
       color: '#8A8BE6', 
       key: 'artsCulture' 
     }
   ]
   
-  addLog('Final KPI categories computed')
+  addLog('Final KPI categories computed with max weights')
   return categories
 })
 
@@ -628,9 +561,9 @@ function renderChart() {
 }
 
 // Watch for changes in data and update chart
-const stopDataWatcher = watch([kpiData, dataSource], () => {
+const stopDataWatcher = watch([mfuKpiData, dataSource, kpiCategories], () => {
   // Only re-render if not currently loading AND data is available
-  if (!loading.value && (kpiData.value || dataSource.value === 'fallback')) {
+  if (!loading.value && (mfuKpiData.value || dataSource.value === 'fallback')) {
     addLog('Data source or data changed, re-rendering chart')
     renderChart();
   }
@@ -644,6 +577,11 @@ let chartInitialized = false; // Flag to ensure chart is initialized only once a
 const onEvaluationPeriodChange = async () => {
   addLog(`🔄 Evaluation period changed to: ${selectedEvaluationPeriod.value}`)
   await loadKpiData()
+  // Force chart re-render after data loads
+  if (!loading.value) {
+    addLog('🔄 Forcing chart re-render after evaluation period change')
+    renderChart()
+  }
 }
 
 const initializeComponentData = async () => {

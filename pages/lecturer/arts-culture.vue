@@ -46,8 +46,25 @@
        <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
      </div>
 
+     <!-- No KPI data available message -->
+    <div v-if="!loading && !kpiLoading && mfuKpiData === null" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 sm:mb-8">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">No KPI Data Available</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>No KPI weights found for the selected evaluation period. Please try a different period or contact support.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
      <!-- KPI Categories with NuxtLink, only when not loading -->
-     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+     <div v-if="!loading && !kpiLoading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -58,7 +75,7 @@
         "
       >
         <p class="text-sm text-inherit">Teaching (60%)</p>
-        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[0]?.value) }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights.teaching }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -70,8 +87,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research (15%)</p>
-        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[1]?.value) }}%</p>
+        <p class="text-sm text-inherit">Research (40%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights.research }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -83,8 +100,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[2]?.value) }}%</p>
+        <p class="text-sm text-inherit">Academic Service (35%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights.academicService }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -96,8 +113,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration (5%)</p>
-        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[3]?.value) }}%</p>
+        <p class="text-sm text-inherit">Administration (30%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights.administration }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -110,7 +127,7 @@
         "
       >
         <p class="text-sm text-inherit">Arts and Culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ formatValue(kpiCategories[4]?.value) }}%</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights.artsCulture }}%</p>
       </NuxtLink>
     </div>
   
@@ -225,11 +242,11 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'   
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-import { useKpiData } from '@/composables/useKpiData'
 import { useArtsCulturePerformance } from '@/composables/useArtsCulturePerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 import { useSelfDevelopment } from '@/composables/useSelfDevelopment'
 import { useMfuArrangedActivities } from '@/composables/useMfuArrangedActivities'
+import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
 
 definePageMeta({
   layout: 'lecturer'
@@ -237,12 +254,12 @@ definePageMeta({
 
 const acChart = ref<HTMLCanvasElement | null>(null)
 const showMobileMenu = ref(false)
-const { getKpiData } = useKpiData()
 const { user, logout } = useFirebaseAuth()
 const { artsCultureData, loading: isLoadingChart, error: chartError, fetchArtsCulturePerformance, getChartData } = useArtsCulturePerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 const { getSelfDevelopmentData } = useSelfDevelopment()
 const { mfuArrangedActivities, loading: mfuLoading, error: mfuError, fetchMfuArrangedActivities } = useMfuArrangedActivities()
+const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
 
 // Reactive data
 const selectedEvaluationPeriod = ref<number | null>(null)
@@ -263,31 +280,46 @@ const formatValue = (value: any) => {
   return '0';
 }
 
-// Dynamic KPI categories from database
-const kpiCategories = computed(() => {
-  if (kpiData.value?.categories) {
-    return kpiData.value.categories
+// KPI weights computed from MFU API
+const kpiWeights = computed(() => {
+  if (mfuKpiData.value?.categories) {
+    const categories = mfuKpiData.value.categories
+    return {
+      teaching: categories[0]?.weight || 0,
+      research: categories[1]?.weight || 0,
+      academicService: categories[2]?.weight || 0,
+      administration: categories[3]?.weight || 0,
+      artsCulture: categories[4]?.weight || 0
+    }
   }
-  // Return empty data if no database data available
+  // Return null when data is not loaded to prevent flashing
+  return null
+})
+
+// KPI categories from MFU API
+const kpiCategories = computed(() => {
+  if (mfuKpiData.value?.categories) {
+    return mfuKpiData.value.categories
+  }
+  // Return empty data if no MFU API data available
   return [
-    { name: 'Teaching', weight: 0, value: 0, color: '#1e40af', bgColor: '#dbeafe', textColor: '#1e40af' },
-    { name: 'Research', weight: 0, value: 0, color: '#0891b2', bgColor: '#cffafe', textColor: '#0891b2' },
-    { name: 'Academic Service', weight: 0, value: 0, color: '#059669', bgColor: '#d1fae5', textColor: '#059669' },
-    { name: 'Administration', weight: 0, value: 0, color: '#7c3aed', bgColor: '#ede9fe', textColor: '#7c3aed' },
-    { name: 'Arts and Culture', weight: 0, value: 0, color: '#dc2626', bgColor: '#fecaca', textColor: '#dc2626' }
+    { name: 'Teaching', weight: 0, value: 0, color: '#1e40af' },
+    { name: 'Research', weight: 0, value: 0, color: '#0891b2' },
+    { name: 'Academic Service', weight: 0, value: 0, color: '#059669' },
+    { name: 'Administration', weight: 0, value: 0, color: '#7c3aed' },
+    { name: 'Arts and Culture', weight: 0, value: 0, color: '#dc2626' }
   ]
 })
 
-// Load KPI data
+// Load KPI data from MFU API
 const loadKpiData = async () => {
   try {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      console.log('Loading KPI data for:', user.value.email, 'evaluation period:', evalId)
-      const data = await getKpiData(user.value.email, evalId)
-      console.log('KPI data loaded:', data)
-      kpiData.value = data as any
+      console.log('Loading KPI data from MFU API for:', user.value.email, 'evaluation period:', evalId)
+      await fetchKpiPercentages(user.value.email, evalId)
+      kpiData.value = mfuKpiData.value as any
     }
   } catch (err) {
     console.error('Failed to load KPI data:', err)
@@ -363,7 +395,8 @@ const onEvaluationPeriodChange = async () => {
       fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData(),
       loadSelfDevelopmentData(),
-      loadMfuArrangedActivities()
+      loadMfuArrangedActivities(),
+      fetchKpiPercentages(user.value.email)
     ])
     initializeChart()
   }
@@ -511,7 +544,8 @@ watch(
       await Promise.all([
         fetchArtsCulturePerformance(email, selectedEvaluationPeriod.value?.toString()),
         loadSelfDevelopmentData(),
-        loadMfuArrangedActivities()
+        loadMfuArrangedActivities(),
+        fetchKpiPercentages(email)
       ])
       // Re-initialize chart with new data
       await nextTick()
