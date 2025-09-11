@@ -33,10 +33,16 @@
       </div>
     </div>
 
-    <!-- Teaching Track -->
+    <!-- Dynamic Track Title -->
     <div class="mb-6">
-      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">Teaching Track</h2>
-      <p class="text-center text-sm text-gray-500 mb-4">{{ formatDateRange() }}</p>
+      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">
+        <span v-if="loading || kpiLoading || !kpiWeights">Loading...</span>
+        <span v-else>{{ kpiWeights.domainScoreName }} Track</span>
+      </h2>
+      <p class="text-center text-sm text-gray-500 mb-4">
+        <span v-if="loading || isLoadingPeriods">Loading...</span>
+        <span v-else>{{ formatDateRange() }}</span>
+      </p>
     </div>
 
     <!-- Loading spinner -->
@@ -74,8 +80,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching (60%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.teaching || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain1') }} ({{ getDomainWeight('domain1') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain1') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -87,8 +95,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research (40%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.research || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain2') }} ({{ getDomainWeight('domain2') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain2') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -100,8 +110,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service (35%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.academicService || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain3') }} ({{ getDomainWeight('domain3') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain3') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -113,8 +125,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration (30%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.administration || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain4') }} ({{ getDomainWeight('domain4') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain4') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -126,8 +140,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and Culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.artsCulture || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain5') }} ({{ getDomainWeight('domain5') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain5') }}%</p>
       </NuxtLink>
     </div>
 
@@ -139,7 +155,7 @@
           Teaching Performance
         </h2>
         <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
-          Threshold (75) - Earned score (93.50)
+          Threshold ({{ getDomainThreshold('domain1') }}) - Earned score ({{ getDomainScore('domain1') }})
         </p>
         <!-- Qualitative Work positioned beside title/threshold -->
         <div class="absolute top-4 right-4 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden z-10 min-w-[120px]">
@@ -253,21 +269,43 @@ const teachingChart = ref<HTMLCanvasElement | null>(null)
 // Chart instance
 let chartInstance: Chart | null = null
 
-// KPI weights computed from MFU API
+// KPI weights computed from MFU API - updated to use the new structure
 const kpiWeights = computed(() => {
-  if (mfuKpiData.value?.categories) {
-    const categories = mfuKpiData.value.categories
+  if (mfuKpiData.value) {
     return {
-      teaching: categories[0]?.weight || 0,
-      research: categories[1]?.weight || 0,
-      academicService: categories[2]?.weight || 0,
-      administration: categories[3]?.weight || 0,
-      artsCulture: categories[4]?.weight || 0
+      domainScoreName: mfuKpiData.value.domainScoreName || 'Teaching',
+      domainWeights: mfuKpiData.value.domainWeights || {},
+      domainScores: mfuKpiData.value.domainScores || {},
+      domainThresholds: mfuKpiData.value.domainThresholds || {}
     }
   }
   // Return null when data is not loaded to prevent flashing
   return null
 })
+
+// Helper functions to get domain data
+const getDomainWeight = (domain: string) => {
+  return kpiWeights.value?.domainWeights?.[domain] || 0
+}
+
+const getDomainScore = (domain: string) => {
+  return kpiWeights.value?.domainScores?.[domain] || 0
+}
+
+const getDomainThreshold = (domain: string) => {
+  return kpiWeights.value?.domainThresholds?.[domain] || 0
+}
+
+const getDomainCategoryName = (domain: string) => {
+  const domainNames = {
+    'domain1': 'Teaching',
+    'domain2': 'Research', 
+    'domain3': 'Academic Service',
+    'domain4': 'Administration',
+    'domain5': 'Arts and Culture'
+  }
+  return domainNames[domain as keyof typeof domainNames] || 'Unknown'
+}
 
 // Load teaching data from MFU API
 const loadTeachingData = async () => {

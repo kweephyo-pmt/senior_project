@@ -1,4 +1,4 @@
-import { ref, readonly } from 'vue'
+import { readonly, ref } from 'vue'
 
 export const useMfuKpiApi = () => {
   const kpiData = ref<any>(null)
@@ -177,44 +177,71 @@ export const useMfuKpiApi = () => {
             const transformedData = {
               staffCode: staffData.staffcode,
               staffName: staffData.staffname,
+              domainScoreName: staffData.domainscorename,
+              domainWeights: {
+                domain1: staffData.domain1weight || 0,
+                domain2: staffData.domain2weight || 0,
+                domain3: staffData.domain3weight || 0,
+                domain4: staffData.domain4weight || 0,
+                domain5: staffData.domain5weight || 0
+              },
+              domainScores: {
+                domain1: staffData.domain1score || 0,
+                domain2: staffData.domain2score || 0,
+                domain3: staffData.domain3score || 0,
+                domain4: staffData.domain4score || 0,
+                domain5: staffData.domain5score || 0
+              },
+              domainThresholds: {
+                domain1: staffData.domain1threshold || 0,
+                domain2: staffData.domain2threshold || 0,
+                domain3: staffData.domain3threshold || 0,
+                domain4: staffData.domain4threshold || 0,
+                domain5: staffData.domain5threshold || 0
+              },
               categories: [
                 {
-                  id: 'teaching',
-                  name: 'Teaching',
+                  id: 'domain1',
+                  name: 'Domain 1',
                   weight: staffData.domain1weight || 0,
-                  value: staffData.domain1weight || 0,
+                  score: staffData.domain1score || 0,
+                  threshold: staffData.domain1threshold || 0,
                   percent: staffData.domain1weight || 0,
                   color: '#1e40af'
                 },
                 {
-                  id: 'research',
-                  name: 'Research',
+                  id: 'domain2',
+                  name: 'Domain 2',
                   weight: staffData.domain2weight || 0,
-                  value: staffData.domain2weight || 0,
+                  score: staffData.domain2score || 0,
+                  threshold: staffData.domain2threshold || 0,
                   percent: staffData.domain2weight || 0,
                   color: '#0891b2'
                 },
                 {
-                  id: 'academic-service',
-                  name: 'Academic Service',
+                  id: 'domain3',
+                  name: 'Domain 3',
                   weight: staffData.domain3weight || 0,
-                  value: staffData.domain3weight || 0,
+                  score: staffData.domain3score || 0,
+                  threshold: staffData.domain3threshold || 0,
                   percent: staffData.domain3weight || 0,
                   color: '#059669'
                 },
                 {
-                  id: 'administration',
-                  name: 'Administration',
+                  id: 'domain4',
+                  name: 'Domain 4',
                   weight: staffData.domain4weight || 0,
-                  value: staffData.domain4weight || 0,
+                  score: staffData.domain4score || 0,
+                  threshold: staffData.domain4threshold || 0,
                   percent: staffData.domain4weight || 0,
                   color: '#7c3aed'
                 },
                 {
-                  id: 'arts-culture',
-                  name: 'Arts and Culture',
+                  id: 'domain5',
+                  name: 'Domain 5',
                   weight: staffData.domain5weight || 0,
-                  value: staffData.domain5weight || 0,
+                  score: staffData.domain5score || 0,
+                  threshold: staffData.domain5threshold || 0,
                   percent: staffData.domain5weight || 0,
                   color: '#dc2626'
                 }
