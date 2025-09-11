@@ -144,7 +144,7 @@
         <!-- Qualitative Work positioned beside title/threshold -->
         <div class="absolute top-4 right-4 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden z-10 min-w-[120px]">
           <div class="bg-[#2C5282] text-white px-4 py-1 text-center">
-            <h3 class="text-xs font-bold">Qualitative work</h3>
+            <h3 class="text-xs font-bold">Quality of Work</h3>
           </div>
           <div class="bg-white px-4 py-1.5 text-center">
             <div class="text-xl font-bold text-gray-800">43/50</div>

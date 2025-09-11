@@ -165,7 +165,7 @@
             <table v-else class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">No.</th>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">Level</th>
                   <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Project Name</th>
                 </tr>
               </thead>
