@@ -123,8 +123,55 @@ export const useMfuKpiApi = () => {
                                staffData.domain5weight > 0
             
             if (!hasValidData) {
-              kpiData.value = null
-              return null
+              // Return fallback data with 0% values instead of null
+              const fallbackData = {
+                staffCode: staffData.staffcode,
+                staffName: staffData.staffname,
+                categories: [
+                  {
+                    id: 'teaching',
+                    name: 'Teaching',
+                    weight: 0,
+                    value: 0,
+                    percent: 0,
+                    color: '#1e40af'
+                  },
+                  {
+                    id: 'research',
+                    name: 'Research',
+                    weight: 0,
+                    value: 0,
+                    percent: 0,
+                    color: '#0891b2'
+                  },
+                  {
+                    id: 'academic-service',
+                    name: 'Academic Service',
+                    weight: 0,
+                    value: 0,
+                    percent: 0,
+                    color: '#059669'
+                  },
+                  {
+                    id: 'administration',
+                    name: 'Administration',
+                    weight: 0,
+                    value: 0,
+                    percent: 0,
+                    color: '#7c3aed'
+                  },
+                  {
+                    id: 'arts-culture',
+                    name: 'Arts and Culture',
+                    weight: 0,
+                    value: 0,
+                    percent: 0,
+                    color: '#dc2626'
+                  }
+                ]
+              }
+              kpiData.value = fallbackData
+              return fallbackData
             }
 
             const transformedData = {
@@ -177,7 +224,55 @@ export const useMfuKpiApi = () => {
             kpiData.value = transformedData
             return transformedData
           } else {
-            throw new Error(`No data found for staff code: ${staffCode}`)
+            // Return fallback data when no staff data found
+            const fallbackData = {
+              staffCode: staffCode,
+              staffName: 'Unknown Staff',
+              categories: [
+                {
+                  id: 'teaching',
+                  name: 'Teaching',
+                  weight: 0,
+                  value: 0,
+                  percent: 0,
+                  color: '#1e40af'
+                },
+                {
+                  id: 'research',
+                  name: 'Research',
+                  weight: 0,
+                  value: 0,
+                  percent: 0,
+                  color: '#0891b2'
+                },
+                {
+                  id: 'academic-service',
+                  name: 'Academic Service',
+                  weight: 0,
+                  value: 0,
+                  percent: 0,
+                  color: '#059669'
+                },
+                {
+                  id: 'administration',
+                  name: 'Administration',
+                  weight: 0,
+                  value: 0,
+                  percent: 0,
+                  color: '#7c3aed'
+                },
+                {
+                  id: 'arts-culture',
+                  name: 'Arts and Culture',
+                  weight: 0,
+                  value: 0,
+                  percent: 0,
+                  color: '#dc2626'
+                }
+              ]
+            }
+            kpiData.value = fallbackData
+            return fallbackData
           }
         } else {
           throw new Error('Invalid API response format')
@@ -191,8 +286,56 @@ export const useMfuKpiApi = () => {
       } else {
         error.value = err.message
       }
-      kpiData.value = null
-      throw err
+      
+      // Provide fallback data instead of null to keep navbar visible
+      const fallbackData = {
+        staffCode: '',
+        staffName: 'Unknown Staff',
+        categories: [
+          {
+            id: 'teaching',
+            name: 'Teaching',
+            weight: 0,
+            value: 0,
+            percent: 0,
+            color: '#1e40af'
+          },
+          {
+            id: 'research',
+            name: 'Research',
+            weight: 0,
+            value: 0,
+            percent: 0,
+            color: '#0891b2'
+          },
+          {
+            id: 'academic-service',
+            name: 'Academic Service',
+            weight: 0,
+            value: 0,
+            percent: 0,
+            color: '#059669'
+          },
+          {
+            id: 'administration',
+            name: 'Administration',
+            weight: 0,
+            value: 0,
+            percent: 0,
+            color: '#7c3aed'
+          },
+          {
+            id: 'arts-culture',
+            name: 'Arts and Culture',
+            weight: 0,
+            value: 0,
+            percent: 0,
+            color: '#dc2626'
+          }
+        ]
+      }
+      kpiData.value = fallbackData
+      return fallbackData
     } finally {
       isLoading.value = false
     }

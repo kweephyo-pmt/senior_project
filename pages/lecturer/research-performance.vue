@@ -45,6 +45,24 @@
        <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
      </div>
 
+    <!-- Error message for MFU API -->
+    <div v-if="mfuResearchError && !loading" class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">MFU API Connection Issue</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>{{ mfuResearchError }}</p>
+            <p class="mt-1">Showing sample data instead. Please try refreshing the page.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- KPI Categories with NuxtLink, only when data is loaded -->
     <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
@@ -177,7 +195,7 @@
             <table v-else class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">No.</th>
+                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">Level</th>
                   <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Project Name</th>
                 </tr>
               </thead>
@@ -200,10 +218,8 @@ import Chart from "chart.js/auto";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { onMounted, ref, nextTick } from "vue";
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-import { useResearchPerformance } from '@/composables/useResearchPerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
-import { useResearchStudies } from '@/composables/useResearchStudies'
-import { useResearchPublications } from '@/composables/useResearchPublications'
+import { useMfuResearchApi } from '@/composables/useMfuResearchApi'
 import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
 
 
@@ -212,10 +228,8 @@ definePageMeta({
 });
 const researchChart = ref<HTMLCanvasElement | null>(null);
 const { user,logout } = useFirebaseAuth()
-const { researchData, loading: researchLoading, error: researchError, fetchResearchPerformance, getChartData } = useResearchPerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
-const { getResearchStudies, formatResearchStudiesData } = useResearchStudies()
-const { getResearchPublications, formatResearchPublicationsData } = useResearchPublications()
+const { getResearchStudies, getResearchPublications, getAllResearchChartData, formatResearchStudiesData, formatResearchPublicationsData, isLoading: mfuResearchLoading, error: mfuResearchError } = useMfuResearchApi()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
 
 // Reactive data
@@ -225,17 +239,19 @@ const kpiData = ref<any>(null)
 const loading = ref(true)
 const researchStudiesData = ref<any[]>([])
 const researchPublicationsData = ref<any[]>([])
+const researchChartData = ref<any>(null)
 const studiesLoading = ref(false)
 const publicationsLoading = ref(false)
+const chartLoading = ref(false)
 
 // Handle evaluation period change
 const onEvaluationPeriodChange = async () => {
   if (selectedEvaluationPeriod.value && user.value?.email) {
     await Promise.all([
-      fetchResearchPerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData(),
-      loadResearchStudies(),
-      loadResearchPublications()
+      loadResearchStudies(), // Now uses MFU API
+      loadResearchPublications(),
+      loadResearchChartData() // Load chart data from seven APIs
     ])
     nextTick(() => {
       createChart()
@@ -319,7 +335,6 @@ const loadKpiData = async () => {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      console.log('Loading KPI data from MFU API for:', user.value.email, 'evaluation period:', evalId)
       await fetchKpiPercentages(user.value.email, evalId)
       kpiData.value = mfuKpiData.value as any
     }
@@ -330,45 +345,59 @@ const loadKpiData = async () => {
   }
 }
 
-// Load research studies data
+// Load research studies data from MFU API
 const loadResearchStudies = async () => {
   try {
     studiesLoading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      const response = await getResearchStudies(user.value.email, evalId)
-      if (response.success) {
-        researchStudiesData.value = formatResearchStudiesData(response.data)
-      } else {
-        researchStudiesData.value = []
-      }
+      const response = await getResearchStudies(user.value.email, evalId.toString())
+      researchStudiesData.value = formatResearchStudiesData(response.data)
     }
   } catch (err) {
-    console.error('Failed to load research studies:', err)
-    researchStudiesData.value = []
+    // Provide fallback data when API fails
+    researchStudiesData.value = [
+      { id: 1, level: 1, projectName: 'Sample Research Study (API unavailable)' },
+      { id: 2, level: 2, projectName: 'Another Research Project (API unavailable)' }
+    ]
   } finally {
     studiesLoading.value = false
   }
 }
 
-// Load research publications data
+// Load research publications data from MFU API
 const loadResearchPublications = async () => {
   try {
     publicationsLoading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      const response = await getResearchPublications(user.value.email, evalId)
-      if (response.success) {
-        researchPublicationsData.value = formatResearchPublicationsData(response.data)
-      } else {
-        researchPublicationsData.value = []
-      }
+      const response = await getResearchPublications(user.value.email, evalId.toString())
+      researchPublicationsData.value = formatResearchPublicationsData(response.data)
     }
   } catch (err) {
-    console.error('Failed to load research publications:', err)
-    researchPublicationsData.value = []
+    // Provide fallback data when API fails
+    researchPublicationsData.value = [
+      { id: 1, level: 1, projectName: 'Sample Research Publication (API unavailable)' },
+      { id: 2, level: 2, projectName: 'Another Research Publication (API unavailable)' }
+    ]
   } finally {
     publicationsLoading.value = false
+  }
+}
+
+// Load research chart data from seven MFU API endpoints
+const loadResearchChartData = async () => {
+  try {
+    chartLoading.value = true
+    if (user.value?.email) {
+      const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+      const response = await getAllResearchChartData(user.value.email, evalId.toString())
+      researchChartData.value = response
+    }
+  } catch (err) {
+    researchChartData.value = null
+  } finally {
+    chartLoading.value = false
   }
 }
 // Register the plugin
@@ -383,12 +412,65 @@ const createChart = () => {
       chartInstance.destroy();
     }
 
+    // Create chart with real API data from seven endpoints
     let chartData;
     
-    if (researchData.value.length > 0) {
-      chartData = getChartData();
+    if (researchChartData.value) {
+      // Extract scores from API data - sum up all scores for each category
+      const extractScore = (dataArray: any[], categoryName: string) => {
+        if (!Array.isArray(dataArray) || dataArray.length === 0) return 0
+        return dataArray.reduce((sum, item) => {
+          // Try multiple possible score property names based on teaching performance pattern
+          const score = parseFloat(
+            item.score || 
+            item.rawscore || 
+            item.total_score || 
+            item.totalscore || 
+            item.sumscore ||
+            item.scorelect ||
+            item.scorelab ||
+            item.Score || 
+            item.RawScore || 
+            item.TotalScore ||
+            item.SumScore ||
+            0
+          )
+          return sum + (isNaN(score) ? 0 : score)
+        }, 0)
+      }
+
+      const scores = [
+        extractScore(researchChartData.value.otherAcademicWorkAssignedBySchool, 'otherAcademicWorkAssignedBySchool'),
+        extractScore(researchChartData.value.otherAcademicWork, 'otherAcademicWork'),
+        extractScore(researchChartData.value.patentedInventions, 'patentedInventions'),
+        extractScore(researchChartData.value.compositionofTextbooks, 'compositionofTextbooks'),
+        extractScore(researchChartData.value.academicArticlesRawscore, 'academicArticlesRawscore'),
+        extractScore(researchChartData.value.researchPublicationRawscore, 'researchPublicationRawscore'),
+        extractScore(researchChartData.value.researchStudiesRawscore, 'researchStudiesRawscore')
+      ]
+
+      chartData = {
+        labels: [
+          ['Other Academic Work assigned', 'by the School'],
+          'Other Academic Work',
+          'Patented Inventions',
+          ['Composition of textbooks, Books,', 'and interactive/e-Learning Materials'],
+          'Academic Articles',
+          'Research Publication',
+          'Research Studies'
+        ],
+        datasets: [
+          {
+            label: "Score",
+            data: scores,
+            backgroundColor: "#172554",
+            borderWidth: 0,
+            borderRadius: 0,
+          },
+        ],
+      };
     } else {
-      // Show empty chart with zero values using same template structure
+      // Fallback chart with zero values when API data is not available
       chartData = {
         labels: [
           ['Other Academic Work assigned', 'by the School'],
@@ -526,26 +608,38 @@ onMounted(async () => {
   if (user.value?.email) {
     await Promise.all([
       loadKpiData(),
-      fetchResearchPerformance(user.value.email),
       loadResearchStudies(),
-      loadResearchPublications()
+      loadResearchPublications(),
+      loadResearchChartData()
     ]);
   }
 });
 
 import { watch } from "vue";
 
-// Watch for research data changes and create chart
+// Watch for research chart data changes and create chart
 watch(
-  () => researchData.value,
+  () => researchChartData.value,
   (data) => {
-    if (data && data.length > 0) {
-      nextTick(() => {
-        createChart();
-      });
-    }
+    nextTick(() => {
+      createChart();
+    });
   },
   { deep: true }
+);
+
+// Watch for evaluation period changes and reload data
+watch(
+  () => selectedEvaluationPeriod.value,
+  async (newPeriod) => {
+    if (newPeriod && user.value?.email) {
+      await Promise.all([
+        loadResearchStudies(),
+        loadResearchPublications(),
+        loadResearchChartData()
+      ]);
+    }
+  }
 );
 
 watch(
@@ -561,9 +655,9 @@ watch(
       }
       
       await Promise.all([
-        fetchResearchPerformance(email),
         loadResearchStudies(),
         loadResearchPublications(),
+        loadResearchChartData(),
         fetchKpiPercentages(email)
       ]);
     }

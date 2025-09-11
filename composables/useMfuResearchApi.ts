@@ -1,7 +1,7 @@
 import { ref, readonly } from 'vue'
 
-// MFU Teaching API composable
-export const useMfuTeachingApi = () => {
+// MFU Research API composable
+export const useMfuResearchApi = () => {
   const authToken = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -156,199 +156,281 @@ export const useMfuTeachingApi = () => {
     }
   }
 
-  // Get undergraduate teaching data
-  const getUndergraduateData = async (email: string, evaluateId: string = '9') => {
+  // Get research studies data
+  const getResearchStudies = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_Undergraduate', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_ResearchStudies', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching undergraduate data:', err)
+      console.error('Error fetching research studies:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get graduate teaching data
-  const getGraduateData = async (email: string, evaluateId: string = '9') => {
+  // Get research publications data
+  const getResearchPublications = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_Graduate', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_ResearchPublication', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching graduate data:', err)
+      console.error('Error fetching research publications:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get undergraduate raw score data (for chart)
-  const getUndergraduateRawScore = async (email: string, evaluateId: string = '9') => {
+  // Get research studies raw score data
+  const getResearchStudiesRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_UndergraduateRawscore', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_ResearchStudiesRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching undergraduate raw score:', err)
+      console.error('Error fetching research studies rawscore:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get graduate raw score data (for chart)
-  const getGraduateRawScore = async (email: string, evaluateId: string = '9') => {
+  // Get research publication raw score data
+  const getResearchPublicationRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_GraduateRawscore', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_ResearchPublicationRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching graduate raw score:', err)
+      console.error('Error fetching research publication rawscore:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get student internships data
-  const getStudentInternships = async (email: string, evaluateId: string = '9') => {
+  // Get academic articles raw score data
+  const getAcademicArticlesRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_StudentInternships', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_AcademicArticlesRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching student internships:', err)
+      console.error('Error fetching academic articles rawscore:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get student projects data
-  const getStudentProjects = async (email: string, evaluateId: string = '9') => {
+  // Get composition of textbooks data
+  const getCompositionofTextbooks = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_StudentProjects', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_CompositionofTextbooks', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching student projects:', err)
+      console.error('Error fetching composition of textbooks:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get thesis oversight duties data
-  const getThesisOversightDuties = async (email: string, evaluateId: string = '9') => {
+  // Get patented inventions data
+  const getPatentedInventions = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_ThesisOversightDuties', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_PatentedInventions', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching thesis oversight duties:', err)
+      console.error('Error fetching patented inventions:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get other teaching tasks data
-  const getOtherTeachingTasks = async (email: string, evaluateId: string = '9') => {
+  // Get other academic work data
+  const getOtherAcademicWork = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest('get_OtherTeachingTasks', staffCode, evaluateId)
+      const data = await makeAuthenticatedRequest('get_OtherAcademicWork', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching other teaching tasks:', err)
+      console.error('Error fetching other academic work:', err)
       return { data: [], staffCode, evaluateId }
     }
   }
 
-  // Get all teaching performance data
-  const getAllTeachingData = async (email: string, evaluateId: string = '9') => {
+  // Get other academic work assigned by the school data
+  const getOtherAcademicWorkassignedbytheSchool = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_OtherAcademicWorkassignedbytheSchool', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      console.error('Error fetching other academic work assigned by school:', err)
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Format research studies data for display
+  const formatResearchStudiesData = (data: any[]) => {
+    if (!Array.isArray(data)) return []
+    
+    return data.map((item, index) => ({
+      id: item.id || index + 1,
+      level: item.level || index + 1,
+      projectName: item.researchtitle || item.projectname || item.project_name || item.title || 'Untitled Research Study',
+      staffCode: item.staffcode || item.staff_code,
+      evaluateId: item.evaluateid || item.evaluate_id,
+      // Additional fields that might be available
+      description: item.description || '',
+      status: item.status || '',
+      startDate: item.start_date || item.startdate,
+      endDate: item.end_date || item.enddate,
+      budget: item.budget || 0,
+      fundingSource: item.funding_source || item.fundingsource || ''
+    }))
+  }
+
+  // Format research publications data for display
+  const formatResearchPublicationsData = (data: any[]) => {
+    if (!Array.isArray(data)) return []
+    
+    return data.map((item, index) => ({
+      id: item.id || index + 1,
+      level: item.level || index + 1,
+      projectName: item.researchtitle || item.publicationtitle || item.title || item.projectname || 'Untitled Research Publication',
+      staffCode: item.staffcode || item.staff_code,
+      evaluateId: item.evaluateid || item.evaluate_id,
+      // Additional fields that might be available
+      authors: item.authors || '',
+      journal: item.journal || '',
+      year: item.year || '',
+      doi: item.doi || '',
+      isbn: item.isbn || '',
+      publisher: item.publisher || ''
+    }))
+  }
+
+  // Get all research chart data from the seven API endpoints
+  const getAllResearchChartData = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
       const [
-        undergraduateData, 
-        graduateData, 
-        undergraduateRawScore, 
-        graduateRawScore,
-        studentInternships,
-        studentProjects,
-        thesisOversight,
-        otherTeachingTasks
+        researchStudiesRawscore,
+        researchPublicationRawscore,
+        academicArticlesRawscore,
+        compositionofTextbooks,
+        patentedInventions,
+        otherAcademicWork,
+        otherAcademicWorkAssignedBySchool
       ] = await Promise.all([
-        getUndergraduateData(email, evaluateId),
-        getGraduateData(email, evaluateId),
-        getUndergraduateRawScore(email, evaluateId),
-        getGraduateRawScore(email, evaluateId),
-        getStudentInternships(email, evaluateId),
-        getStudentProjects(email, evaluateId),
-        getThesisOversightDuties(email, evaluateId),
-        getOtherTeachingTasks(email, evaluateId)
+        getResearchStudiesRawscore(email, evaluateId),
+        getResearchPublicationRawscore(email, evaluateId),
+        getAcademicArticlesRawscore(email, evaluateId),
+        getCompositionofTextbooks(email, evaluateId),
+        getPatentedInventions(email, evaluateId),
+        getOtherAcademicWork(email, evaluateId),
+        getOtherAcademicWorkassignedbytheSchool(email, evaluateId)
       ])
 
       return {
-        undergraduate: undergraduateData.data,
-        graduate: graduateData.data,
-        undergraduateRawScore: undergraduateRawScore.data,
-        graduateRawScore: graduateRawScore.data,
-        studentInternships: studentInternships.data,
-        studentProjects: studentProjects.data,
-        thesisOversight: thesisOversight.data,
-        otherTeachingTasks: otherTeachingTasks.data,
+        researchStudiesRawscore: researchStudiesRawscore.data,
+        researchPublicationRawscore: researchPublicationRawscore.data,
+        academicArticlesRawscore: academicArticlesRawscore.data,
+        compositionofTextbooks: compositionofTextbooks.data,
+        patentedInventions: patentedInventions.data,
+        otherAcademicWork: otherAcademicWork.data,
+        otherAcademicWorkAssignedBySchool: otherAcademicWorkAssignedBySchool.data,
         staffCode,
         evaluateId
       }
     } catch (err) {
-      console.error('Error fetching all teaching data:', err)
+      console.error('Error fetching all research chart data:', err)
       return { 
-        undergraduate: [], 
-        graduate: [], 
-        undergraduateRawScore: [], 
-        graduateRawScore: [],
-        studentInternships: [],
-        studentProjects: [],
-        thesisOversight: [],
-        otherTeachingTasks: [],
+        researchStudiesRawscore: [],
+        researchPublicationRawscore: [],
+        academicArticlesRawscore: [],
+        compositionofTextbooks: [],
+        patentedInventions: [],
+        otherAcademicWork: [],
+        otherAcademicWorkAssignedBySchool: [],
+        staffCode, 
+        evaluateId 
+      }
+    }
+  }
+
+  // Get all research data (can be extended for other research endpoints)
+  const getAllResearchData = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const [researchStudiesData, researchPublicationsData] = await Promise.all([
+        getResearchStudies(email, evaluateId),
+        getResearchPublications(email, evaluateId)
+      ])
+
+      return {
+        researchStudies: researchStudiesData.data,
+        researchPublications: researchPublicationsData.data,
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      console.error('Error fetching all research data:', err)
+      return { 
+        researchStudies: [],
+        researchPublications: [],
         staffCode, 
         evaluateId 
       }
@@ -364,14 +446,18 @@ export const useMfuTeachingApi = () => {
     // Methods
     login,
     extractStaffCode,
-    getUndergraduateData,
-    getGraduateData,
-    getUndergraduateRawScore,
-    getGraduateRawScore,
-    getStudentInternships,
-    getStudentProjects,
-    getThesisOversightDuties,
-    getOtherTeachingTasks,
-    getAllTeachingData
+    getResearchStudies,
+    getResearchPublications,
+    getResearchStudiesRawscore,
+    getResearchPublicationRawscore,
+    getAcademicArticlesRawscore,
+    getCompositionofTextbooks,
+    getPatentedInventions,
+    getOtherAcademicWork,
+    getOtherAcademicWorkassignedbytheSchool,
+    formatResearchStudiesData,
+    formatResearchPublicationsData,
+    getAllResearchChartData,
+    getAllResearchData
   }
 }
