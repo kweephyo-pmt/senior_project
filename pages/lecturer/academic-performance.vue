@@ -31,23 +31,45 @@
       </div>
     </div>
 
-    <!-- Academic Service Track -->
+
+    <!-- Dynamic Track Title -->
     <div class="mb-6">
-      <h2 class="text-center text-base sm:text-lg font-medium text-inherit mb-1">Academic Service Track</h2>
+      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">
+        <span v-if="loading || kpiLoading || !kpiWeights">Loading...</span>
+        <span v-else>{{ kpiWeights.domainScoreName }} Track</span>
+      </h2>
       <p class="text-center text-sm text-gray-500 mb-4">
-        <span v-if="isLoadingPeriods">Loading...</span>
+        <span v-if="loading || isLoadingPeriods">Loading...</span>
         <span v-else>{{ formatDateRange() }}</span>
       </p>
     </div>
 
-    <!-- Loading spinner -->
-    <div v-if="loading" class="flex justify-center items-center py-8">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
-      <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
+     <!-- Loading spinner -->
+     <div v-if="loading" class="flex justify-center items-center py-8">
+       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4697b9]"></div>
+       <p class="ml-3 text-sm text-gray-600">Loading KPI data...</p>
+     </div>
+
+    <!-- Error message for MFU API -->
+    <div v-if="chartError && !loading" class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">MFU API Connection Issue</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>{{ chartError }}</p>
+            <p class="mt-1">Showing sample data instead. Please try refreshing the page.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- KPI Categories with NuxtLink, only when data is loaded -->
-    <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+ <!-- KPI Categories with NuxtLink, only when not loading -->
+ <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -57,8 +79,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching (60%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.teaching || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain1') }} ({{ getDomainWeight('domain1') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain1') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -70,8 +94,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research (40%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.research || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain2') }} ({{ getDomainWeight('domain2') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain2') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -83,8 +109,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service (35%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.academicService || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain3') }} ({{ getDomainWeight('domain3') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain3') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -96,8 +124,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration (30%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.administration || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain4') }} ({{ getDomainWeight('domain4') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain4') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -109,8 +139,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and Culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.artsCulture || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain5') }} ({{ getDomainWeight('domain5') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain5') }}%</p>
       </NuxtLink>
     </div>
 
@@ -224,36 +256,43 @@ const formatValue = (value: any) => {
   return '0';
 }
 
-// KPI weights computed from MFU API
+// KPI weights computed from MFU API - updated to use the new structure
 const kpiWeights = computed(() => {
-  if (mfuKpiData.value?.categories) {
-    const categories = mfuKpiData.value.categories
+  if (mfuKpiData.value) {
     return {
-      teaching: categories[0]?.weight || 0,
-      research: categories[1]?.weight || 0,
-      academicService: categories[2]?.weight || 0,
-      administration: categories[3]?.weight || 0,
-      artsCulture: categories[4]?.weight || 0
+      domainScoreName: mfuKpiData.value.domainScoreName || 'Academic Service',
+      domainWeights: mfuKpiData.value.domainWeights || {},
+      domainScores: mfuKpiData.value.domainScores || {},
+      domainThresholds: mfuKpiData.value.domainThresholds || {}
     }
   }
   // Return null when data is not loaded to prevent flashing
   return null
 })
 
-// KPI categories from MFU API
-const kpiCategories = computed(() => {
-  if (mfuKpiData.value?.categories) {
-    return mfuKpiData.value.categories
+// Helper functions to get domain data
+const getDomainWeight = (domain: string) => {
+  return kpiWeights.value?.domainWeights?.[domain] || 0
+}
+
+const getDomainScore = (domain: string) => {
+  return kpiWeights.value?.domainScores?.[domain] || 0
+}
+
+const getDomainThreshold = (domain: string) => {
+  return kpiWeights.value?.domainThresholds?.[domain] || 0
+}
+
+const getDomainCategoryName = (domain: string) => {
+  const domainNames = {
+    'domain1': 'Teaching',
+    'domain2': 'Research', 
+    'domain3': 'Academic Service',
+    'domain4': 'Administration',
+    'domain5': 'Arts and Culture'
   }
-  // Return empty data if no MFU API data available
-  return [
-    { name: 'Teaching', weight: 0, value: 0, color: '#1e40af' },
-    { name: 'Research', weight: 0, value: 0, color: '#0891b2' },
-    { name: 'Academic Service', weight: 0, value: 0, color: '#059669' },
-    { name: 'Administration', weight: 0, value: 0, color: '#7c3aed' },
-    { name: 'Arts and Culture', weight: 0, value: 0, color: '#dc2626' }
-  ]
-})
+  return domainNames[domain as keyof typeof domainNames] || domain
+}
 
 // Load KPI data from MFU API
 const loadKpiData = async () => {
@@ -301,7 +340,7 @@ const onEvaluationPeriodChange = async () => {
     await Promise.all([
       fetchAcademicServicePerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData(),
-      fetchKpiPercentages(user.value.email)
+      fetchKpiPercentages(user.value.email, selectedEvaluationPeriod.value)
     ])
     initializeChart()
   }
@@ -465,6 +504,22 @@ onMounted(async () => {
   initializeChart()
 })
 
+// Watch for evaluation period changes
+watch(
+  () => selectedEvaluationPeriod.value,
+  async (newEvalId, oldEvalId) => {
+    if (newEvalId && newEvalId !== oldEvalId && user.value?.email && !loading.value) {
+      console.log(`Evaluation period changed from ${oldEvalId} to ${newEvalId}`)
+      await Promise.all([
+        fetchAcademicServicePerformance(user.value.email, newEvalId.toString()),
+        loadKpiData(),
+        fetchKpiPercentages(user.value.email, newEvalId)
+      ])
+      initializeChart()
+    }
+  }
+)
+
 watch(
   () => user.value?.email,
   async (email) => {
@@ -477,7 +532,7 @@ watch(
       }
       await Promise.all([
         fetchAcademicServicePerformance(email, selectedEvaluationPeriod.value?.toString()),
-        fetchKpiPercentages(email)
+        fetchKpiPercentages(email, selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9)
       ])
       // Re-initialize chart with new data
       initializeChart()

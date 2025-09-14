@@ -69,7 +69,7 @@
       </div>
     </div>
 
-    <!-- KPI Categories with NuxtLink, only when data is loaded -->
+    <!-- KPI Categories with NuxtLink, only when not loading -->
     <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
@@ -280,7 +280,6 @@ const kpiWeights = computed(() => {
       domainThresholds: mfuKpiData.value.domainThresholds || {}
     }
   }
-  // Return null when data is not loaded to prevent flashing
   return null
 })
 

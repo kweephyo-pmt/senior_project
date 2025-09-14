@@ -33,10 +33,16 @@
       </div>
     </div>
 
-    <!-- Research Track -->
+    <!-- Dynamic Track Title -->
     <div class="mb-6">
-      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">Research Track</h2>
-      <p class="text-center text-sm text-gray-500 mb-4">{{ formatDateRange() }}</p>
+      <h2 class="text-center text-lg font-medium text-gray-700 mb-1">
+        <span v-if="loading || kpiLoading || !kpiWeights">Loading...</span>
+        <span v-else>{{ kpiWeights.domainScoreName }} Track</span>
+      </h2>
+      <p class="text-center text-sm text-gray-500 mb-4">
+        <span v-if="loading || isLoadingPeriods">Loading...</span>
+        <span v-else>{{ formatDateRange() }}</span>
+      </p>
     </div>
 
      <!-- Loading spinner -->
@@ -63,8 +69,8 @@
       </div>
     </div>
 
-    <!-- KPI Categories with NuxtLink, only when data is loaded -->
-    <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+ <!-- KPI Categories with NuxtLink, only when not loading -->
+ <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -74,8 +80,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching ({{ kpiWeights?.domainWeights?.domain1 || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain1 || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain1') }} ({{ getDomainWeight('domain1') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain1') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -87,8 +95,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research ({{ kpiWeights?.domainWeights?.domain2 || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain2 || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain2') }} ({{ getDomainWeight('domain2') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain2') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -100,8 +110,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service ({{ kpiWeights?.domainWeights?.domain3 || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain3 || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain3') }} ({{ getDomainWeight('domain3') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain3') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -113,8 +125,10 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration ({{ kpiWeights?.domainWeights?.domain4 || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain4 || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain4') }} ({{ getDomainWeight('domain4') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain4') }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -126,20 +140,22 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and Culture ({{ kpiWeights?.domainWeights?.domain5 || 0 }}%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain5 || 0 }}%</p>
+        <p class="text-sm text-inherit">
+          {{ getDomainCategoryName('domain5') }} ({{ getDomainWeight('domain5') }}%)
+        </p>
+        <p class="text-xl font-bold text-inherit">{{ getDomainScore('domain5') }}%</p>
       </NuxtLink>
     </div>
-    
+
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+    <div v-if="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
       <!-- Research Performance Card -->
       <div class="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl p-4 sm:p-6">
         <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 text-center">
           Research Performance
         </h2>
         <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
-          Threshold (25) - Earned score (94.93)
+          Threshold ({{ getDomainThreshold('domain2') }}) - Earned score ({{ getDomainScore('domain2') }})
         </p>
         <div class="h-[300px] sm:h-[360px] w-full">
           <canvas ref="researchChart"></canvas>
@@ -229,14 +245,13 @@ definePageMeta({
 const researchChart = ref<HTMLCanvasElement | null>(null);
 const { user,logout } = useFirebaseAuth()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
-const { getResearchStudies, getResearchPublications, getAllResearchChartData, formatResearchStudiesData, formatResearchPublicationsData, getPercentage, isLoading: mfuResearchLoading, error: mfuResearchError } = useMfuResearchApi()
+const { getResearchStudies, getResearchPublications, getAllResearchChartData, formatResearchStudiesData, formatResearchPublicationsData, isLoading: mfuResearchLoading, error: mfuResearchError } = useMfuResearchApi()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
 
 // Reactive data
 const selectedRound = ref('round2-2025')
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
-const percentageData = ref<any>(null)
 const loading = ref(true)
 const researchStudiesData = ref<any[]>([])
 const researchPublicationsData = ref<any[]>([])
@@ -249,10 +264,10 @@ const chartLoading = ref(false)
 const onEvaluationPeriodChange = async () => {
   if (selectedEvaluationPeriod.value && user.value?.email) {
     await Promise.all([
-      loadKpiData(), // Now uses percentage API
-      loadResearchStudies(),
+      loadKpiData(),
+      loadResearchStudies(), // Now uses MFU API
       loadResearchPublications(),
-      loadResearchChartData()
+      loadResearchChartData() // Load chart data from seven APIs
     ])
     nextTick(() => {
       createChart()
@@ -299,43 +314,43 @@ const formatValue = (value: any) => {
   }
   return '0';
 }
-// KPI weights computed from percentage API (like kpi-overview)
+// KPI weights computed from MFU API - updated to use the new structure
 const kpiWeights = computed(() => {
-  if (percentageData.value && percentageData.value.length > 0) {
-    const data = percentageData.value[0]
+  if (mfuKpiData.value) {
     return {
-      teaching: data.domain1weight || 0,
-      research: data.domain2weight || 0,
-      academicService: data.domain3weight || 0,
-      administration: data.domain4weight || 0,
-      artsCulture: data.domain5weight || 0,
-      domainScoreName: data.domainscorename || 'Research',
-      domainWeights: {
-        domain1: data.domain1weight || 0,
-        domain2: data.domain2weight || 0,
-        domain3: data.domain3weight || 0,
-        domain4: data.domain4weight || 0,
-        domain5: data.domain5weight || 0
-      },
-      domainScores: {
-        domain1: data.domain1score || 0,
-        domain2: data.domain2score || 0,
-        domain3: data.domain3score || 0,
-        domain4: data.domain4score || 0,
-        domain5: data.domain5score || 0
-      },
-      domainThresholds: {
-        domain1: data.domain1threshold || 0,
-        domain2: data.domain2threshold || 0,
-        domain3: data.domain3threshold || 0,
-        domain4: data.domain4threshold || 0,
-        domain5: data.domain5threshold || 0
-      }
+      domainScoreName: mfuKpiData.value.domainScoreName || 'Research',
+      domainWeights: mfuKpiData.value.domainWeights || {},
+      domainScores: mfuKpiData.value.domainScores || {},
+      domainThresholds: mfuKpiData.value.domainThresholds || {}
     }
   }
   // Return null when data is not loaded to prevent flashing
   return null
 })
+
+// Helper functions to get domain data
+const getDomainWeight = (domain: string) => {
+  return kpiWeights.value?.domainWeights?.[domain] || 0
+}
+
+const getDomainScore = (domain: string) => {
+  return kpiWeights.value?.domainScores?.[domain] || 0
+}
+
+const getDomainThreshold = (domain: string) => {
+  return kpiWeights.value?.domainThresholds?.[domain] || 0
+}
+
+const getDomainCategoryName = (domain: string) => {
+  const domainNames = {
+    'domain1': 'Teaching',
+    'domain2': 'Research', 
+    'domain3': 'Academic Service',
+    'domain4': 'Administration',
+    'domain5': 'Arts and Culture'
+  }
+  return domainNames[domain as keyof typeof domainNames] || 'Unknown'
+}
 
 // KPI categories from MFU API
 const kpiCategories = computed(() => {
@@ -352,29 +367,17 @@ const kpiCategories = computed(() => {
   ]
 })
 
-// Load KPI data from percentage API (like kpi-overview)
+// Load KPI data from MFU API
 const loadKpiData = async () => {
   try {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      
-      // Use percentage API instead of fetchKpiPercentages
-      const result = await getPercentage(user.value.email, evalId.toString())
-      percentageData.value = result.data
-      
-      console.log('Percentage data received:', result.data)
-      
-      if (result.data && result.data.length > 0) {
-        console.log('✅ Successfully loaded percentage data from MFU API')
-      } else {
-        console.log('⚠️ No percentage data available for this evaluation period')
-      }
+      await fetchKpiPercentages(user.value.email, evalId)
+      kpiData.value = mfuKpiData.value as any
     }
   } catch (err) {
-    console.error('Failed to load percentage data:', err)
-    // Set fallback empty data
-    percentageData.value = []
+    console.error('Failed to load KPI data:', err)
   } finally {
     loading.value = false
   }
