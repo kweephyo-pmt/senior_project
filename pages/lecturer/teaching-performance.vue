@@ -163,7 +163,7 @@
             <h3 class="text-xs font-bold">Quality of Work</h3>
           </div>
           <div class="bg-white px-4 py-1.5 text-center">
-            <div class="text-xl font-bold text-gray-800">43/50</div>
+            <div class="text-xl font-bold text-gray-800">{{ qualityOfWorkDisplay }}</div>
           </div>
         </div>
         
@@ -253,7 +253,7 @@ definePageMeta({
 
 const { user } = useFirebaseAuth()
 const { evaluationPeriods, loading: isLoadingPeriods, fetchEvaluationPeriods, activeEvaluationPeriod } = useEvaluationPeriods()
-const { getAllTeachingData, extractStaffCode } = useMfuTeachingApi()
+const { getAllTeachingData, extractStaffCode, getQualityOfWork } = useMfuTeachingApi()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
 
 // Reactive data
@@ -263,6 +263,7 @@ const teachingData = ref<any>(null)
 const undergraduateData = ref<any[]>([])
 const graduateData = ref<any[]>([])
 const chartData = ref<any>(null)
+const qualityOfWorkData = ref<any>(null)
 const fetchError = ref<string | null>(null)
 const teachingChart = ref<HTMLCanvasElement | null>(null)
 
@@ -307,6 +308,17 @@ const getDomainCategoryName = (domain: string) => {
   return domainNames[domain as keyof typeof domainNames] || 'Unknown'
 }
 
+// Computed property for quality of work display
+const qualityOfWorkDisplay = computed(() => {
+  if (qualityOfWorkData.value && qualityOfWorkData.value.length > 0) {
+    const qualityData = qualityOfWorkData.value[0]
+    const qualityScore = qualityData.qualityscore || 0
+    const totalQuality = qualityData.totalquality || 50
+    return `${Math.round(qualityScore * 100) / 100}/${totalQuality}`
+  }
+  return '0/50' // Fallback when no data available
+})
+
 // Load teaching data from MFU API
 const loadTeachingData = async () => {
   try {
@@ -325,31 +337,60 @@ const loadTeachingData = async () => {
     
     console.log('Teaching data received:', result)
     
-    teachingData.value = result
-    undergraduateData.value = result.undergraduate || []
-    graduateData.value = result.graduate || []
+    // Always set data, even if empty - this prevents infinite loading
+    teachingData.value = result || {}
+    undergraduateData.value = result?.undergraduate || []
+    graduateData.value = result?.graduate || []
+    qualityOfWorkData.value = result?.qualityOfWork || []
     
     // Use all teaching data for chart
     chartData.value = {
-      undergraduate: result.undergraduateRawScore || [],
-      graduate: result.graduateRawScore || [],
-      studentInternships: result.studentInternships || [],
-      studentProjects: result.studentProjects || [],
-      thesisOversight: result.thesisOversight || [],
-      otherTeachingTasks: result.otherTeachingTasks || []
+      undergraduate: result?.undergraduateRawScore || [],
+      graduate: result?.graduateRawScore || [],
+      studentInternships: result?.studentInternships || [],
+      studentProjects: result?.studentProjects || [],
+      thesisOversight: result?.thesisOversight || [],
+      otherTeachingTasks: result?.otherTeachingTasks || []
     }
     
     console.log('All teaching data for chart:', chartData.value)
-    console.log('✅ Successfully loaded teaching data from MFU API')
     
-    // Render chart after data is loaded
+    // Check if we have any actual data
+    const hasData = Object.values(chartData.value).some(arr => Array.isArray(arr) && arr.length > 0)
+    
+    if (hasData) {
+      console.log('✅ Successfully loaded teaching data from MFU API')
+    } else {
+      console.log('⚠️ No teaching data available for this evaluation period')
+      fetchError.value = `No teaching data available for evaluation period ${evalId}. This may be a future period with no data yet.`
+    }
+    
+    // Always render chart, even with empty data
     renderChart()
     
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err)
     console.error('❌ Failed to load teaching data:', errorMessage)
     fetchError.value = errorMessage
+    
+    // Set fallback empty data to prevent infinite loading
+    teachingData.value = {}
+    undergraduateData.value = []
+    graduateData.value = []
+    qualityOfWorkData.value = []
+    chartData.value = {
+      undergraduate: [],
+      graduate: [],
+      studentInternships: [],
+      studentProjects: [],
+      thesisOversight: [],
+      otherTeachingTasks: []
+    }
+    
+    // Render chart with empty data
+    renderChart()
   } finally {
+    // Always set loading to false to prevent infinite loading state
     loading.value = false
   }
 }

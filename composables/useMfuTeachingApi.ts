@@ -300,6 +300,24 @@ export const useMfuTeachingApi = () => {
     }
   }
 
+  // Get quality of work data
+  const getQualityOfWork = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_QualityofWork', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      console.error('Error fetching quality of work:', err)
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
   // Get all teaching performance data
   const getAllTeachingData = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
@@ -314,7 +332,8 @@ export const useMfuTeachingApi = () => {
         studentInternships,
         studentProjects,
         thesisOversight,
-        otherTeachingTasks
+        otherTeachingTasks,
+        qualityOfWork
       ] = await Promise.all([
         getUndergraduateData(email, evaluateId),
         getGraduateData(email, evaluateId),
@@ -323,7 +342,8 @@ export const useMfuTeachingApi = () => {
         getStudentInternships(email, evaluateId),
         getStudentProjects(email, evaluateId),
         getThesisOversightDuties(email, evaluateId),
-        getOtherTeachingTasks(email, evaluateId)
+        getOtherTeachingTasks(email, evaluateId),
+        getQualityOfWork(email, evaluateId)
       ])
 
       return {
@@ -335,6 +355,7 @@ export const useMfuTeachingApi = () => {
         studentProjects: studentProjects.data,
         thesisOversight: thesisOversight.data,
         otherTeachingTasks: otherTeachingTasks.data,
+        qualityOfWork: qualityOfWork.data,
         staffCode,
         evaluateId
       }
@@ -349,6 +370,7 @@ export const useMfuTeachingApi = () => {
         studentProjects: [],
         thesisOversight: [],
         otherTeachingTasks: [],
+        qualityOfWork: [],
         staffCode, 
         evaluateId 
       }
@@ -372,6 +394,7 @@ export const useMfuTeachingApi = () => {
     getStudentProjects,
     getThesisOversightDuties,
     getOtherTeachingTasks,
+    getQualityOfWork,
     getAllTeachingData
   }
 }

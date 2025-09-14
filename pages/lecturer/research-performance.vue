@@ -74,8 +74,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Teaching (60%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.teaching || 0 }}%</p>
+        <p class="text-sm text-inherit">Teaching ({{ kpiWeights?.domainWeights?.domain1 || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain1 || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -87,8 +87,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Research (40%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.research || 0 }}%</p>
+        <p class="text-sm text-inherit">Research ({{ kpiWeights?.domainWeights?.domain2 || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain2 || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -100,8 +100,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Academic Service (35%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.academicService || 0 }}%</p>
+        <p class="text-sm text-inherit">Academic Service ({{ kpiWeights?.domainWeights?.domain3 || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain3 || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -113,8 +113,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Administration (30%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.administration || 0 }}%</p>
+        <p class="text-sm text-inherit">Administration ({{ kpiWeights?.domainWeights?.domain4 || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain4 || 0 }}%</p>
       </NuxtLink>
 
       <NuxtLink
@@ -126,8 +126,8 @@
             : 'bg-gray-100 hover:bg-gradient-to-b hover:from-[#38ADEA] hover:to-[#21739D] hover:text-white'
         "
       >
-        <p class="text-sm text-inherit">Arts and Culture (10%)</p>
-        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.artsCulture || 0 }}%</p>
+        <p class="text-sm text-inherit">Arts and Culture ({{ kpiWeights?.domainWeights?.domain5 || 0 }}%)</p>
+        <p class="text-xl font-bold text-inherit">{{ kpiWeights?.domainScores?.domain5 || 0 }}%</p>
       </NuxtLink>
     </div>
     
@@ -229,13 +229,14 @@ definePageMeta({
 const researchChart = ref<HTMLCanvasElement | null>(null);
 const { user,logout } = useFirebaseAuth()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
-const { getResearchStudies, getResearchPublications, getAllResearchChartData, formatResearchStudiesData, formatResearchPublicationsData, isLoading: mfuResearchLoading, error: mfuResearchError } = useMfuResearchApi()
+const { getResearchStudies, getResearchPublications, getAllResearchChartData, formatResearchStudiesData, formatResearchPublicationsData, getPercentage, isLoading: mfuResearchLoading, error: mfuResearchError } = useMfuResearchApi()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
 
 // Reactive data
 const selectedRound = ref('round2-2025')
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
+const percentageData = ref<any>(null)
 const loading = ref(true)
 const researchStudiesData = ref<any[]>([])
 const researchPublicationsData = ref<any[]>([])
@@ -248,10 +249,10 @@ const chartLoading = ref(false)
 const onEvaluationPeriodChange = async () => {
   if (selectedEvaluationPeriod.value && user.value?.email) {
     await Promise.all([
-      loadKpiData(),
-      loadResearchStudies(), // Now uses MFU API
+      loadKpiData(), // Now uses percentage API
+      loadResearchStudies(),
       loadResearchPublications(),
-      loadResearchChartData() // Load chart data from seven APIs
+      loadResearchChartData()
     ])
     nextTick(() => {
       createChart()
@@ -298,16 +299,38 @@ const formatValue = (value: any) => {
   }
   return '0';
 }
-// KPI weights computed from MFU API
+// KPI weights computed from percentage API (like kpi-overview)
 const kpiWeights = computed(() => {
-  if (mfuKpiData.value?.categories) {
-    const categories = mfuKpiData.value.categories
+  if (percentageData.value && percentageData.value.length > 0) {
+    const data = percentageData.value[0]
     return {
-      teaching: categories[0]?.weight || 0,
-      research: categories[1]?.weight || 0,
-      academicService: categories[2]?.weight || 0,
-      administration: categories[3]?.weight || 0,
-      artsCulture: categories[4]?.weight || 0
+      teaching: data.domain1weight || 0,
+      research: data.domain2weight || 0,
+      academicService: data.domain3weight || 0,
+      administration: data.domain4weight || 0,
+      artsCulture: data.domain5weight || 0,
+      domainScoreName: data.domainscorename || 'Research',
+      domainWeights: {
+        domain1: data.domain1weight || 0,
+        domain2: data.domain2weight || 0,
+        domain3: data.domain3weight || 0,
+        domain4: data.domain4weight || 0,
+        domain5: data.domain5weight || 0
+      },
+      domainScores: {
+        domain1: data.domain1score || 0,
+        domain2: data.domain2score || 0,
+        domain3: data.domain3score || 0,
+        domain4: data.domain4score || 0,
+        domain5: data.domain5score || 0
+      },
+      domainThresholds: {
+        domain1: data.domain1threshold || 0,
+        domain2: data.domain2threshold || 0,
+        domain3: data.domain3threshold || 0,
+        domain4: data.domain4threshold || 0,
+        domain5: data.domain5threshold || 0
+      }
     }
   }
   // Return null when data is not loaded to prevent flashing
@@ -329,17 +352,29 @@ const kpiCategories = computed(() => {
   ]
 })
 
-// Load KPI data from MFU API
+// Load KPI data from percentage API (like kpi-overview)
 const loadKpiData = async () => {
   try {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      await fetchKpiPercentages(user.value.email, evalId)
-      kpiData.value = mfuKpiData.value as any
+      
+      // Use percentage API instead of fetchKpiPercentages
+      const result = await getPercentage(user.value.email, evalId.toString())
+      percentageData.value = result.data
+      
+      console.log('Percentage data received:', result.data)
+      
+      if (result.data && result.data.length > 0) {
+        console.log('✅ Successfully loaded percentage data from MFU API')
+      } else {
+        console.log('⚠️ No percentage data available for this evaluation period')
+      }
     }
   } catch (err) {
-    console.error('Failed to load KPI data:', err)
+    console.error('Failed to load percentage data:', err)
+    // Set fallback empty data
+    percentageData.value = []
   } finally {
     loading.value = false
   }
@@ -507,24 +542,34 @@ const createChart = () => {
             max: 180,
             grid: {
               color: "#E5E7EB",
-              drawTicks: false
+              drawTicks: true,
+              display: true
             },
             border: {
-              display: false
+              display: true,
+              color: "#D1D5DB",
+              width: 1
             },
             ticks: {
               color: "#64748B",
               padding: 8,
               font: {
-                size: 10
-              }
+                size: 11,
+                weight: 500
+              },
+              display: true,
+              stepSize: 20
             },
             title: {
               display: true,
               text: 'Raw Score',
+              color: "#374151",
               font: {
                 size: 14,
                 weight: 'bold'
+              },
+              padding: {
+                top: 10
               }
             }
           },

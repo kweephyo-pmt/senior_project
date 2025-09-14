@@ -318,6 +318,24 @@ export const useMfuResearchApi = () => {
     }
   }
 
+  // Get percentage data (KPI weights and scores)
+  const getPercentage = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_Percentage', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      console.error('Error fetching percentage data:', err)
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
   // Format research studies data for display
   const formatResearchStudiesData = (data: any[]) => {
     if (!Array.isArray(data)) return []
@@ -455,6 +473,7 @@ export const useMfuResearchApi = () => {
     getPatentedInventions,
     getOtherAcademicWork,
     getOtherAcademicWorkassignedbytheSchool,
+    getPercentage,
     formatResearchStudiesData,
     formatResearchPublicationsData,
     getAllResearchChartData,
