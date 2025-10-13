@@ -17,9 +17,9 @@
           :disabled="isLoadingPeriods"
         >
           <option v-if="isLoadingPeriods" disabled>Loading periods...</option>
-          <option 
-            v-for="period in evaluationPeriods" 
-            :key="period.evaluateid" 
+          <option
+            v-for="period in evaluationPeriods"
+            :key="period.evaluateid"
             :value="period.evaluateid"
           >
             Round {{ period.evaluatename }}
@@ -69,8 +69,8 @@
       </div>
     </div>
 
- <!-- KPI Categories with NuxtLink, only when not loading -->
- <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+    <!-- KPI Categories with NuxtLink, only when not loading -->
+    <div v-if="!loading && kpiWeights" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <NuxtLink
         to="/lecturer/teaching-performance"
         class="rounded-lg p-4 text-center transition-colors cursor-pointer"
@@ -172,28 +172,21 @@
         <!-- Curricular Committee Table -->
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Curricular Committee</h2>
-          <div class="max-h-[200px] overflow-y-auto">
-            <div v-if="curricularLoading" class="flex justify-center items-center py-4">
-              <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#4697b9]"></div>
-              <p class="ml-2 text-xs text-gray-600">Loading...</p>
-            </div>
-            <div v-else-if="curricularError" class="text-center py-4 text-xs text-red-600">
-              Error loading data
-            </div>
-            <div v-else-if="curricularData.length === 0" class="text-center py-4 text-xs text-gray-500">
-              No committee data available
-            </div>
-            <table v-else class="min-w-full text-xs">
-              <thead class="sticky top-0">
+          <div v-if="!curricularCommitteeData || curricularCommitteeData.length === 0" class="text-center py-4 text-sm text-gray-500">
+            No member found
+          </div>
+          <div v-else class="max-h-[200px] overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+              <thead class="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">ID</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Name</th>
+                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(item, index) in curricularData" :key="item.id" :class="index % 2 === 1 ? 'bg-[#E8F4FC]' : ''">
-                  <td class="px-3 py-1 text-center">{{ item.id }}</td>
-                  <td class="px-3 py-1 text-center">{{ item.staff_name }}</td>
+                <tr v-for="(item, index) in curricularCommitteeData" :key="index">
+                  <td class="px-2 py-2 whitespace-nowrap text-gray-900">{{ index + 1 }}.</td>
+                  <td class="px-2 py-2 whitespace-normal text-gray-900">{{ item.nameofcommittee || item.committee_name || item.name }}</td>
                 </tr>
               </tbody>
             </table>
@@ -203,28 +196,21 @@
         <!-- School Committee Table -->
         <div class="bg-white rounded-2xl shadow-xl p-3 sm:p-4">
           <h2 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">School Committee</h2>
-          <div class="max-h-[200px] overflow-y-auto">
-            <div v-if="schoolLoading" class="flex justify-center items-center py-4">
-              <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#4697b9]"></div>
-              <p class="ml-2 text-xs text-gray-600">Loading...</p>
-            </div>
-            <div v-else-if="schoolError" class="text-center py-4 text-xs text-red-600">
-              Error loading data
-            </div>
-            <div v-else-if="schoolData.length === 0" class="text-center py-4 text-xs text-gray-500">
-              No committee data available
-            </div>
-            <table v-else class="min-w-full text-xs">
-              <thead class="sticky top-0">
+          <div v-if="!schoolCommitteeData || schoolCommitteeData.filter(item => item && (item.nameofcommittee || item.committee_name || item.name)).length === 0" class="text-center py-4 text-sm text-gray-500">
+            No member found
+          </div>
+          <div v-else class="max-h-[200px] overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+              <thead class="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tl-xl">ID</th>
-                  <th class="px-3 py-2 bg-[#046e93] text-white text-center text-[11px] font-bold uppercase rounded-tr-xl">Name</th>
+                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(item, index) in schoolData" :key="item.id" :class="index % 2 === 1 ? 'bg-[#E8F4FC]' : ''">
-                  <td class="px-3 py-1 text-center">{{ item.id }}</td>
-                  <td class="px-3 py-1 text-center">{{ item.staff_name }}</td>
+                <tr v-for="(item, index) in schoolCommitteeData.filter(item => item && (item.nameofcommittee || item.committee_name || item.name))" :key="index">
+                  <td class="px-2 py-2 whitespace-nowrap text-gray-900">{{ index + 1 }}.</td>
+                  <td class="px-2 py-2 whitespace-normal text-gray-900">{{ item.nameofcommittee || item.committee_name || item.name }}</td>
                 </tr>
               </tbody>
             </table>
@@ -236,34 +222,57 @@
 </template>
 
 <script setup lang="ts">
+import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
+import { useMfuAdministrationApi } from '@/composables/useMfuAdministrationApi'
+import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import { onMounted, ref, computed, watch, nextTick } from 'vue'
-import { useAdministrationPerformance } from '@/composables/useAdministrationPerformance'
-import { useCurricularCommittee } from '@/composables/useCurricularCommittee'
-import { useSchoolCommittee } from '@/composables/useSchoolCommittee'
-import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
-import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
+import { computed, onMounted, ref, watch } from 'vue'
 
 definePageMeta({
   layout: 'lecturer'
 })
 
+// Refs
 const administrationChart = ref<HTMLCanvasElement | null>(null)
 const showMobileMenu = ref(false)
-const { user, logout } = useFirebaseAuth()
-const { administrationData, loading: isLoadingChart, error: chartError, fetchAdministrationPerformance, getChartData } = useAdministrationPerformance()
-const { curricularData, loading: curricularLoading, error: curricularError, fetchCurricularCommittee } = useCurricularCommittee()
-const { schoolData, loading: schoolLoading, error: schoolError, fetchSchoolCommittee } = useSchoolCommittee()
-const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
-const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
+const loading = ref(true)
+const isLoadingChart = ref(true)
+const chartError = ref('')
 
-// Reactive data
+// Composable hooks
+const { user } = useFirebaseAuth()
+const { evaluationPeriods, loading: isLoadingPeriods, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
+const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
+const {
+  isLoading: isAdminApiLoading,
+  error: adminApiError,
+  getAcademicAdministration,
+  getGuestLecturerCoordination,
+  getCourseCoordination,
+  getUniversityCommittee,
+  getSchoolCommittee,
+  getSchoolCommitteeList,
+  getCurricularCommittee,
+  getAdministrativeDuty,
+  getAllAdministrationData
+} = useMfuAdministrationApi()
+
+// Data refs
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
-const loading = ref(true)
 let chartInstance: Chart | null = null
+
+// Administration data refs
+const academicAdministrationData = ref<any[]>([])
+const guestLecturerData = ref<any[]>([])
+const courseCoordinationData = ref<any[]>([])
+const universityCommitteeData = ref<any[]>([])
+const schoolCommitteeData = ref<any[]>([])
+const schoolCommitteeListData = ref<any[]>([])
+const curricularCommitteeData = ref<any[]>([])
+const administrativeDutyData = ref<any[]>([])
 
 // Format value helper
 const formatValue = (value: any) => {
@@ -276,7 +285,7 @@ const formatValue = (value: any) => {
   return '0';
 }
 
-// KPI weights computed from MFU API - updated to use the new structure
+// KPI weights computed from MFU API
 const kpiWeights = computed(() => {
   if (mfuKpiData.value) {
     return {
@@ -286,27 +295,18 @@ const kpiWeights = computed(() => {
       domainThresholds: mfuKpiData.value.domainThresholds || {}
     }
   }
-  // Return null when data is not loaded to prevent flashing
   return null
 })
 
 // Helper functions to get domain data
-const getDomainWeight = (domain: string) => {
-  return kpiWeights.value?.domainWeights?.[domain] || 0
-}
-
-const getDomainScore = (domain: string) => {
-  return kpiWeights.value?.domainScores?.[domain] || 0
-}
-
-const getDomainThreshold = (domain: string) => {
-  return kpiWeights.value?.domainThresholds?.[domain] || 0
-}
+const getDomainWeight = (domain: string) => kpiWeights.value?.domainWeights?.[domain] || 0
+const getDomainScore = (domain: string) => kpiWeights.value?.domainScores?.[domain] || 0
+const getDomainThreshold = (domain: string) => kpiWeights.value?.domainThresholds?.[domain] || 0
 
 const getDomainCategoryName = (domain: string) => {
   const domainNames = {
     'domain1': 'Teaching',
-    'domain2': 'Research', 
+    'domain2': 'Research',
     'domain3': 'Academic Service',
     'domain4': 'Administration',
     'domain5': 'Arts and Culture'
@@ -322,7 +322,7 @@ const loadKpiData = async () => {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
       console.log('Loading KPI data from MFU API for:', user.value.email, 'evaluation period:', evalId)
       await fetchKpiPercentages(user.value.email, evalId)
-      kpiData.value = mfuKpiData.value as any
+      kpiData.value = mfuKpiData.value
       console.log('KPI data loaded:', mfuKpiData.value)
     }
   } catch (err) {
@@ -332,81 +332,133 @@ const loadKpiData = async () => {
   }
 }
 
-const toggleMobileMenu = () => {
-  showMobileMenu.value = !showMobileMenu.value
-}
+// Load all administration data
+const loadAdministrationData = async () => {
+  if (!user.value?.email) return
 
-// Format date range for evaluation period
-const formatDateRange = () => {
-  const currentPeriod = evaluationPeriods.value.find(p => p.evaluateid === selectedEvaluationPeriod.value)
-  if (!currentPeriod) return 'Loading...'
-  
-  const startDate = new Date(currentPeriod.evaluatestartdate)
-  const endDate = new Date(currentPeriod.evaluateenddate)
-  
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
-  
-  return `${formatDate(startDate)} - ${formatDate(endDate)}`
-}
+  try {
+    loading.value = true
+    isLoadingChart.value = true
+    chartError.value = ''
 
-// Handle evaluation period change
-const onEvaluationPeriodChange = async () => {
-  if (user.value?.email && selectedEvaluationPeriod.value) {
-    await Promise.all([
-      fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
-      fetchCurricularCommittee(user.value.email, selectedEvaluationPeriod.value.toString()),
-      fetchSchoolCommittee(user.value.email, selectedEvaluationPeriod.value.toString()),
-      loadKpiData(),
-      fetchKpiPercentages(user.value.email, selectedEvaluationPeriod.value)
-    ])
-    initializeChart()
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+
+    // Use the new composable to fetch all data at once
+    console.log('Fetching administration data for email:', user.value.email, 'evaluateId:', evalId)
+    const result = await getAllAdministrationData(user.value.email, evalId.toString())
+    console.log('Received administration data:', JSON.stringify(result, null, 2))
+
+    if (result) {
+      // Log each data field to help with debugging
+      console.log('Academic Administration:', result.academicAdministration)
+      console.log('Guest Lecturer:', result.guestLecturer)
+      console.log('Course Coordination:', result.courseCoordination)
+      console.log('University Committee:', result.universityCommittee)
+      console.log('School Committee:', result.schoolCommittee)
+      console.log('School Committee List:', result.schoolCommitteeList)
+      console.log('Curricular Committee:', result.curricularCommittee)
+      console.log('Administrative Duty:', result.administrativeDuty)
+      
+      // Update the data refs with the response data
+      // Handle both array and single object responses
+      academicAdministrationData.value = Array.isArray(result.academicAdministration) ? result.academicAdministration : [result.academicAdministration].filter(Boolean)
+      guestLecturerData.value = Array.isArray(result.guestLecturer) ? result.guestLecturer : [result.guestLecturer].filter(Boolean)
+      courseCoordinationData.value = Array.isArray(result.courseCoordination) ? result.courseCoordination : [result.courseCoordination].filter(Boolean)
+      universityCommitteeData.value = Array.isArray(result.universityCommittee) ? result.universityCommittee : [result.universityCommittee].filter(Boolean)
+      schoolCommitteeData.value = Array.isArray(result.schoolCommittee) ? result.schoolCommittee : [result.schoolCommittee].filter(Boolean)
+      schoolCommitteeListData.value = Array.isArray(result.schoolCommitteeList) ? result.schoolCommitteeList : [result.schoolCommitteeList].filter(Boolean)
+      curricularCommitteeData.value = Array.isArray(result.curricularCommittee) ? result.curricularCommittee : [result.curricularCommittee].filter(Boolean)
+      administrativeDutyData.value = Array.isArray(result.administrativeDuty) ? result.administrativeDuty : [result.administrativeDuty].filter(Boolean)
+      
+      console.log('Processed data for chart:', {
+        academicAdministration: academicAdministrationData.value,
+        guestLecturer: guestLecturerData.value,
+        courseCoordination: courseCoordinationData.value,
+        universityCommittee: universityCommitteeData.value,
+        schoolCommittee: schoolCommitteeData.value,
+        schoolCommitteeList: schoolCommitteeListData.value,
+        curricularCommittee: curricularCommitteeData.value,
+        administrativeDuty: administrativeDutyData.value
+      })
+
+      // Initialize the chart with the new data
+      initializeChart()
+    } else {
+      throw new Error('No data returned from API')
+    }
+  } catch (err) {
+    console.error('Error loading administration data:', err)
+    chartError.value = 'Failed to load administration data. Please try again later.'
+
+    // Reset data on error
+    academicAdministrationData.value = []
+    guestLecturerData.value = []
+    courseCoordinationData.value = []
+    universityCommitteeData.value = []
+    schoolCommitteeData.value = []
+    schoolCommitteeListData.value = []
+    curricularCommitteeData.value = []
+    administrativeDutyData.value = []
+  } finally {
+    loading.value = false
+    isLoadingChart.value = false
   }
 }
 
 // Initialize chart with data
 const initializeChart = () => {
   if (!administrationChart.value) return
-  
+
   // Destroy existing chart
   if (chartInstance) {
     chartInstance.destroy()
   }
-  
-  let chartData;
-  
-  if (administrationData.value.length > 0) {
-    chartData = getChartData();
-  } else {
-    // Show empty chart with zero values using same template structure
-    chartData = {
+
+      // Helper function to get the score from a data array, handling different possible field names
+    const getScore = (dataArray: any[]) => {
+      if (!dataArray || dataArray.length === 0) return 0
+      const item = dataArray[0]
+      // Try different possible field names for score
+      return item?.sumscore || item?.score || item?.rawscore || 0
+    }
+
+    const chartData = {
       labels: [
-        ['Academic Administration assigned', 'by the School or University'],
-        ['Coordination with Guest Lecturer'],
+        ['Academic Administration', 'assigned by School/University'],
+        'Coordination with a Guest Lecturer',
         'Course Coordination',
-        ['University\'s Committee or', 'Committee-Appointed Working Group'],
-        ['School\'s Committee or', 'Committee-Appointed Working Group'],
+        'University\'s Committee',
+        'School\'s Committee',
         'School Committee',
         'Curricular Committee',
-        ['Administrative duty assigned', 'by the school']
+        ['Administrative Duty', 'Assigned by School']
       ],
-      datasets: [
-        {
-          label: "Score",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          backgroundColor: "#172554",
-          borderWidth: 0,
-          borderRadius: 0,
-        },
-      ],
-    };
+      datasets: [{
+        label: 'Score',
+        data: [
+          // Academic Administration
+          getScore(academicAdministrationData.value),
+          // Guest Lecturer
+          getScore(guestLecturerData.value),
+          // Course Coordination
+          getScore(courseCoordinationData.value),
+          // University Committee
+          getScore(universityCommitteeData.value),
+          // School Committee
+          getScore(schoolCommitteeData.value),
+          // School Committee List
+          getScore(schoolCommitteeListData.value),
+          // Curricular Committee
+          getScore(curricularCommitteeData.value),
+          // Administrative Duty
+          getScore(administrativeDutyData.value)
+        ],
+      backgroundColor: '#172554',
+      borderWidth: 0,
+      borderRadius: 0,
+    }]
   }
-  
+
   chartInstance = new Chart(administrationChart.value, {
     type: 'bar',
     data: chartData,
@@ -415,32 +467,24 @@ const initializeChart = () => {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        },
-        datalabels: {               
-          anchor: 'end',              
-          align: 'end',               
-          color: '#6B7280',           
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          color: '#6B7280',
           font: {
             size: 12,
             weight: 'bold'
           },
-          offset: 4                  
+          offset: 4
         }
       },
       scales: {
         x: {
           beginAtZero: true,
           max: 180,
-          grid: {
-            color: '#f0f0f0'
-          },
-          ticks: {
-            font: {
-              size: 12
-            }
-          },
+          grid: { color: '#f0f0f0' },
+          ticks: { font: { size: 12 } },
           title: {
             display: true,
             text: 'Raw Score',
@@ -451,14 +495,8 @@ const initializeChart = () => {
           }
         },
         y: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            font: {
-              size: 12
-            }
-          }
+          grid: { display: false },
+          ticks: { font: { size: 12 } }
         }
       }
     },
@@ -466,45 +504,68 @@ const initializeChart = () => {
   })
 }
 
-onMounted(async () => {
-  // Load KPI data first
-  if (user.value?.email) {
-    await loadKpiData()
+// Handle evaluation period change
+const onEvaluationPeriodChange = async () => {
+  if (user.value?.email && selectedEvaluationPeriod.value) {
+    await Promise.all([
+      loadKpiData(),
+      loadAdministrationData()
+    ])
   }
-  
-  // Fetch evaluation periods and set default
+}
+
+// Format date range for evaluation period
+const formatDateRange = () => {
+  const currentPeriod = evaluationPeriods.value.find(p => p.evaluateid === selectedEvaluationPeriod.value)
+  if (!currentPeriod) return 'Loading...'
+
+  const startDate = new Date(currentPeriod.evaluatestartdate)
+  const endDate = new Date(currentPeriod.evaluateenddate)
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+
+  return `${formatDate(startDate)} - ${formatDate(endDate)}`
+}
+
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  // Load evaluation periods first
   await fetchEvaluationPeriods()
+
+  // Set the selected evaluation period if not already set
   if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
     selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
   }
-  
-  // Load administration performance data
+
+  // Load KPI data and administration data
   if (user.value?.email) {
     await Promise.all([
-      fetchAdministrationPerformance(user.value.email, selectedEvaluationPeriod.value?.toString()),
-      fetchCurricularCommittee(user.value.email, selectedEvaluationPeriod.value?.toString()),
-      fetchSchoolCommittee(user.value.email, selectedEvaluationPeriod.value?.toString())
+      loadKpiData(),
+      loadAdministrationData()
     ])
   }
-  
-  // Initialize the chart with database data
-  initializeChart()
 })
 
-// Watch for evaluation period changes
+// Watchers
 watch(
   () => selectedEvaluationPeriod.value,
   async (newEvalId, oldEvalId) => {
     if (newEvalId && newEvalId !== oldEvalId && user.value?.email && !loading.value) {
       console.log(`Evaluation period changed from ${oldEvalId} to ${newEvalId}`)
       await Promise.all([
-        fetchAdministrationPerformance(user.value.email, newEvalId.toString()),
-        fetchCurricularCommittee(user.value.email, newEvalId.toString()),
-        fetchSchoolCommittee(user.value.email, newEvalId.toString()),
         loadKpiData(),
-        fetchKpiPercentages(user.value.email, newEvalId)
+        loadAdministrationData()
       ])
-      initializeChart()
     }
   }
 )
@@ -513,20 +574,15 @@ watch(
   () => user.value?.email,
   async (email) => {
     if (email) {
-      loadKpiData()
       // Fetch evaluation periods and set default
       await fetchEvaluationPeriods()
       if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
         selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
       }
       await Promise.all([
-        fetchAdministrationPerformance(email, selectedEvaluationPeriod.value?.toString()),
-        fetchCurricularCommittee(email, selectedEvaluationPeriod.value?.toString()),
-        fetchSchoolCommittee(email, selectedEvaluationPeriod.value?.toString()),
-        fetchKpiPercentages(email, selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9)
+        loadKpiData(),
+        loadAdministrationData()
       ])
-      // Re-initialize chart with new data
-      initializeChart()
     }
   },
   { immediate: true }
