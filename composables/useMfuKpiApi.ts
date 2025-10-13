@@ -199,6 +199,11 @@ export const useMfuKpiApi = () => {
                 domain4: staffData.domain4threshold || 0,
                 domain5: staffData.domain5threshold || 0
               },
+              overallPerformance: {
+                academicPerformance: staffData['Academic Performance (60%)'] || 0,
+                behavior: staffData['Behavior (40%)'] || 0,
+                totalScore: staffData['Total Score (100%)'] || 0
+              },
               categories: [
                 {
                   id: 'domain1',

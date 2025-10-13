@@ -155,7 +155,7 @@
           Administration Performance
         </h2>
         <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
-          Threshold (30) - Earned score (115)
+          Threshold ({{ getDomainThreshold('domain4') }}) - Earned score ({{ getDomainScore('domain4') }})
         </p>
         <!-- Performance Chart -->
         <div class="h-[300px] sm:h-[400px] mb-4 sm:mb-6">
@@ -177,10 +177,10 @@
           </div>
           <div v-else class="max-h-[200px] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-              <thead class="bg-gray-50 sticky top-0 z-10">
+              <thead class="bg-[#0e7490] sticky top-0 z-10">
                 <tr>
-                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-2 py-2 text-center text-xs font-medium text-white uppercase tracking-wider">No.</th>
+                  <th class="px-2 py-2 text-center text-xs font-medium text-white uppercase tracking-wider">Name</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -201,10 +201,10 @@
           </div>
           <div v-else class="max-h-[200px] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-              <thead class="bg-gray-50 sticky top-0 z-10">
+              <thead class="bg-[#0e7490] sticky top-0 z-10">
                 <tr>
-                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                  <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-2 py-2 text-center text-xs font-medium text-white uppercase tracking-wider">No.</th>
+                  <th class="px-2 py-2 text-center text-xs font-medium text-white uppercase tracking-wider">Name</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -320,13 +320,11 @@ const loadKpiData = async () => {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      console.log('Loading KPI data from MFU API for:', user.value.email, 'evaluation period:', evalId)
       await fetchKpiPercentages(user.value.email, evalId)
       kpiData.value = mfuKpiData.value
-      console.log('KPI data loaded:', mfuKpiData.value)
     }
   } catch (err) {
-    console.error('Failed to load KPI data:', err)
+    // Error handled silently
   } finally {
     loading.value = false
   }
@@ -343,22 +341,9 @@ const loadAdministrationData = async () => {
 
     const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
 
-    // Use the new composable to fetch all data at once
-    console.log('Fetching administration data for email:', user.value.email, 'evaluateId:', evalId)
     const result = await getAllAdministrationData(user.value.email, evalId.toString())
-    console.log('Received administration data:', JSON.stringify(result, null, 2))
 
     if (result) {
-      // Log each data field to help with debugging
-      console.log('Academic Administration:', result.academicAdministration)
-      console.log('Guest Lecturer:', result.guestLecturer)
-      console.log('Course Coordination:', result.courseCoordination)
-      console.log('University Committee:', result.universityCommittee)
-      console.log('School Committee:', result.schoolCommittee)
-      console.log('School Committee List:', result.schoolCommitteeList)
-      console.log('Curricular Committee:', result.curricularCommittee)
-      console.log('Administrative Duty:', result.administrativeDuty)
-      
       // Update the data refs with the response data
       // Handle both array and single object responses
       academicAdministrationData.value = Array.isArray(result.academicAdministration) ? result.academicAdministration : [result.academicAdministration].filter(Boolean)
@@ -369,17 +354,6 @@ const loadAdministrationData = async () => {
       schoolCommitteeListData.value = Array.isArray(result.schoolCommitteeList) ? result.schoolCommitteeList : [result.schoolCommitteeList].filter(Boolean)
       curricularCommitteeData.value = Array.isArray(result.curricularCommittee) ? result.curricularCommittee : [result.curricularCommittee].filter(Boolean)
       administrativeDutyData.value = Array.isArray(result.administrativeDuty) ? result.administrativeDuty : [result.administrativeDuty].filter(Boolean)
-      
-      console.log('Processed data for chart:', {
-        academicAdministration: academicAdministrationData.value,
-        guestLecturer: guestLecturerData.value,
-        courseCoordination: courseCoordinationData.value,
-        universityCommittee: universityCommitteeData.value,
-        schoolCommittee: schoolCommitteeData.value,
-        schoolCommitteeList: schoolCommitteeListData.value,
-        curricularCommittee: curricularCommitteeData.value,
-        administrativeDuty: administrativeDutyData.value
-      })
 
       // Initialize the chart with the new data
       initializeChart()
@@ -387,7 +361,6 @@ const loadAdministrationData = async () => {
       throw new Error('No data returned from API')
     }
   } catch (err) {
-    console.error('Error loading administration data:', err)
     chartError.value = 'Failed to load administration data. Please try again later.'
 
     // Reset data on error
@@ -561,7 +534,6 @@ watch(
   () => selectedEvaluationPeriod.value,
   async (newEvalId, oldEvalId) => {
     if (newEvalId && newEvalId !== oldEvalId && user.value?.email && !loading.value) {
-      console.log(`Evaluation period changed from ${oldEvalId} to ${newEvalId}`)
       await Promise.all([
         loadKpiData(),
         loadAdministrationData()

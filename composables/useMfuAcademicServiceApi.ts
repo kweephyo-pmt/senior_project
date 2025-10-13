@@ -1,14 +1,14 @@
-import { ref } from 'vue'
+import { ref, readonly } from 'vue'
 
-// MFU Administration API composable
-export const useMfuAdministrationApi = () => {
+// MFU Academic Service API composable
+export const useMfuAcademicServiceApi = () => {
   const authToken = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
   // API Configuration using Nuxt runtime config
   const runtimeConfig = useRuntimeConfig()
-
+  
   const API_BASE_URL = runtimeConfig.public.apiBaseUrl || 'https://eport.mfu.ac.th/api/master'
   const API_CREDENTIALS = {
     username: runtimeConfig.public.apiUsername || 'sombi',
@@ -18,7 +18,7 @@ export const useMfuAdministrationApi = () => {
   // Extract staff code from email by looking up in lecturer_profiles database
   const extractStaffCode = async (email: string): Promise<string> => {
     if (!email) return ''
-
+    
     try {
       // Use production API URL for staff code lookup
       const response = await fetch('https://senior-project-backend-51782680110.asia-southeast1.run.app/api/lecturer/lookup-staffcode', {
@@ -64,7 +64,7 @@ export const useMfuAdministrationApi = () => {
 
         clearTimeout(timeoutId)
         const responseText = await response.text()
-
+        
         if (response.ok) {
           const data = JSON.parse(responseText)
           authToken.value = data.token || data.access_token || data.bearer_token
@@ -74,15 +74,15 @@ export const useMfuAdministrationApi = () => {
         }
       } catch (fetchError: any) {
         clearTimeout(timeoutId)
-
+        
         if (fetchError.name === 'AbortError') {
           throw new Error('Login timeout: Authentication took longer than 15 seconds')
         }
-
+        
         if (fetchError.code === 'ECONNRESET' || fetchError.message.includes('ECONNRESET')) {
           throw new Error('Connection reset during authentication. The MFU API server may be temporarily unavailable.')
         }
-
+        
         throw fetchError
       }
     } catch (err: any) {
@@ -127,7 +127,7 @@ export const useMfuAdministrationApi = () => {
 
         clearTimeout(timeoutId)
         const responseText = await response.text()
-
+        
         if (response.ok) {
           return JSON.parse(responseText)
         } else {
@@ -135,15 +135,15 @@ export const useMfuAdministrationApi = () => {
         }
       } catch (fetchError: any) {
         clearTimeout(timeoutId)
-
+        
         if (fetchError.name === 'AbortError') {
           throw new Error(`Request timeout: ${endpoint} took longer than 30 seconds`)
         }
-
+        
         if (fetchError.code === 'ECONNRESET' || fetchError.message.includes('ECONNRESET')) {
           throw new Error(`Connection reset by server: ${endpoint}. The MFU API server may be temporarily unavailable.`)
         }
-
+        
         throw fetchError
       }
     } catch (err: any) {
@@ -152,17 +152,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get academic administration data
-  const getAcademicAdministration = async (email: string, evaluateId: string = '9') => {
+  // Get Academic Service Activities data
+  const getAcademicServiceActivities = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_AcademicAdministrationassignedbytheSchoolorUniversityRawscore',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_AcademicServiceActivities', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -173,17 +169,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get guest lecturer coordination data
-  const getGuestLecturerCoordination = async (email: string, evaluateId: string = '9') => {
+  // Get Performance as an Invited Lecturer or Speaker data
+  const getPerformanceasanInvitedLecturerorSpeaker = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_CoordinationwithaGuestLecturerRawscore',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_PerformanceasanInvitedLecturerorSpeaker', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -194,17 +186,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get course coordination data
-  const getCourseCoordination = async (email: string, evaluateId: string = '9') => {
+  // Get Academic Service Activities Raw Score data
+  const getAcademicServiceActivitiesRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_CourseCoordinationRawscore',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_AcademicServiceActivitiesRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -215,17 +203,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get university committee data
-  const getUniversityCommittee = async (email: string, evaluateId: string = '9') => {
+  // Get Performance as an Invited Lecturer or Speaker Raw Score data
+  const getPerformanceasanInvitedLecturerorSpeakerRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_UniversityCommitteeorCommitteeAppointedWorkingGroupRawscore',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_PerformanceasanInvitedLecturerorSpeakerRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -236,17 +220,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get school committee data
-  const getSchoolCommittee = async (email: string, evaluateId: string = '9') => {
+  // Get External Committee Advisor Member Raw Score data
+  const getExternalCommitteeAdvisorMemberRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_SchoolCommitteeorCommitteeAppointedWorkingGroupRawscore',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_ExternalCommitteeAdvisorMemberRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -257,17 +237,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get school committee list
-  const getSchoolCommitteeList = async (email: string, evaluateId: string = '9') => {
+  // Get Academic Reviewer Raw Score data
+  const getAcademicreviewerRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_SchoolCommittee',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_AcademicreviewerRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -278,17 +254,13 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get curricular committee data
-  const getCurricularCommittee = async (email: string, evaluateId: string = '9') => {
+  // Get Other Types of Academic Service Provided Raw Score data
+  const getOtherTypesofAcademicServiceProvidedRawscore = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_CurricularCommittee',
-        staffCode,
-        evaluateId
-      )
+      const data = await makeAuthenticatedRequest('get_OtherTypesofAcademicServiceProvidedRawscore', staffCode, evaluateId)
       return {
         data: data?.data || [],
         staffCode,
@@ -299,83 +271,94 @@ export const useMfuAdministrationApi = () => {
     }
   }
 
-  // Get administrative duty data
-  const getAdministrativeDuty = async (email: string, evaluateId: string = '9') => {
+  // Get all academic service data (for tables)
+  const getAllAcademicServiceData = async (email: string, evaluateId: string = '9') => {
     const staffCode = await extractStaffCode(email)
     if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
 
     try {
-      const data = await makeAuthenticatedRequest(
-        'get_AdministrativedutyassignedbytheSchoolRawscore',
-        staffCode,
-        evaluateId
-      )
-      return {
-        data: data?.data || [],
-        staffCode,
-        evaluateId
-      }
-    } catch (err) {
-      return { data: [], staffCode, evaluateId }
-    }
-  }
-
-  // Get all administration data in parallel
-  const getAllAdministrationData = async (email: string, evaluateId: string = '9') => {
-    try {
-      const [
-        academicAdmin,
-        guestLecturer,
-        courseCoordination,
-        universityCommittee,
-        schoolCommittee,
-        schoolCommitteeList,
-        curricularCommittee,
-        administrativeDuty
-      ] = await Promise.all([
-        getAcademicAdministration(email, evaluateId),
-        getGuestLecturerCoordination(email, evaluateId),
-        getCourseCoordination(email, evaluateId),
-        getUniversityCommittee(email, evaluateId),
-        getSchoolCommittee(email, evaluateId),
-        getSchoolCommitteeList(email, evaluateId),
-        getCurricularCommittee(email, evaluateId),
-        getAdministrativeDuty(email, evaluateId)
+      const [activitiesData, speakerData] = await Promise.all([
+        getAcademicServiceActivities(email, evaluateId),
+        getPerformanceasanInvitedLecturerorSpeaker(email, evaluateId)
       ])
 
       return {
-        academicAdministration: academicAdmin.data,
-        guestLecturer: guestLecturer.data,
-        courseCoordination: courseCoordination.data,
-        universityCommittee: universityCommittee.data,
-        schoolCommittee: schoolCommittee.data,
-        schoolCommitteeList: schoolCommitteeList.data,
-        curricularCommittee: curricularCommittee.data,
-        administrativeDuty: administrativeDuty.data,
-        staffCode: academicAdmin.staffCode || '',
-        evaluateId: academicAdmin.evaluateId || evaluateId
+        academicServiceActivities: activitiesData.data,
+        invitedLecturerSpeaker: speakerData.data,
+        staffCode,
+        evaluateId
       }
-    } catch (error) {
-      throw error
+    } catch (err) {
+      return { 
+        academicServiceActivities: [],
+        invitedLecturerSpeaker: [],
+        staffCode, 
+        evaluateId 
+      }
+    }
+  }
+
+  // Get all academic service chart data from the five rawscore API endpoints
+  const getAllAcademicServiceChartData = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const [
+        activitiesRawscore,
+        speakerRawscore,
+        externalCommitteeRawscore,
+        reviewerRawscore,
+        otherServicesRawscore
+      ] = await Promise.all([
+        getAcademicServiceActivitiesRawscore(email, evaluateId),
+        getPerformanceasanInvitedLecturerorSpeakerRawscore(email, evaluateId),
+        getExternalCommitteeAdvisorMemberRawscore(email, evaluateId),
+        getAcademicreviewerRawscore(email, evaluateId),
+        getOtherTypesofAcademicServiceProvidedRawscore(email, evaluateId)
+      ])
+
+      return {
+        academicServiceActivitiesRawscore: activitiesRawscore.data,
+        invitedLecturerSpeakerRawscore: speakerRawscore.data,
+        externalCommitteeRawscore: externalCommitteeRawscore.data,
+        academicReviewerRawscore: reviewerRawscore.data,
+        otherServicesRawscore: otherServicesRawscore.data,
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { 
+        academicServiceActivitiesRawscore: [],
+        invitedLecturerSpeakerRawscore: [],
+        externalCommitteeRawscore: [],
+        academicReviewerRawscore: [],
+        otherServicesRawscore: [],
+        staffCode, 
+        evaluateId 
+      }
     }
   }
 
   return {
     // State
-    isLoading,
-    error,
-
+    authToken: readonly(authToken),
+    isLoading: readonly(isLoading),
+    error: readonly(error),
+    
     // Methods
-    getAcademicAdministration,
-    getGuestLecturerCoordination,
-    getCourseCoordination,
-    getUniversityCommittee,
-    getSchoolCommittee,
-    getSchoolCommitteeList,
-    getCurricularCommittee,
-    getAdministrativeDuty,
-    getAllAdministrationData
+    login,
+    extractStaffCode,
+    getAcademicServiceActivities,
+    getPerformanceasanInvitedLecturerorSpeaker,
+    getAcademicServiceActivitiesRawscore,
+    getPerformanceasanInvitedLecturerorSpeakerRawscore,
+    getExternalCommitteeAdvisorMemberRawscore,
+    getAcademicreviewerRawscore,
+    getOtherTypesofAcademicServiceProvidedRawscore,
+    getAllAcademicServiceData,
+    getAllAcademicServiceChartData
   }
 }
 
-export default useMfuAdministrationApi
+export default useMfuAcademicServiceApi

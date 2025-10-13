@@ -153,7 +153,7 @@
             Arts and Culture Conservation Performance
           </h2>
           <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
-          Threshold (40) - Earned score (15)
+          Threshold ({{ getDomainThreshold('domain5') }}) - Earned score ({{ getDomainScore('domain5') }})
         </p>
         </div>
         
@@ -185,18 +185,18 @@
                     No self-development activities found for this evaluation period.
                   </td>
                 </tr>
-                <tr v-else v-for="activity in selfDevelopmentData" :key="activity.title + activity.date">
+                <tr v-else v-for="activity in selfDevelopmentData" :key="activity.activity">
                   <td class="px-6 py-4 flex items-center gap-2">
                     <div class="flex-1">
-                      <p class="text-sm font-bold mb-1">{{ activity.title }}</p>
+                      <p class="text-sm font-bold mb-1">{{ activity.activity }}</p>
                       <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acDateLogo class="w-4 h-4"/>Date : {{ formatDate(activity.date) }}
+                        <acDateLogo class="w-4 h-4"/>Date : {{ formatDate(activity.startdate) }}
                       </p>
                       <p class="text-xs text-gray-600 mb-1 flex items-center gap-1">
-                        <acTypeLogo class="w-4 h-4"/>Type : {{ activity.type }}
+                        <acTypeLogo class="w-4 h-4"/>Type : {{ activity.typename }}
                       </p>
                       <p class="text-xs text-gray-600 flex items-center gap-1">
-                        <acLocationLogo class="w-4 h-4"/>{{ activity.location }}
+                        <acLocationLogo class="w-4 h-4"/>{{ activity.venue }}
                       </p>
                     </div>
                   </td>
@@ -257,9 +257,9 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import { useArtsCulturePerformance } from '@/composables/useArtsCulturePerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
-import { useSelfDevelopment } from '@/composables/useSelfDevelopment'
 import { useMfuArrangedActivities } from '@/composables/useMfuArrangedActivities'
 import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
+import { useMfuArtsCultureApi } from '@/composables/useMfuArtsCultureApi'
 
 definePageMeta({
   layout: 'lecturer'
@@ -270,9 +270,9 @@ const showMobileMenu = ref(false)
 const { user, logout } = useFirebaseAuth()
 const { artsCultureData, loading: isLoadingChart, error: chartError, fetchArtsCulturePerformance, getChartData } = useArtsCulturePerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
-const { getSelfDevelopmentData } = useSelfDevelopment()
 const { mfuArrangedActivities, loading: mfuLoading, error: mfuError, fetchMfuArrangedActivities } = useMfuArrangedActivities()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
+const { getSelfDevelopment } = useMfuArtsCultureApi()
 
 // Reactive data
 const selectedEvaluationPeriod = ref<number | null>(null)
@@ -337,12 +337,11 @@ const loadKpiData = async () => {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      console.log('Loading KPI data from MFU API for:', user.value.email, 'evaluation period:', evalId)
       await fetchKpiPercentages(user.value.email, evalId)
       kpiData.value = mfuKpiData.value as any
     }
   } catch (err) {
-    console.error('Failed to load KPI data:', err)
+    // Error handled silently
   } finally {
     loading.value = false
   }
@@ -351,19 +350,16 @@ const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
 
-// Load self-development data
+// Load self-development data from MFU API
 const loadSelfDevelopmentData = async () => {
   try {
     loadingSelfDevelopment.value = true
     if (user.value?.email) {
-      const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 8
-      console.log('Loading self-development data for:', user.value.email, 'evaluation period:', evalId)
-      const response = await getSelfDevelopmentData(user.value.email, evalId) as any
+      const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+      const response = await getSelfDevelopment(user.value.email, evalId.toString())
       selfDevelopmentData.value = response.data || []
-      console.log('Self-development data loaded:', selfDevelopmentData.value)
     }
   } catch (err) {
-    console.error('Failed to load self-development data:', err)
     selfDevelopmentData.value = []
   } finally {
     loadingSelfDevelopment.value = false
@@ -374,7 +370,6 @@ const loadSelfDevelopmentData = async () => {
 const loadMfuArrangedActivities = async () => {
   if (user.value?.email) {
     const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-    console.log('Loading MFU arranged activities for:', user.value.email, 'evaluation period:', evalId)
     await fetchMfuArrangedActivities(user.value.email, evalId.toString())
   }
 }

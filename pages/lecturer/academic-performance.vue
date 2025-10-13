@@ -154,7 +154,7 @@
             Academic Services Performance
           </h2>
           <p class="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-6">
-          Threshold (10) - Earned score (59)
+          Threshold ({{ getDomainThreshold('domain3') }}) - Earned score ({{ getDomainScore('domain3') }})
         </p>
         </div>
 
@@ -176,28 +176,20 @@
         <div class="w-full h-0.5 bg-[#B0B9C4] mb-1"></div>
 
         <div class="flex flex-col">
-          <div class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-4 rounded-lg shadow-sm shadow-b-gray-300">
-
-          <div>
-            <p class="text-xs font-bold mb-2">Digital Literacy Enhancement Training for Elderly (Ban Pang Lao)</p>
-            <p class="text-xs text-[#606060]">Dr.Supansa Chaising(Co-organizer)</p>
-            <p class="text-xs text-[#606060]">Budget (THB) : 0 </p>
+          <div v-if="academicServiceActivities.length === 0" class="text-center py-4 text-sm text-gray-500">
+            No activities found
           </div>
-          <div class="flex items-center">
-            <span class="bg-[#22C55E] text-[#FFFFFF] text-xs font-semibold px-3 py-1 rounded-full mt-8 whitespace-nowrap">Non-revenue</span>
+          <div v-else v-for="(activity, index) in academicServiceActivities" :key="index" class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-4 rounded-lg shadow-sm shadow-b-gray-300">
+            <div class="flex-1">
+              <p class="text-xs font-bold mb-2">{{ activity.projecttitle }}</p>
+              <p class="text-xs text-[#606060]">Budget (THB) : {{ activity.budgetlimit || 0 }}</p>
+            </div>
+            <div class="flex items-center">
+              <span :class="activity.profitable === 0 ? 'bg-[#22C55E]' : 'bg-[#3B82F6]'" class="text-[#FFFFFF] text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
+                {{ activity.profitable === 0 ? 'Non-revenue' : 'Revenue' }}
+              </span>
+            </div>
           </div>
-        </div>  
-        <div class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-4 rounded-lg shadow-sm shadow-b-gray-300">
-
-          <div>
-            <p class="text-xs font-bold mb-2">Digital Literacy Enhancement Training for Youth (NFE Chiang Rai)</p>
-            <p class="text-xs text-[#606060]">Dr.Supansa Chaising(Co-organizer)</p>
-            <p class="text-xs text-[#606060]">Budget (THB) : 0 </p>
-          </div>
-          <div class="flex items-center">
-            <span class="bg-[#22C55E] text-[#FFFFFF] text-xs font-semibold px-3 py-1 rounded-full mt-8 whitespace-nowrap">Non-revenue</span>
-          </div>
-        </div>
         </div>
       </div>
       <div class="bg-[#FAFBFD] rounded-lg shadow-md p-4 sm:p-6 mr-0 sm:mr-8">
@@ -206,10 +198,13 @@
         </h2>
         <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
 
-        <div class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-3 rounded-lg shadow-sm shadow-b-gray-300">
+        <div v-if="invitedLecturerSpeaker.length === 0" class="text-center py-4 text-sm text-gray-500">
+          No invited lecturer or speaker records found
+        </div>
+        <div v-else v-for="(speaker, index) in invitedLecturerSpeaker" :key="index" class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-3 rounded-lg shadow-sm shadow-b-gray-300">
           <div>
-            <p class="text-xs font-bold mb-2">Developing Steps for Learning Programming through Gamification</p>
-            <p class="text-xs text-[#606060]">Dr.Supansa Chaising(Co-organizer)</p>
+            <p class="text-xs font-bold mb-2">{{ speaker.speakertitle || speaker.speechtitle }}</p>
+            <p class="text-xs text-[#606060]">{{ speaker.organizingunit }}</p>
           </div>
         </div> 
       </div>
@@ -224,9 +219,9 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-import { useAcademicServicePerformance } from '@/composables/useAcademicServicePerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
 import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
+import { useMfuAcademicServiceApi } from '@/composables/useMfuAcademicServiceApi'
 
 definePageMeta({
   layout: 'lecturer'
@@ -235,15 +230,24 @@ definePageMeta({
 const academicChart = ref<HTMLCanvasElement | null>(null)
 const showMobileMenu = ref(false)
 const { user, logout } = useFirebaseAuth()
-const { academicServiceData, loading: isLoadingChart, error: chartError, fetchAcademicServicePerformance, getChartData } = useAcademicServicePerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
+const { getAllAcademicServiceData, getAllAcademicServiceChartData } = useMfuAcademicServiceApi()
 
 // Reactive data
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
 const loading = ref(true)
+const isLoadingChart = ref(false)
+const chartError = ref<string | null>(null)
 let chartInstance: Chart | null = null
+
+// Academic Service API data
+const academicServiceActivities = ref<any[]>([])
+const invitedLecturerSpeaker = ref<any[]>([])
+
+// Academic Service Chart API data
+const chartDataFromApi = ref<any>(null)
 
 // Format value helper
 const formatValue = (value: any) => {
@@ -300,15 +304,47 @@ const loadKpiData = async () => {
     loading.value = true
     if (user.value?.email) {
       const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-      console.log('Loading KPI data from MFU API for:', user.value.email, 'evaluation period:', evalId)
       await fetchKpiPercentages(user.value.email, evalId)
-      console.log('KPI data loaded:', mfuKpiData.value)
       kpiData.value = mfuKpiData.value as any
     }
   } catch (err) {
-    console.error('Failed to load KPI data:', err)
+    // Error handled silently
   } finally {
     loading.value = false
+  }
+}
+
+// Load Academic Service data from MFU API
+const loadAcademicServiceData = async () => {
+  if (!user.value?.email) return
+  
+  try {
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+    const result = await getAllAcademicServiceData(user.value.email, evalId.toString())
+    
+    if (result) {
+      academicServiceActivities.value = result.academicServiceActivities || []
+      invitedLecturerSpeaker.value = result.invitedLecturerSpeaker || []
+    }
+  } catch (err) {
+    academicServiceActivities.value = []
+    invitedLecturerSpeaker.value = []
+  }
+}
+
+// Load Academic Service Chart data from MFU API
+const loadAcademicServiceChartData = async () => {
+  if (!user.value?.email) return
+  
+  try {
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+    const result = await getAllAcademicServiceChartData(user.value.email, evalId.toString())
+    
+    if (result) {
+      chartDataFromApi.value = result
+    }
+  } catch (err) {
+    chartDataFromApi.value = null
   }
 }
 const toggleMobileMenu = () => {
@@ -338,12 +374,19 @@ const formatDateRange = () => {
 const onEvaluationPeriodChange = async () => {
   if (user.value?.email && selectedEvaluationPeriod.value) {
     await Promise.all([
-      fetchAcademicServicePerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData(),
-      fetchKpiPercentages(user.value.email, selectedEvaluationPeriod.value)
+      loadAcademicServiceData(),
+      loadAcademicServiceChartData()
     ])
     initializeChart()
   }
+}
+
+// Helper function to get score from API data
+const getScore = (dataArray: any[]) => {
+  if (!dataArray || dataArray.length === 0) return 0
+  const item = dataArray[0]
+  return item?.sumscore || item?.score || item?.rawscore || 0
 }
 
 // Initialize chart with data
@@ -357,50 +400,47 @@ const initializeChart = () => {
   
   let chartData;
   
-  if (academicServiceData.value.length > 0) {
-    chartData = getChartData();
-  } else {
-    // Show empty chart with zero values using same template structure
+  // Use MFU API data if available
+  if (chartDataFromApi.value) {
     chartData = {
       labels: [
-        'Other Services',
-        'Visiting Professor',
-        'Additional Assigned Tasks',
-        'Reviewer',
-        'Committee/Advisor',
-        'Guest Lecturer',
+        'Other Types of Academic Service',
+        'Academic Reviewer',
+        'External Committee/Advisor/Member',
+        'Performance as Invited Lecturer/Speaker',
         'Academic Service Activities'
       ],
-      datasets: [
-        {
-          label: "Internal (Score)",
-          data: [0, 0, 0, 0, 0, 0, 0],
-          backgroundColor: "#1D3555",
-          borderWidth: 0,
-          borderRadius: 4,
-        },
-        {
-          label: "External (Score)",
-          data: [0, 0, 0, 0, 0, 0, 0],
-          backgroundColor: "#a21a5b",
-          borderWidth: 0,
-          borderRadius: 4,
-        },
-        {
-          label: "Non-Revenue (Score)",
-          data: [0, 0, 0, 0, 0, 0, 0],
-          backgroundColor: "#059669",
-          borderWidth: 0,
-          borderRadius: 4,
-        },
-        {
-          label: "Revenue (Score)",
-          data: [0, 0, 0, 0, 0, 0, 0],
-          backgroundColor: "#dc2626",
-          borderWidth: 0,
-          borderRadius: 4,
-        },
+      datasets: [{
+        label: 'Score',
+        data: [
+          getScore(chartDataFromApi.value.otherServicesRawscore),
+          getScore(chartDataFromApi.value.academicReviewerRawscore),
+          getScore(chartDataFromApi.value.externalCommitteeRawscore),
+          getScore(chartDataFromApi.value.invitedLecturerSpeakerRawscore),
+          getScore(chartDataFromApi.value.academicServiceActivitiesRawscore)
+        ],
+        backgroundColor: '#172554',
+        borderWidth: 0,
+        borderRadius: 0,
+      }]
+    }
+  } else {
+    // Show empty chart with zero values
+    chartData = {
+      labels: [
+        'Other Types of Academic Service',
+        'Academic Reviewer',
+        'External Committee/Advisor/Member',
+        'Performance as Invited Lecturer/Speaker',
+        'Academic Service Activities'
       ],
+      datasets: [{
+        label: 'Score',
+        data: [0, 0, 0, 0, 0],
+        backgroundColor: '#172554',
+        borderWidth: 0,
+        borderRadius: 0,
+      }]
     };
   }
   
@@ -423,32 +463,13 @@ const initializeChart = () => {
             size: 12,
             weight: 'bold'
           },
-          offset: 10,
-          padding: 5,
-          clamp: true,
-          formatter: function (value, context) {
-            const datasets = context.chart?.data?.datasets || []
-            const index = context.dataIndex
-
-            const internal = datasets[0]?.data?.[index] ?? 0
-            const external = datasets[1]?.data?.[index] ?? 0
-            const nonRevenue = datasets[2]?.data?.[index] ?? 0
-            const revenue = datasets[3]?.data?.[index] ?? 0
-
-            const total = Number(internal) + Number(external) + Number(nonRevenue) + Number(revenue)
-
-            if (context.datasetIndex === 3) {
-              return total > 0 ? total : '0'
-            }
-            return ''
-          }
+          offset: 4
         }
       },
       scales: {
         x: {
-          stacked: true,
           beginAtZero: true,
-          max: 160,
+          max: 180,
           grid: {
             color: '#f0f0f0'
           },
@@ -467,7 +488,6 @@ const initializeChart = () => {
           }
         },
         y: {
-          stacked: true,
           grid: {
             display: false
           },
@@ -484,20 +504,19 @@ const initializeChart = () => {
 }
 
 onMounted(async () => {
-  // Load KPI data first
-  if (user.value?.email) {
-    await loadKpiData()
-  }
-  
   // Fetch evaluation periods and set default
   await fetchEvaluationPeriods()
   if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
     selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
   }
   
-  // Load academic service performance data
+  // Load all data
   if (user.value?.email) {
-    await fetchAcademicServicePerformance(user.value.email, selectedEvaluationPeriod.value?.toString())
+    await Promise.all([
+      loadKpiData(),
+      loadAcademicServiceData(),
+      loadAcademicServiceChartData()
+    ])
   }
   
   // Initialize the chart with database data
@@ -509,11 +528,10 @@ watch(
   () => selectedEvaluationPeriod.value,
   async (newEvalId, oldEvalId) => {
     if (newEvalId && newEvalId !== oldEvalId && user.value?.email && !loading.value) {
-      console.log(`Evaluation period changed from ${oldEvalId} to ${newEvalId}`)
       await Promise.all([
-        fetchAcademicServicePerformance(user.value.email, newEvalId.toString()),
         loadKpiData(),
-        fetchKpiPercentages(user.value.email, newEvalId)
+        loadAcademicServiceData(),
+        loadAcademicServiceChartData()
       ])
       initializeChart()
     }
@@ -524,15 +542,15 @@ watch(
   () => user.value?.email,
   async (email) => {
     if (email) {
-      loadKpiData()
       // Fetch evaluation periods and set default
       await fetchEvaluationPeriods()
       if (activeEvaluationPeriod.value && !selectedEvaluationPeriod.value) {
         selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
       }
       await Promise.all([
-        fetchAcademicServicePerformance(email, selectedEvaluationPeriod.value?.toString()),
-        fetchKpiPercentages(email, selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9)
+        loadKpiData(),
+        loadAcademicServiceData(),
+        loadAcademicServiceChartData()
       ])
       // Re-initialize chart with new data
       initializeChart()

@@ -256,7 +256,7 @@
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-700">65-74</span>
               <span
-                class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full" 
+                class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full" 
                 >Moderate</span
               >
             </div>
@@ -270,7 +270,7 @@
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-700">85-100</span>
               <span
-                class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full" 
+                class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full" 
                 >Excellent</span
               >
             </div>
@@ -289,18 +289,10 @@ import { computed, onMounted, ref, watch, onUnmounted } from "vue";
 
 // Import KPI composable
 import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
-import { useOverallPerformance } from '@/composables/useOverallPerformance'
 
 const { user, logout } = useFirebaseAuth()
 const { evaluationPeriods, loading: isLoadingPeriods, fetchEvaluationPeriods, activeEvaluationPeriod } = useEvaluationPeriods()
 const { kpiData: mfuKpiData, isLoading: mfuKpiLoading, error: mfuKpiError, fetchKpiPercentages } = useMfuKpiApi()
-const { 
-  performanceData, 
-  loading: performanceLoading, 
-  error: performanceError, 
-  fetchOverallPerformance,
-  getPerformanceLevelColor 
-} = useOverallPerformance()
 
 // Selected evaluation period state
 const selectedEvaluationPeriod = ref<number | null>(null)
@@ -413,17 +405,13 @@ const loadKpiData = async () => {
     const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
     addLog(`Loading data for: ${user.value.email}, evaluation period: ${evalId}`)
     
-    // Fetch both KPI data from MFU API and overall performance data
-    const [kpiResult, performanceResult] = await Promise.all([
-      fetchKpiPercentages(user.value.email, evalId),
-      fetchOverallPerformance(user.value.email, evalId)
-    ])
+    // Fetch KPI data from MFU API (includes overall performance)
+    await fetchKpiPercentages(user.value.email, evalId)
     
     addLog('Raw KPI data received from MFU API:')
-    console.log('KPI Data:', kpiResult)
-    console.log('Performance Data:', performanceResult)
+    console.log('KPI Data:', mfuKpiData.value)
     
-    if (kpiResult && kpiResult.categories) {
+    if (mfuKpiData.value && mfuKpiData.value.categories) {
       addLog('✅ Successfully loaded KPI data from MFU API')
     } else {
       throw new Error('Invalid KPI data format received from MFU API')
@@ -500,14 +488,25 @@ const kpiCategories = computed(() => {
   ]
 })
 
-// Overall performance data from database
+// Helper function to determine performance level based on total score
+const getPerformanceLevel = (totalScore: number): string => {
+  if (totalScore >= 90) return 'Excellent'
+  if (totalScore >= 80) return 'Very Good'
+  if (totalScore >= 70) return 'Good'
+  if (totalScore >= 60) return 'Satisfactory'
+  if (totalScore >= 55) return 'Poor'
+  return 'Very Poor'
+}
+
+// Overall performance data from MFU API
 const overallPerformance = computed(() => {
-  if (performanceData.value) {
+  if (mfuKpiData.value?.overallPerformance) {
+    const data = mfuKpiData.value.overallPerformance
     return {
-      academicPerformance: performanceData.value.academicPerformance || 0,
-      behavior: performanceData.value.behavior || 0,
-      totalScore: performanceData.value.totalScore || 0,
-      performanceLevel: performanceData.value.performanceLevel || 'No Data'
+      academicPerformance: data.academicPerformance || 0,
+      behavior: data.behavior || 0,
+      totalScore: data.totalScore || 0,
+      performanceLevel: getPerformanceLevel(data.totalScore || 0)
     }
   }
   
