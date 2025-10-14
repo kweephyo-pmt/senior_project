@@ -169,17 +169,17 @@
       </div>
       <!-- table -->
       <div class="">
-        <div class="bg-[#FAFBFD] rounded-lg shadow-md p-4 sm:p-6 mr-0 sm:mr-8 mb-2">
+        <div class="bg-[#FAFBFD] rounded-lg shadow-md p-4 sm:p-6 mr-0 sm:mr-8 mb-6" style="max-height: 264px; overflow-y: auto;">
         <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">
           Academic Service Activities
         </h2>
-        <div class="w-full h-0.5 bg-[#B0B9C4] mb-1"></div>
+        <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
 
-        <div class="flex flex-col">
-          <div v-if="academicServiceActivities.length === 0" class="text-center py-4 text-sm text-gray-500">
-            No activities found
-          </div>
-          <div v-else v-for="(activity, index) in academicServiceActivities" :key="index" class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-4 rounded-lg shadow-sm shadow-b-gray-300">
+        <div v-if="academicServiceActivities.length === 0" class="text-center py-4 text-sm text-gray-500">
+          No activities found
+        </div>
+        <div v-else class="space-y-3">
+          <div v-for="(activity, index) in academicServiceActivities" :key="index" class="flex items-start gap-4 bg-[#FFFFFF] p-4 rounded-lg shadow-sm shadow-b-gray-300">
             <div class="flex-1">
               <p class="text-xs font-bold mb-2">{{ activity.projecttitle }}</p>
               <p class="text-xs text-[#606060]">Budget (THB) : {{ activity.budgetlimit || 0 }}</p>
@@ -192,8 +192,8 @@
           </div>
         </div>
       </div>
-      <div class="bg-[#FAFBFD] rounded-lg shadow-md p-4 sm:p-6 mr-0 sm:mr-8">
-        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+      <div class="bg-[#FAFBFD] rounded-lg shadow-md p-4 sm:p-6 mr-0 sm:mr-8" style="max-height: 264px; overflow-y: auto;">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">
           Performance as an Invited Lecturer or Speaker
         </h2>
         <div class="w-full h-0.5 bg-[#B0B9C4] mb-2"></div>
@@ -201,12 +201,14 @@
         <div v-if="invitedLecturerSpeaker.length === 0" class="text-center py-4 text-sm text-gray-500">
           No invited lecturer or speaker records found
         </div>
-        <div v-else v-for="(speaker, index) in invitedLecturerSpeaker" :key="index" class="flex items-start gap-4 bg-[#FFFFFF] p-4 mt-3 rounded-lg shadow-sm shadow-b-gray-300">
-          <div>
-            <p class="text-xs font-bold mb-2">{{ speaker.speakertitle || speaker.speechtitle }}</p>
-            <p class="text-xs text-[#606060]">{{ speaker.organizingunit }}</p>
+        <div v-else class="space-y-3">
+          <div v-for="(speaker, index) in invitedLecturerSpeaker" :key="index" class="flex items-start gap-4 bg-[#FFFFFF] p-4 rounded-lg shadow-sm shadow-b-gray-300">
+            <div>
+              <p class="text-xs font-bold mb-2">{{ speaker.speakertitle || speaker.speechtitle }}</p>
+              <p class="text-xs text-[#606060]">{{ speaker.organizingunit }}</p>
+            </div>
           </div>
-        </div> 
+        </div>
       </div>
       </div>
     </div>
