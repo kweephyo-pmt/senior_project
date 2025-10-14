@@ -211,7 +211,23 @@
           <h2 class="text-lg font-medium text-gray-900 mb-4">
             MFU-arranged activities
           </h2>
-          <div class="max-h-[150px] overflow-y-auto pr-2">
+          
+          <!-- Loading state -->
+          <div v-if="isLoadingChart" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#4697b9] mr-2"></div>
+            <p class="text-sm text-gray-600 mt-2">Loading MFU arranged activities...</p>
+          </div>
+          
+          <!-- No data state -->
+          <div v-else-if="!mfuArrangedActivitiesData || mfuArrangedActivitiesData.filter(a => a && (a.projectname || a.project_name || a.activity)).length === 0" class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p class="text-sm text-gray-500 mt-2">No MFU arranged activities found for this evaluation period.</p>
+          </div>
+          
+          <!-- Table with data -->
+          <div v-else class="max-h-[150px] overflow-y-auto pr-2">
             <table class="min-w-full text-xs">
               <thead class="sticky top-0">
                 <tr>
@@ -220,26 +236,10 @@
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-if="mfuLoading">
-                  <td colspan="2" class="px-3 py-4 text-center text-gray-500">
-                    <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-[#4697b9] mr-2"></div>
-                    Loading MFU arranged activities...
-                  </td>
-                </tr>
-                <tr v-else-if="mfuError">
-                  <td colspan="2" class="px-3 py-4 text-center text-red-600">
-                    {{ mfuError }}
-                  </td>
-                </tr>
-                <tr v-else-if="mfuArrangedActivities.length === 0">
-                  <td colspan="2" class="px-3 py-4 text-center text-gray-500">
-                    No MFU arranged activities found for this evaluation period.
-                  </td>
-                </tr>
-                <tr v-else v-for="(activity, index) in mfuArrangedActivities" :key="activity.id" 
+                <tr v-for="(activity, index) in mfuArrangedActivitiesData.filter(a => a && (a.projectname || a.project_name || a.activity))" :key="index" 
                     :class="{ 'bg-[#E8F4FC]': index % 2 === 1 }">
-                  <td class="px-3 py-1 text-center">{{ activity.activity_level }}</td>
-                  <td class="px-3 py-1">{{ activity.project_name }}</td>
+                  <td class="px-3 py-1 text-center">{{ index + 1 }}</td>
+                  <td class="px-3 py-1">{{ activity.projectname || activity.project_name || activity.activity }}</td>
                 </tr>
               </tbody>
             </table>
@@ -255,9 +255,7 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'   
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
-import { useArtsCulturePerformance } from '@/composables/useArtsCulturePerformance'
 import { useEvaluationPeriods } from '@/composables/useEvaluationPeriods'
-import { useMfuArrangedActivities } from '@/composables/useMfuArrangedActivities'
 import { useMfuKpiApi } from '@/composables/useMfuKpiApi'
 import { useMfuArtsCultureApi } from '@/composables/useMfuArtsCultureApi'
 
@@ -268,18 +266,20 @@ definePageMeta({
 const acChart = ref<HTMLCanvasElement | null>(null)
 const showMobileMenu = ref(false)
 const { user, logout } = useFirebaseAuth()
-const { artsCultureData, loading: isLoadingChart, error: chartError, fetchArtsCulturePerformance, getChartData } = useArtsCulturePerformance()
 const { evaluationPeriods, loading: isLoadingPeriods, error: periodsError, activeEvaluationPeriod, fetchEvaluationPeriods } = useEvaluationPeriods()
-const { mfuArrangedActivities, loading: mfuLoading, error: mfuError, fetchMfuArrangedActivities } = useMfuArrangedActivities()
 const { kpiData: mfuKpiData, isLoading: kpiLoading, fetchKpiPercentages } = useMfuKpiApi()
-const { getSelfDevelopment } = useMfuArtsCultureApi()
+const { getSelfDevelopment, getMFUArrangedActivities, getAllArtsCultureChartData } = useMfuArtsCultureApi()
 
 // Reactive data
 const selectedEvaluationPeriod = ref<number | null>(null)
 const kpiData = ref<any>(null)
 const loading = ref(true)
+const isLoadingChart = ref(false)
+const mfuError = ref<string | null>(null)
 const selfDevelopmentData = ref<any[]>([])
 const loadingSelfDevelopment = ref(false)
+const mfuArrangedActivitiesData = ref<any[]>([])
+const chartDataFromApi = ref<any>(null)
 let chartInstance: Chart | null = null
 
 // Format value helper
@@ -366,11 +366,37 @@ const loadSelfDevelopmentData = async () => {
   }
 }
 
-// Load MFU arranged activities
-const loadMfuArrangedActivities = async () => {
-  if (user.value?.email) {
+// Load MFU arranged activities table data from MFU API
+const loadMfuArrangedActivitiesData = async () => {
+  if (!user.value?.email) return
+  
+  try {
     const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
-    await fetchMfuArrangedActivities(user.value.email, evalId.toString())
+    const response = await getMFUArrangedActivities(user.value.email, evalId.toString())
+    mfuArrangedActivitiesData.value = response.data || []
+  } catch (err) {
+    mfuArrangedActivitiesData.value = []
+  }
+}
+
+// Load Arts and Culture Chart data from MFU API
+const loadArtsCultureChartData = async () => {
+  if (!user.value?.email) return
+  
+  try {
+    isLoadingChart.value = true
+    mfuError.value = null
+    const evalId = selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9
+    const result = await getAllArtsCultureChartData(user.value.email, evalId.toString())
+    
+    if (result) {
+      chartDataFromApi.value = result
+    }
+  } catch (err) {
+    chartDataFromApi.value = null
+    mfuError.value = err instanceof Error ? err.message : 'Failed to load chart data'
+  } finally {
+    isLoadingChart.value = false
   }
 }
 
@@ -407,14 +433,21 @@ const formatDateRange = () => {
 const onEvaluationPeriodChange = async () => {
   if (user.value?.email && selectedEvaluationPeriod.value) {
     await Promise.all([
-      fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value.toString()),
       loadKpiData(),
       loadSelfDevelopmentData(),
-      loadMfuArrangedActivities(),
+      loadMfuArrangedActivitiesData(),
+      loadArtsCultureChartData(),
       fetchKpiPercentages(user.value.email, selectedEvaluationPeriod.value)
     ])
     initializeChart()
   }
+}
+
+// Helper function to get score from API data
+const getScore = (dataArray: any[]) => {
+  if (!dataArray || dataArray.length === 0) return 0
+  const item = dataArray[0]
+  return item?.sumscore || item?.score || item?.rawscore || 0
 }
 
 // Initialize chart with data
@@ -431,8 +464,30 @@ const initializeChart = () => {
   
   let chartData;
   
-  if (artsCultureData.value.length > 0) {
-    chartData = getChartData();
+  // Use MFU API data if available
+  if (chartDataFromApi.value) {
+    chartData = {
+      labels: [
+        ['Arts & Culture Conservation Performance'],
+        ['Organization development or participation'],
+        'Self-development',
+        'Student Development activities',
+        ['MFU-arranged arts & culture', 'conservation activities']
+      ],
+      datasets: [{
+        label: 'Score',
+        data: [
+          getScore(chartDataFromApi.value.artsCultureConservationRawscore),
+          getScore(chartDataFromApi.value.organizationDevelopmentRawscore),
+          getScore(chartDataFromApi.value.selfDevelopmentRawscore),
+          getScore(chartDataFromApi.value.studentDevelopmentActivitiesRawscore),
+          getScore(chartDataFromApi.value.mfuArrangedActivitiesRawscore)
+        ],
+        backgroundColor: '#172554',
+        borderWidth: 0,
+        borderRadius: 0,
+      }]
+    }
   } else {
     // Show empty chart with zero values using same template structure
     chartData = {
@@ -532,12 +587,12 @@ onMounted(async () => {
     selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
   }
   
-  // Load arts culture performance data and self-development data
+  // Load all data from MFU API
   if (user.value?.email) {
     await Promise.all([
-      fetchArtsCulturePerformance(user.value.email, selectedEvaluationPeriod.value?.toString()),
       loadSelfDevelopmentData(),
-      loadMfuArrangedActivities()
+      loadMfuArrangedActivitiesData(),
+      loadArtsCultureChartData()
     ])
   }
   
@@ -553,10 +608,10 @@ watch(
     if (newEvalId && newEvalId !== oldEvalId && user.value?.email && !loading.value) {
       console.log(`Evaluation period changed from ${oldEvalId} to ${newEvalId}`)
       await Promise.all([
-        fetchArtsCulturePerformance(user.value.email, newEvalId.toString()),
         loadKpiData(),
         loadSelfDevelopmentData(),
-        loadMfuArrangedActivities(),
+        loadMfuArrangedActivitiesData(),
+        loadArtsCultureChartData(),
         fetchKpiPercentages(user.value.email, newEvalId)
       ])
       initializeChart()
@@ -575,9 +630,9 @@ watch(
         selectedEvaluationPeriod.value = activeEvaluationPeriod.value.evaluateid
       }
       await Promise.all([
-        fetchArtsCulturePerformance(email, selectedEvaluationPeriod.value?.toString()),
         loadSelfDevelopmentData(),
-        loadMfuArrangedActivities(),
+        loadMfuArrangedActivitiesData(),
+        loadArtsCultureChartData(),
         fetchKpiPercentages(email, selectedEvaluationPeriod.value || activeEvaluationPeriod.value?.evaluateid || 9)
       ])
       // Re-initialize chart with new data
@@ -586,18 +641,18 @@ watch(
     }
   },
   { immediate: true }
-);
+)
 
-// Watch for arts culture data changes and re-initialize chart
+// Watch for chart data changes and re-initialize chart
 watch(
-  () => artsCultureData.value,
+  () => chartDataFromApi.value,
   () => {
-    if (artsCultureData.value && artsCultureData.value.length > 0) {
+    if (chartDataFromApi.value) {
       nextTick(() => {
         initializeChart()
       })
     }
   },
   { deep: true }
-);
+)
 </script>

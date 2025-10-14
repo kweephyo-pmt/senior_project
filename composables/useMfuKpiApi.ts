@@ -127,6 +127,33 @@ export const useMfuKpiApi = () => {
               const fallbackData = {
                 staffCode: staffData.staffcode,
                 staffName: staffData.staffname,
+                domainScoreName: staffData.domainscorename || 'Teaching',
+                domainWeights: {
+                  domain1: 0,
+                  domain2: 0,
+                  domain3: 0,
+                  domain4: 0,
+                  domain5: 0
+                },
+                domainScores: {
+                  domain1: 0,
+                  domain2: 0,
+                  domain3: 0,
+                  domain4: 0,
+                  domain5: 0
+                },
+                domainThresholds: {
+                  domain1: 0,
+                  domain2: 0,
+                  domain3: 0,
+                  domain4: 0,
+                  domain5: 0
+                },
+                overallPerformance: {
+                  academicPerformance: 0,
+                  behavior: 0,
+                  totalScore: 0
+                },
                 categories: [
                   {
                     id: 'teaching',

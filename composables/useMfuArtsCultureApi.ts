@@ -169,6 +169,150 @@ export const useMfuArtsCultureApi = () => {
     }
   }
 
+  // Get MFU Arranged Activities data (for table)
+  const getMFUArrangedActivities = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_MFUarrangedactivities', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Get MFU Arranged Activities Raw Score data (for chart)
+  const getMFUArrangedActivitiesRawscore = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_MFUarrangedactivitiesRawscore', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Get Student Development Activities Raw Score data (for chart)
+  const getStudentDevelopmentActivitiesRawscore = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_StudentdevelopmentactivitiesRawscore', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Get Self Development Raw Score data (for chart)
+  const getSelfDevelopmentRawscore = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_SelfdevelopmentRawscore', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Get Organization Development or Participation Raw Score data (for chart)
+  const getOrganizationDevelopmentOrParticipationRawscore = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_OrganizationdevelopmentorparticipationRawscore', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Get Arts and Culture Conservation Performance Raw Score data (for chart)
+  const getArtsAndCultureConservationPerformanceRawscore = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const data = await makeAuthenticatedRequest('get_ArtsandCultureConservationPerformanceRawscore', staffCode, evaluateId)
+      return {
+        data: data?.data || [],
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { data: [], staffCode, evaluateId }
+    }
+  }
+
+  // Get all Arts and Culture chart data from the five rawscore API endpoints
+  const getAllArtsCultureChartData = async (email: string, evaluateId: string = '9') => {
+    const staffCode = await extractStaffCode(email)
+    if (!staffCode) throw new Error('Invalid email format - cannot extract staff code')
+
+    try {
+      const [
+        mfuArrangedActivitiesRawscore,
+        studentDevelopmentActivitiesRawscore,
+        selfDevelopmentRawscore,
+        organizationDevelopmentRawscore,
+        artsCultureConservationRawscore
+      ] = await Promise.all([
+        getMFUArrangedActivitiesRawscore(email, evaluateId),
+        getStudentDevelopmentActivitiesRawscore(email, evaluateId),
+        getSelfDevelopmentRawscore(email, evaluateId),
+        getOrganizationDevelopmentOrParticipationRawscore(email, evaluateId),
+        getArtsAndCultureConservationPerformanceRawscore(email, evaluateId)
+      ])
+
+      return {
+        mfuArrangedActivitiesRawscore: mfuArrangedActivitiesRawscore.data,
+        studentDevelopmentActivitiesRawscore: studentDevelopmentActivitiesRawscore.data,
+        selfDevelopmentRawscore: selfDevelopmentRawscore.data,
+        organizationDevelopmentRawscore: organizationDevelopmentRawscore.data,
+        artsCultureConservationRawscore: artsCultureConservationRawscore.data,
+        staffCode,
+        evaluateId
+      }
+    } catch (err) {
+      return { 
+        mfuArrangedActivitiesRawscore: [],
+        studentDevelopmentActivitiesRawscore: [],
+        selfDevelopmentRawscore: [],
+        organizationDevelopmentRawscore: [],
+        artsCultureConservationRawscore: [],
+        staffCode, 
+        evaluateId 
+      }
+    }
+  }
+
   return {
     // State
     authToken: readonly(authToken),
@@ -178,7 +322,14 @@ export const useMfuArtsCultureApi = () => {
     // Methods
     login,
     extractStaffCode,
-    getSelfDevelopment
+    getSelfDevelopment,
+    getMFUArrangedActivities,
+    getMFUArrangedActivitiesRawscore,
+    getStudentDevelopmentActivitiesRawscore,
+    getSelfDevelopmentRawscore,
+    getOrganizationDevelopmentOrParticipationRawscore,
+    getArtsAndCultureConservationPerformanceRawscore,
+    getAllArtsCultureChartData
   }
 }
 
