@@ -82,99 +82,81 @@
     <!-- Mobile Sidebar Overlay -->
     <div 
       v-if="showSidebar" 
-      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity md:hidden z-40"
+      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity md:hidden z-[55]"
       @click="showSidebar = false"
       aria-hidden="true"
     ></div>
 
     <!-- Mobile Sidebar -->
     <aside 
-      class="fixed inset-y-0 left-0 bg-gradient-to-br from-[#212936]/95 via-[#22334d]/95 to-[#1a2636]/95 backdrop-blur-md shadow-2xl w-[280px] z-50 flex flex-col md:hidden transform transition-transform duration-300 ease-in-out"
+      class="fixed inset-y-0 left-0 bg-gradient-to-b from-[#18345c] via-[#17688f] to-[#137b97] shadow-2xl w-[280px] z-[60] flex flex-col md:hidden transform transition-transform duration-300 ease-in-out"
       :class="showSidebar ? 'translate-x-0' : '-translate-x-full'"
       aria-label="Mobile sidebar"
     >
       <!-- Mobile Sidebar Header -->
-      <div class="sticky top-0 z-20 flex flex-col bg-[#23272f]/90">
-        <!-- Top Bar -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700/40">
-          <h2 class="text-base font-semibold text-white tracking-wide">Menu</h2>
-          <button 
-            @click="showSidebar = false"
-            class="p-2 text-gray-200 hover:bg-gray-700/30 rounded-md transition-colors"
-            aria-label="Close sidebar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
+      <div class="sticky top-0 z-20 flex flex-col">
         <!-- Logo Section -->
-        <div class="px-4 py-4 border-b border-white/10">
-          <div class="flex items-center space-x-3">
-            <div class="flex items-center">
-              <mfulogo class="w-8 h-8"/>
-              <div class="w-0.5 h-8 bg-[#FFFFFF]/50 mx-3"></div>
-              <div>
-                <h2 class="text-lg font-bold text-white mb-1">SoM.BI</h2>
-                <div class="w-full h-0.5 bg-[#FFFFFF]/50 mb-1"></div>
-                <p class="text-xs text-white/90">School of Management</p>
-              </div>
+        <div class="px-5 py-5 border-b border-white/10">
+          <div class="flex items-center">
+            <mfulogo class="w-10 h-10"/>
+            <div class="w-0.5 h-10 bg-white/30 mx-3"></div>
+            <div>
+              <h2 class="text-xl font-bold text-white">SoM.BI</h2>
+              <div class="w-full h-0.5 bg-white/30 my-1"></div>
+              <p class="text-xs text-white/80">School of Management</p>
             </div>
           </div>
         </div>
       </div>
-      <nav class="flex-1 px-4 py-6">
-        <ul class="space-y-2">
+      <nav class="flex-1 px-5 py-6 overflow-y-auto">
+        <ul class="space-y-1">
           <li v-for="(item, index) in menuItems" :key="index">
             <NuxtLink 
               :to="item.path" 
               @click="showSidebar = false" 
-              class="flex items-center px-4 py-3 text-white/90 hover:text-white hover:bg-[#035e80]/50 rounded-lg transition-all duration-200"
-              :class="{ 'bg-[#035475]/60 text-white shadow-sm': $route.path === item.path }"
+              class="flex items-center px-4 py-3 text-white hover:bg-[#035e80] rounded-lg transition-all duration-200 group"
+              :class="{ 'bg-[#035475] shadow-lg': $route.path === item.path }"
             >
               <component 
                 :is="item.icon" 
-                class="h-5 w-5 mr-3" 
+                class="h-5 w-5 mr-3 transition-transform duration-200 group-hover:scale-110" 
                 :fill="'none'" 
                 :viewBox="'0 0 24 24'" 
                 :stroke="'currentColor'"
               />
-              {{ item.label }}
+              <span class="font-medium">{{ item.label }}</span>
             </NuxtLink>
           </li>
         </ul>
       </nav>
       <!-- User Profile at Bottom -->
-      <div class="sticky bottom-0 bg-[#18345c]/90 backdrop-blur-sm border-t border-[#035e80]/30 pt-3 pb-4 px-4">
-        <div class="flex items-center p-3 rounded-xl bg-white/5">
-          <div v-if="initialLoading" class="w-10 h-10 rounded-full bg-gray-200 animate-pulse mr-3"></div>
-          <div v-else class="w-10 h-10 rounded-full ring-2 ring-white/10 overflow-hidden mr-3">
+      <div class="sticky bottom-0 border-t border-[#035e80]">
+        <div class="p-4 flex items-center">
+          <div v-if="initialLoading" class="w-10 h-10 rounded-full bg-white/20 animate-pulse mr-3"></div>
+          <div v-else class="w-10 h-10 rounded-full bg-white overflow-hidden mr-3 relative ring-2 ring-white/20">
+            <div class="w-full h-full flex items-center justify-center bg-gray-100" :class="{ 'hidden': showImage }">
+              <span class="text-xl font-semibold text-gray-500">{{ (userData?.displayName || user?.displayName || 'U')?.[0]?.toUpperCase() }}</span>
+            </div>
             <img 
+              v-show="showImage"
               :src="photoURL" 
               :alt="userData?.displayName || user?.displayName || 'User'" 
-              class="w-10 h-10 rounded-full object-cover"
+              class="w-full h-full object-cover absolute inset-0"
               @error="handleImageError"
+              @load="handleImageLoad"
             />
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between">
-              <div v-if="initialLoading" class="flex items-center space-x-3 animate-pulse">
-                <div class="w-10 h-10 rounded-full bg-gray-200"></div>
-                <div>
-                  <div class="h-4 bg-gray-200 rounded w-24 mb-1"></div>
-                  <div class="h-3 bg-gray-200 rounded w-32"></div>
-                </div>
-              </div>
-              <div v-else class="flex flex-col">
-                <p class="text-sm font-medium text-white">{{ userData?.displayName || user?.displayName || 'User' }}</p>
-                <p class="text-xs text-white/90">Lecturer</p>
-              </div>
-            </div>
+          <div v-if="initialLoading" class="flex-1 animate-pulse">
+            <div class="h-4 bg-white/20 rounded w-24 mb-2"></div>
+            <div class="h-3 bg-white/20 rounded w-16"></div>
+          </div>
+          <div v-else class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-white truncate">{{ userData?.displayName || user?.displayName || 'User' }}</p>
+            <p class="text-xs text-white/70">Lecturer</p>
           </div>
           <button 
             @click="logout" 
-            class="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            class="ml-2 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
             aria-label="Logout"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,7 +170,7 @@
     <!-- Main Content -->
     <div class="flex-1 bg-gray-50 min-h-screen flex flex-col">
       <!-- Mobile menu button -->
-      <div class="md:hidden sticky top-0 z-50 bg-white p-3 sm:p-4 shadow-sm">
+      <div class="md:hidden sticky top-0 z-40 bg-white p-3 sm:p-4 shadow-sm">
         <button @click="showSidebar = !showSidebar" class="text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label="Toggle sidebar">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
