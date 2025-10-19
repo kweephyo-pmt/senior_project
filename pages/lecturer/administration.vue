@@ -175,7 +175,7 @@
           <div v-if="!curricularCommitteeData || curricularCommitteeData.length === 0" class="text-center py-4 text-sm text-gray-500">
             No member found
           </div>
-          <div v-else class="max-h-[200px] overflow-y-auto">
+          <div v-else class="max-h-[300px] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
               <thead class="bg-[#0e7490] sticky top-0 z-10">
                 <tr>
@@ -199,7 +199,7 @@
           <div v-if="!schoolCommitteeData || schoolCommitteeData.filter(item => item && (item.nameofcommittee || item.committee_name || item.name)).length === 0" class="text-center py-4 text-sm text-gray-500">
             No member found
           </div>
-          <div v-else class="max-h-[200px] overflow-y-auto">
+          <div v-else class="max-h-[300px] overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
               <thead class="bg-[#0e7490] sticky top-0 z-10">
                 <tr>
