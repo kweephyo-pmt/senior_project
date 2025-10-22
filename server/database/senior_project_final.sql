@@ -43,7 +43,8 @@ CREATE TABLE `budget_categories` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_evaluateid` (`evaluateid`),
-  KEY `idx_staff_evaluate` (`staff_code`,`evaluateid`)
+  KEY `idx_staff_evaluate` (`staff_code`,`evaluateid`),
+  CONSTRAINT `fk_budget_categories_staff` FOREIGN KEY (`staff_code`) REFERENCES `lecturer_profiles` (`staff_code`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -173,7 +174,8 @@ CREATE TABLE `lecturer_publications` (
   PRIMARY KEY (`id`),
   KEY `idx_staff_code` (`staff_code`),
   KEY `idx_year` (`year`),
-  KEY `idx_evaluateid` (`evaluateid`)
+  KEY `idx_evaluateid` (`evaluateid`),
+  CONSTRAINT `fk_publications_staff` FOREIGN KEY (`staff_code`) REFERENCES `lecturer_profiles` (`staff_code`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -261,7 +263,8 @@ CREATE TABLE `staff_budget_info` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `staff_code` (`staff_code`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  CONSTRAINT `fk_staff_budget_info_staff` FOREIGN KEY (`staff_code`) REFERENCES `lecturer_profiles` (`staff_code`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -284,4 +287,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-10-20 15:18:03
+-- Dump completed on 2025-10-21 17:22:55
