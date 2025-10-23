@@ -6,7 +6,7 @@
     </div>
     <div class="absolute inset-0 bg-black/30"></div>
     <div class="relative container mx-auto px-3 sm:px-4 md:px-6 lg:px-20 pt-4 sm:pt-6 lg:pt-8 z-10">
-      <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[82px] font-bold text-[#1D3555] leading-tight">Overview testing</h1>
+      <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[82px] font-bold text-[#1D3555] leading-tight">Overview</h1>
       <h2 class="text-sm sm:text-lg md:text-xl lg:text-2xl text-[#1D3555] px-0 sm:px-1.5 mt-1">Welcome back, {{ user?.displayName || 'User' }}</h2>
     </div>
   </div>
