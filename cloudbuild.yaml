@@ -56,4 +56,8 @@ steps:
       - '--set-env-vars'
       - 'DB_HOST=/cloudsql/curriculum-statistics:asia-southeast1:senior-project-db,DB_USER=root,DB_PASSWORD=,DB_NAME=senior_project,NODE_ENV=production'
 
+# Logging configuration
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 timeout: '1200s'
